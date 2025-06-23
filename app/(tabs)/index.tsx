@@ -1,14 +1,36 @@
+import { useEffect, useState } from 'react';
 import { StyleSheet } from 'react-native';
-
-import EditScreenInfo from '@/components/EditScreenInfo';
 import { Text, View } from '@/components/Themed';
+import { useUserStore } from '@/stores/userStore';
+import { supabase } from '@/lib/supabase';
+import { router } from 'expo-router';
 
 export default function TabOneScreen() {
+  const userId = useUserStore((s) => s.userId);
+  const [nickname, setNickname] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchNickname = async () => {
+      if (!userId) return;
+      const { data, error } = await supabase
+        .from('users')
+        .select('nickname')
+        .eq('id', userId)
+        .single();
+      if (error || !data?.nickname) {
+        // ニックネームが取得できなければ登録画面へ
+        router.replace('/onboarding/nickname');
+        return;
+      }
+      setNickname(data.nickname);
+    };
+    fetchNickname();
+  }, [userId]);
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Tab One</Text>
-      <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
-      <EditScreenInfo path="app/(tabs)/index.tsx" />
+      <Text style={styles.title}>ホーム</Text>
+      {nickname ? <Text>こんにちは、{nickname} さん！</Text> : <Text>ニックネームを取得中...</Text>}
     </View>
   );
 }
@@ -22,10 +44,5 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: 'bold',
-  },
-  separator: {
-    marginVertical: 30,
-    height: 1,
-    width: '80%',
   },
 });

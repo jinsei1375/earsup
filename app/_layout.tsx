@@ -1,59 +1,34 @@
-import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
-import 'react-native-reanimated';
-
-import { useColorScheme } from '@/components/useColorScheme';
-
-export {
-  // Catch any errors thrown by the Layout component.
-  ErrorBoundary,
-} from 'expo-router';
-
-export const unstable_settings = {
-  // Ensure that reloading on `/modal` keeps a back button present.
-  initialRouteName: '(tabs)',
-};
-
-// Prevent the splash screen from auto-hiding before asset loading is complete.
-SplashScreen.preventAutoHideAsync();
+import { useUserStore } from '@/stores/userStore';
+import { useEffect, useState } from 'react';
+import { Slot, useRouter, useRootNavigationState } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function RootLayout() {
-  const [loaded, error] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-    ...FontAwesome.font,
-  });
-
-  // Expo Router uses Error Boundaries to catch errors in the navigation tree.
-  useEffect(() => {
-    if (error) throw error;
-  }, [error]);
+  const userId = useUserStore((s) => s.userId);
+  const setUserId = useUserStore((s) => s.setUserId);
+  const router = useRouter();
+  const rootNavigationState = useRootNavigationState();
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
+    // 初回のみAsyncStorageからuserIdを復元
+    (async () => {
+      const storedId = await AsyncStorage.getItem('userId');
+      if (storedId) setUserId(storedId);
+      setIsReady(true);
+    })();
+  }, []);
+
+  useEffect(() => {
+    if (!isReady || !rootNavigationState?.key) return;
+    if (!userId) {
+      setTimeout(() => {
+        router.replace('/onboarding/nickname');
+      }, 0);
     }
-  }, [loaded]);
+  }, [userId, rootNavigationState?.key, isReady]);
 
-  if (!loaded) {
-    return null;
-  }
+  if (!isReady) return null; // ローディング中は何も表示しない
 
-  return <RootLayoutNav />;
-}
-
-function RootLayoutNav() {
-  const colorScheme = useColorScheme();
-
-  return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
-      </Stack>
-    </ThemeProvider>
-  );
+  return <Slot />;
 }
