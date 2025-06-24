@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react';
-import { StyleSheet } from 'react-native';
-import { Text, View } from '@/components/Themed';
+import { View, Text, StyleSheet } from 'react-native';
 import { useUserStore } from '@/stores/userStore';
 import { supabase } from '@/lib/supabase';
 import { router } from 'expo-router';
 
-export default function TabOneScreen() {
+export default function HomeScreen() {
   const userId = useUserStore((s) => s.userId);
   const [nickname, setNickname] = useState<string | null>(null);
 
@@ -18,7 +17,6 @@ export default function TabOneScreen() {
         .eq('id', userId)
         .single();
       if (error || !data?.nickname) {
-        // ニックネームが取得できなければ登録画面へ
         router.replace('/onboarding/nickname');
         return;
       }
@@ -29,7 +27,6 @@ export default function TabOneScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>ホーム</Text>
       {nickname ? <Text>こんにちは、{nickname} さん！</Text> : <Text>ニックネームを取得中...</Text>}
     </View>
   );
