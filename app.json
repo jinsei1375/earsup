@@ -33,6 +33,13 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "2b55fafa-ea99-45f1-9e14-0e6f5e18b95f"
+      }
+    },
+    "owner": "shinsei1118"
   }
 }

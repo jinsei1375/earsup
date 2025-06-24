@@ -6,24 +6,39 @@ import { router } from 'expo-router';
 
 export default function HomeScreen() {
   const userId = useUserStore((s) => s.userId);
-  const [nickname, setNickname] = useState<string | null>(null);
+  const storeNickname = useUserStore((s) => s.nickname);
+  const setUserInfo = useUserStore((s) => s.setUserInfo);
+  const [nickname, setNickname] = useState<string | null>(storeNickname);
 
   useEffect(() => {
-    const fetchNickname = async () => {
+    const fetchUserInfo = async () => {
       if (!userId) return;
+
+      // ストアにニックネームがあれば、それを使用
+      if (storeNickname) {
+        setNickname(storeNickname);
+        return;
+      }
+
+      // なければDBから取得
       const { data, error } = await supabase
         .from('users')
         .select('nickname')
         .eq('id', userId)
         .single();
+
       if (error || !data?.nickname) {
         router.replace('/onboarding/nickname');
         return;
       }
+
+      // 取得したニックネームをストアと状態にセット
       setNickname(data.nickname);
+      setUserInfo(userId, data.nickname);
     };
-    fetchNickname();
-  }, [userId]);
+
+    fetchUserInfo();
+  }, [userId, storeNickname]);
 
   const handleCreateRoom = () => {
     router.push({ pathname: '/room', params: { mode: 'create' } });

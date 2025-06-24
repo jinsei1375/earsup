@@ -1,6 +1,14 @@
 // app/quiz.tsx
 import { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, ActivityIndicator } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  Button,
+  StyleSheet,
+  ActivityIndicator,
+  ScrollView,
+} from 'react-native';
 import * as Speech from 'expo-speech';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { supabase } from '@/lib/supabase';
@@ -27,6 +35,16 @@ export default function QuizScreen() {
   const [autoPlay, setAutoPlay] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(Date.now());
   const [debugInfo, setDebugInfo] = useState<string>('');
+  const [participants, setParticipants] = useState<Array<{ id: string; nickname: string }>>([]);
+  const [answers, setAnswers] = useState<
+    Array<{
+      id: string;
+      user_id: string;
+      answer_text: string;
+      is_correct: boolean;
+      nickname?: string; // nickname は後から追加するプロパティ
+    }>
+  >([]);
 
   const isHost = role === 'host' || room?.host_user_id === userId;
 
@@ -79,6 +97,28 @@ export default function QuizScreen() {
             }
           }
         )
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'answers',
+            filter: currentQuestionId ? `question_id=eq.${currentQuestionId}` : undefined,
+          },
+          (payload: any) => {
+            console.log('Answer changed:', payload);
+
+            // 回答が変更されたら回答一覧を更新
+            fetchAnswers();
+
+            if (payload.eventType === 'INSERT') {
+              const timestamp = new Date().toLocaleTimeString();
+              setDebugInfo(
+                `回答追加: ${timestamp} - ユーザー: ${payload.new?.nickname || 'unknown'}`
+              );
+            }
+          }
+        )
         .subscribe((status) => {
           console.log(`Supabase realtime status: ${status}`);
         });
@@ -99,14 +139,64 @@ export default function QuizScreen() {
     }
   }, [roomId]);
 
-  // 自動再生用の効果
+  // 自動再生用の効果 - 参加者用に強化
   useEffect(() => {
-    if (autoPlay && questionText && !isHost && playCount === 0) {
-      console.log('自動再生を開始します:', questionText);
-      handlePlayQuestion();
-      setAutoPlay(false);
+    if (questionText && !isHost) {
+      // 参加者は自動再生を実行する (playCountに関わらず再生)
+      console.log('参加者自動再生を開始します:', questionText);
+      Speech.speak(questionText, {
+        language: 'en-US',
+        rate: 0.9, // 少しゆっくり目に
+      });
+      // 再生回数カウントをリセットしない (ホストの管理とは別にする)
     }
-  }, [autoPlay, questionText, isHost, playCount]);
+  }, [questionText, isHost]);
+
+  // 回答一覧を取得する関数
+  const fetchAnswers = async () => {
+    if (!roomId || !currentQuestionId) return;
+
+    try {
+      // 現在の問題に対する回答を取得
+      const { data, error } = await supabase
+        .from('answers')
+        .select('id, user_id, answer_text, is_correct')
+        .eq('question_id', currentQuestionId)
+        .order('created_at', { ascending: true });
+
+      if (error) {
+        console.error('回答取得エラー:', error);
+        return;
+      }
+
+      // すべての回答に対するユーザー情報を取得
+      const userIds = data.map((a) => a.user_id);
+      if (userIds.length > 0) {
+        const { data: usersData } = await supabase
+          .from('users')
+          .select('id, nickname')
+          .in('id', userIds);
+
+        // ニックネーム情報を結合
+        if (usersData && usersData.length > 0) {
+          const userMap = new Map(usersData.map((u) => [u.id, u.nickname]));
+          // データにニックネームを追加
+          const answersWithNickname = data.map((answer) => ({
+            ...answer,
+            nickname: userMap.get(answer.user_id) || '不明なユーザー',
+          }));
+          setAnswers(answersWithNickname);
+          return; // ここで終了
+        }
+      }
+
+      // ユーザー情報がない場合はそのまま設定
+      setAnswers(data || []);
+      console.log(`${data?.length || 0}件の回答を取得しました`);
+    } catch (err) {
+      console.error('回答データ取得エラー:', err);
+    }
+  };
 
   const fetchRoomAndQuestion = async (force = false) => {
     if (!roomId) return;
@@ -176,6 +266,17 @@ export default function QuizScreen() {
           if (isHost || roomData.status === 'active' || roomData.status === 'judged') {
             setQuestionText(questionData[0].text);
             console.log(`問題文をセット: ${questionData[0].text.slice(0, 10)}... (${timestamp})`);
+
+            // 問題が取得できたら回答も取得
+            if (questionData[0].id) {
+              // 現在のcurrentQuestionIdに代入
+              if (currentQuestionId !== questionData[0].id) {
+                setCurrentQuestionId(questionData[0].id);
+              }
+
+              // 回答データを取得
+              fetchAnswers();
+            }
           }
         }
       } else if (questionError) {
@@ -292,21 +393,33 @@ export default function QuizScreen() {
     setLoading(true);
 
     try {
+      // 正解判定（大文字小文字区別なし）
+      const isCorrectAnswer = answer.trim().toLowerCase() === questionText.toLowerCase();
+
       // ユーザーの回答を保存
-      const { error } = await supabase.from('answers').insert({
-        room_id: roomId,
-        user_id: userId,
-        question_id: currentQuestionId,
-        answer_text: answer,
-        judged: false,
-        is_correct: false,
-      });
+      const { data, error } = await supabase
+        .from('answers')
+        .insert({
+          room_id: roomId,
+          user_id: userId,
+          question_id: currentQuestionId,
+          answer_text: answer,
+          judged: true, // 自動判定を有効化
+          is_correct: isCorrectAnswer,
+          created_at: new Date().toISOString(),
+        })
+        .select()
+        .single();
 
       if (error) throw error;
 
       setShowResult(true);
-      // 仮判定 (簡易実装)
-      setIsCorrect(answer.trim().toLowerCase() === questionText.toLowerCase());
+      setIsCorrect(isCorrectAnswer);
+
+      console.log('回答を送信しました:', { answer, isCorrect: isCorrectAnswer });
+
+      // 回答データを再取得
+      fetchAnswers();
     } catch (err: any) {
       setError(err.message || '回答の送信中にエラーが発生しました。');
     } finally {
@@ -389,14 +502,7 @@ export default function QuizScreen() {
       <View style={styles.container}>
         <Text style={styles.title}>リスニングクイズ</Text>
 
-        {/* デバッグ情報の表示 */}
-        <Text style={styles.debugInfo}>{debugInfo}</Text>
-
-        {/* ルームステータスと問題ID情報 */}
-        <Text style={styles.statusText}>
-          ステータス: {room?.status || 'loading...'} / 問題ID:{' '}
-          {currentQuestionId?.slice(0, 8) || 'なし'}
-        </Text>
+        {/* デバッグ情報と状態表示を削除 */}
 
         {!isQuizActive || !hasQuestion ? (
           // 問題未作成またはホスト待機中
@@ -408,12 +514,6 @@ export default function QuizScreen() {
           // 出題中・回答可能
           <>
             <Text style={styles.questionInfo}>問題が出題されました!</Text>
-
-            <Button
-              title={`音声を再生 (${3 - playCount}回残り)`}
-              onPress={handlePlayQuestion}
-              disabled={playCount >= 3}
-            />
 
             <TextInput
               style={styles.input}
@@ -450,12 +550,6 @@ export default function QuizScreen() {
       <View style={styles.container}>
         <Text style={styles.title}>問題を作成</Text>
 
-        {/* デバッグ情報の表示 */}
-        <Text style={styles.debugInfo}>{debugInfo}</Text>
-
-        {/* ルームステータスの表示 */}
-        <Text style={styles.statusText}>ステータス: {room?.status || 'loading...'}</Text>
-
         <TextInput
           style={[styles.input, styles.textArea]}
           placeholder="英語フレーズを入力してください"
@@ -481,18 +575,39 @@ export default function QuizScreen() {
       <View style={styles.container}>
         <Text style={styles.title}>出題中</Text>
 
-        {/* デバッグ情報の表示 */}
-        <Text style={styles.debugInfo}>{debugInfo}</Text>
-
-        {/* ルームステータスの表示 */}
-        <Text style={styles.statusText}>ステータス: {room?.status || 'loading...'}</Text>
-
         <Text style={styles.questionText}>{questionText}</Text>
         <Button
           title={`音声を再生する (${3 - playCount}回残り)`}
           onPress={handlePlayQuestion}
           disabled={playCount >= 3 || !questionText}
         />
+
+        {/* 回答一覧 */}
+        <View style={styles.answersContainer}>
+          <Text style={styles.answersTitle}>回答一覧 ({answers.length}件)</Text>
+          {answers.length === 0 ? (
+            <Text style={styles.noAnswers}>まだ回答がありません</Text>
+          ) : (
+            <ScrollView style={styles.answersList}>
+              {answers.map((answer) => (
+                <View
+                  key={answer.id}
+                  style={[
+                    styles.answerItem,
+                    answer.is_correct ? styles.correctAnswer : styles.incorrectAnswer,
+                  ]}
+                >
+                  <Text style={styles.answerNickname}>{answer.nickname || '不明なユーザー'}</Text>
+                  <Text style={styles.answerText}>「{answer.answer_text}」</Text>
+                  <Text style={answer.is_correct ? styles.correctText : styles.incorrectText}>
+                    {answer.is_correct ? '✓ 正解' : '✗ 不正解'}
+                  </Text>
+                </View>
+              ))}
+            </ScrollView>
+          )}
+        </View>
+
         <View style={styles.spacer} />
         <Button title="クイズを終了する" onPress={handleEndQuiz} color="red" />
         {loading && <ActivityIndicator style={styles.loader} />}
@@ -559,24 +674,65 @@ const styles = StyleSheet.create({
     color: 'red',
   },
   statusText: {
-    marginTop: 8,
-    marginBottom: 12,
-    color: '#666',
-    fontStyle: 'italic',
+    display: 'none', // ステータス表示も非表示
   },
   debugInfo: {
-    padding: 8,
-    backgroundColor: '#f0f0f0',
-    borderRadius: 4,
-    marginBottom: 8,
-    fontSize: 12,
-    width: '100%',
-    textAlign: 'center',
+    display: 'none', // デバッグ情報を非表示
   },
   questionInfo: {
     fontSize: 18,
     fontWeight: 'bold',
     color: '#4CAF50',
     marginVertical: 16,
+  },
+  // 回答一覧のスタイル
+  answersContainer: {
+    width: '100%',
+    marginVertical: 16,
+    maxHeight: 200,
+  },
+  answersTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 8,
+  },
+  noAnswers: {
+    fontStyle: 'italic',
+    color: '#666',
+    textAlign: 'center',
+    marginTop: 8,
+  },
+  answersList: {
+    width: '100%',
+    maxHeight: 180,
+  },
+  answerItem: {
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 8,
+    borderWidth: 1,
+  },
+  correctAnswer: {
+    borderColor: '#4CAF50',
+    backgroundColor: 'rgba(76, 175, 80, 0.1)',
+  },
+  incorrectAnswer: {
+    borderColor: '#F44336',
+    backgroundColor: 'rgba(244, 67, 54, 0.1)',
+  },
+  answerNickname: {
+    fontWeight: 'bold',
+    marginBottom: 4,
+  },
+  answerText: {
+    marginBottom: 4,
+  },
+  correctText: {
+    color: '#4CAF50',
+    fontWeight: 'bold',
+  },
+  incorrectText: {
+    color: '#F44336',
+    fontWeight: 'bold',
   },
 });

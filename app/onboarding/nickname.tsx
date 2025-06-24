@@ -9,27 +9,52 @@ import { v4 as uuidv4 } from 'uuid';
 
 export default function NicknameScreen() {
   const [nickname, setNickname] = useState('');
-  const setUserId = useUserStore((s) => s.setUserId);
+  const setUserInfo = useUserStore((s) => s.setUserInfo);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async () => {
-    // 既存IDがあれば取得、なければ生成
-    let userId = await AsyncStorage.getItem('userId');
-    if (!userId) {
-      userId = uuidv4();
-      await AsyncStorage.setItem('userId', userId);
+    if (!nickname.trim()) return;
+    setLoading(true);
+    setError(null);
+
+    try {
+      // 既存IDがあれば取得、なければ生成
+      let userId = await AsyncStorage.getItem('userId');
+      if (!userId) {
+        userId = uuidv4();
+        await AsyncStorage.setItem('userId', userId);
+      }
+
+      // ニックネームも保存
+      await AsyncStorage.setItem('userNickname', nickname);
+
+      // Supabaseに保存
+      const { data, error } = await supabase
+        .from('users')
+        .upsert({
+          id: userId,
+          nickname,
+          updated_at: new Date().toISOString(),
+        })
+        .select()
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      // ストアに保存
+      setUserInfo(userId, nickname);
+
+      console.log('ユーザー登録完了:', { userId, nickname });
+      router.replace('/'); // ホームに遷移
+    } catch (err: any) {
+      console.error('ニックネーム登録エラー:', err);
+      setError(err.message || 'ニックネームの登録中にエラーが発生しました');
+    } finally {
+      setLoading(false);
     }
-    // Supabaseに保存
-    const { data, error } = await supabase
-      .from('users')
-      .upsert({ id: userId, nickname })
-      .select()
-      .single();
-    if (error) {
-      console.error(error);
-      return;
-    }
-    setUserId(userId);
-    router.replace('/'); // ホームに遷移
   };
 
   return (

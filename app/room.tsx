@@ -40,16 +40,75 @@ export default function RoomScreen() {
   useEffect(() => {
     if (roomId) {
       fetchRoomAndParticipants();
-      // リアルタイム更新を設定
+
+      // リアルタイム更新を設定（改善版）
+      const channelName = `room-participants-${roomId}-${Date.now()}`;
+      console.log(`参加者リアルタイムチャンネル設定: ${channelName}`);
+
       const participantsSubscription = supabase
-        .channel('room-' + roomId)
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'users' }, () => {
-          fetchRoomAndParticipants();
-        })
-        .subscribe();
+        .channel(channelName)
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'room_participants',
+            filter: `room_id=eq.${roomId}`,
+          },
+          (payload) => {
+            console.log('参加者変更検知:', payload);
+            fetchRoomAndParticipants();
+          }
+        )
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'users',
+          },
+          () => {
+            fetchRoomAndParticipants();
+          }
+        )
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'rooms',
+            filter: `id=eq.${roomId}`,
+          },
+          (payload: any) => {
+            console.log('ルーム状態変更:', payload);
+
+            // ルームステータスが変わったら更新
+            if (payload.new?.status === 'ready' && !isHost) {
+              console.log('クイズ開始を検知: 参加者画面へ遷移します');
+              // 参加者がクイズ画面へ遷移
+              router.push({
+                pathname: '/quiz',
+                params: { roomId, role: 'participant' },
+              });
+              return; // 画面遷移後は他の処理をスキップ
+            }
+
+            fetchRoomAndParticipants();
+          }
+        )
+        .subscribe((status) => {
+          console.log(`参加者チャンネル状態: ${status}`);
+        });
+
+      // ポーリングによるバックアップ
+      const intervalId = setInterval(() => {
+        fetchRoomAndParticipants();
+      }, 5000);
 
       return () => {
+        console.log(`チャンネル${channelName}を解除します`);
         participantsSubscription.unsubscribe();
+        clearInterval(intervalId);
       };
     }
   }, [roomId]);
@@ -70,16 +129,64 @@ export default function RoomScreen() {
       setRoom(roomData);
       setIsHost(roomData.host_user_id === userId);
 
-      // 参加者情報の取得
-      const { data: participantsData, error: participantsError } = await supabase
-        .from('users')
-        .select('id, nickname')
-        .eq('id', roomData.host_user_id); // 将来的には参加者テーブルから取得
+      // ルームのステータスが ready で自分がホストでない場合は参加者として画面遷移
+      if (roomData.status === 'ready' && roomData.host_user_id !== userId) {
+        console.log('クイズ開始状態を検知: 参加者画面へ遷移します');
+        router.push({
+          pathname: '/quiz',
+          params: { roomId, role: 'participant' },
+        });
+        return; // 画面遷移後は他の処理をスキップ
+      }
 
-      if (participantsError) throw participantsError;
-      setParticipants(participantsData || []);
+      // 参加者テーブルから取得 (ルームの参加者)
+      const { data: participantsData, error: participantsError } = await supabase
+        .from('room_participants')
+        .select('user_id')
+        .eq('room_id', roomId);
+
+      if (participantsError) {
+        console.error('参加者取得エラー:', participantsError);
+      }
+
+      // ホストユーザーも含めて表示するため
+      const userIds = [roomData.host_user_id];
+
+      // room_participantsテーブルにデータがある場合は追加
+      if (participantsData && participantsData.length > 0) {
+        participantsData.forEach((p) => {
+          if (p.user_id && !userIds.includes(p.user_id)) {
+            userIds.push(p.user_id);
+          }
+        });
+      }
+
+      // 各ユーザーの情報を取得
+      if (userIds.length > 0) {
+        const { data: usersData, error: usersError } = await supabase
+          .from('users')
+          .select('id, nickname')
+          .in('id', userIds);
+
+        if (usersError) {
+          throw usersError;
+        }
+
+        setParticipants(usersData || []);
+      } else {
+        // ホストのみを取得
+        const { data: hostData, error: hostError } = await supabase
+          .from('users')
+          .select('id, nickname')
+          .eq('id', roomData.host_user_id);
+
+        if (!hostError) {
+          setParticipants(hostData || []);
+        }
+      }
     } catch (err: any) {
       setError(err.message || 'ルーム情報の取得中にエラーが発生しました。');
+      console.error('参加者情報取得エラー:', err);
     } finally {
       setLoading(false);
     }
@@ -117,6 +224,7 @@ export default function RoomScreen() {
     setError(null);
 
     try {
+      // ルームを検索
       const { data, error: findError } = await supabase
         .from('rooms')
         .select()
@@ -129,10 +237,43 @@ export default function RoomScreen() {
         return;
       }
 
-      setRoomId(data.id);
+      const roomId = data.id;
+
+      // まず既存の参加者エントリをチェック
+      const { data: existingParticipant, error: checkError } = await supabase
+        .from('room_participants')
+        .select()
+        .eq('room_id', roomId)
+        .eq('user_id', userId)
+        .maybeSingle();
+
+      if (checkError) {
+        console.error('参加者チェックエラー:', checkError);
+      }
+
+      // 既存のエントリが無い場合のみ挿入
+      if (!existingParticipant) {
+        const { error: participantError } = await supabase.from('room_participants').insert({
+          room_id: roomId,
+          user_id: userId,
+          joined_at: new Date().toISOString(),
+        });
+
+        if (participantError) {
+          console.error('参加者登録エラー:', participantError);
+          // エラーがあっても続行（UI体験を優先）
+        } else {
+          console.log('参加者として登録しました:', roomId);
+        }
+      } else {
+        console.log('既に参加者として登録されています:', roomId);
+      }
+
+      setRoomId(roomId);
       // 待機画面にとどまる
     } catch (err: any) {
       setError(err.message || 'ルーム参加中にエラーが発生しました。');
+      console.error('ルーム参加エラー:', err);
     } finally {
       setLoading(false);
     }
@@ -142,13 +283,28 @@ export default function RoomScreen() {
     if (!room || !isHost) return;
 
     try {
+      setLoading(true);
+      console.log('クイズを開始します: ルームステータスを更新');
+
       // ルームのステータスを更新
-      await supabase.from('rooms').update({ status: 'ready' }).eq('id', roomId);
+      const { error: updateError } = await supabase
+        .from('rooms')
+        .update({ status: 'ready' })
+        .eq('id', roomId);
+
+      if (updateError) {
+        throw updateError;
+      }
+
+      console.log('ルームステータス更新完了、出題者画面へ遷移します');
 
       // 出題者画面へ遷移
       router.push({ pathname: '/quiz', params: { roomId, role: 'host' } });
     } catch (err: any) {
       setError(err.message || 'クイズ開始中にエラーが発生しました。');
+      console.error('クイズ開始エラー:', err);
+    } finally {
+      setLoading(false);
     }
   };
 
