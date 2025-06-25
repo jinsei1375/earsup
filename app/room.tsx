@@ -39,7 +39,8 @@ export default function RoomScreen() {
   // ルーム情報と参加者情報の取得
   useEffect(() => {
     if (roomId) {
-      fetchRoomAndParticipants();
+      // 初回は強制的にローディングを表示
+      fetchRoomAndParticipants(true);
 
       // リアルタイム更新を設定（改善版）
       const channelName = `room-participants-${roomId}-${Date.now()}`;
@@ -57,7 +58,7 @@ export default function RoomScreen() {
           },
           (payload) => {
             console.log('参加者変更検知:', payload);
-            fetchRoomAndParticipants();
+            fetchRoomAndParticipants(false); // リアルタイム更新ではローディングを表示しない
           }
         )
         .on(
@@ -68,7 +69,7 @@ export default function RoomScreen() {
             table: 'users',
           },
           () => {
-            fetchRoomAndParticipants();
+            fetchRoomAndParticipants(false); // リアルタイム更新ではローディングを表示しない
           }
         )
         .on(
@@ -93,16 +94,16 @@ export default function RoomScreen() {
               return; // 画面遷移後は他の処理をスキップ
             }
 
-            fetchRoomAndParticipants();
+            fetchRoomAndParticipants(false); // リアルタイム更新ではローディングを表示しない
           }
         )
         .subscribe((status) => {
           console.log(`参加者チャンネル状態: ${status}`);
         });
 
-      // ポーリングによるバックアップ
+      // ポーリングによるバックアップ (ローディング表示なし)
       const intervalId = setInterval(() => {
-        fetchRoomAndParticipants();
+        fetchRoomAndParticipants(false); // force=falseでローディングを表示しない
       }, 5000);
 
       return () => {
@@ -113,9 +114,15 @@ export default function RoomScreen() {
     }
   }, [roomId]);
 
-  const fetchRoomAndParticipants = async () => {
+  const fetchRoomAndParticipants = async (force = false) => {
     if (!roomId) return;
-    setLoading(true);
+
+    // 初回読み込みの場合や明示的にforce=trueが指定された場合のみローディングを表示
+    // ポーリングなどの定期更新ではローディングを表示しない
+    const shouldShowLoading = force && !loading;
+    if (shouldShowLoading) {
+      setLoading(true);
+    }
 
     try {
       // ルーム情報の取得
@@ -188,7 +195,9 @@ export default function RoomScreen() {
       setError(err.message || 'ルーム情報の取得中にエラーが発生しました。');
       console.error('参加者情報取得エラー:', err);
     } finally {
-      setLoading(false);
+      if (shouldShowLoading) {
+        setLoading(false);
+      }
     }
   };
 
@@ -328,7 +337,10 @@ export default function RoomScreen() {
       <View style={styles.container}>
         <Text style={styles.title}>ルーム待機中</Text>
         <Text style={styles.codeDisplay}>{room?.code || ''}</Text>
-        <Text>参加者 ({participants.length}名)</Text>
+        <View style={styles.headerRow}>
+          <Text>参加者 ({participants.length}名)</Text>
+          <Button title="更新" onPress={() => fetchRoomAndParticipants(true)} disabled={loading} />
+        </View>
 
         <ScrollView style={styles.participantsList}>
           {participants.map((participant) => (
@@ -403,6 +415,14 @@ const styles = StyleSheet.create({
     padding: 24,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '100%',
+    marginTop: 10,
+    marginBottom: 10,
   },
   title: {
     fontSize: 20,

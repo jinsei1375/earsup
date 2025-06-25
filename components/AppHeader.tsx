@@ -37,9 +37,7 @@ export default function AppHeader({
 
       <Text style={styles.title}>{title}</Text>
 
-      <View style={styles.rightContainer}>
-        {rightComponent}
-      </View>
+      <View style={styles.rightContainer}>{rightComponent}</View>
     </View>
   );
 }

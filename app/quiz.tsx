@@ -34,7 +34,6 @@ export default function QuizScreen() {
   const [playCount, setPlayCount] = useState(0);
   const [autoPlay, setAutoPlay] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(Date.now());
-  const [debugInfo, setDebugInfo] = useState<string>('');
   const [participants, setParticipants] = useState<Array<{ id: string; nickname: string }>>([]);
   const [answers, setAnswers] = useState<
     Array<{
@@ -68,7 +67,6 @@ export default function QuizScreen() {
           (payload: any) => {
             console.log('Room changed:', payload);
             const timestamp = new Date().toLocaleTimeString();
-            setDebugInfo(`Room更新: ${timestamp} - status: ${payload.new?.status || 'unknown'}`);
 
             // 状態が変わったら即時更新
             if (room?.status !== payload.new?.status) {
@@ -83,7 +81,6 @@ export default function QuizScreen() {
           (payload: any) => {
             console.log('Question changed:', payload);
             const timestamp = new Date().toLocaleTimeString();
-            setDebugInfo(`Question更新: ${timestamp} - id: ${payload.new?.id || 'unknown'}`);
 
             // 新しい問題が作成された場合
             if (payload.eventType === 'INSERT') {
@@ -113,8 +110,8 @@ export default function QuizScreen() {
 
             if (payload.eventType === 'INSERT') {
               const timestamp = new Date().toLocaleTimeString();
-              setDebugInfo(
-                `回答追加: ${timestamp} - ユーザー: ${payload.new?.nickname || 'unknown'}`
+              console.log(
+                `回答追加: ${timestamp} - ユーザーID: ${payload.new?.user_id || 'unknown'}`
               );
             }
           }
@@ -123,12 +120,18 @@ export default function QuizScreen() {
           console.log(`Supabase realtime status: ${status}`);
         });
 
-      // 参加者はより頻繁にポーリング
-      const pollingFrequency = !isHost ? 2000 : POLLING_INTERVAL;
+      // リアルタイム更新が主要な手段、ポーリングはバックアップ
+      // ポーリング頻度を調整（ホストなら5秒、参加者なら3秒）
+      const pollingFrequency = isHost ? 5000 : 3000;
 
-      // ポーリングによる定期的な状態確認（バックアップ）
+      // ポーリングによる静かな状態確認（ローディング表示なし）
+      let lastPollTime = Date.now();
       const intervalId = setInterval(() => {
-        fetchRoomAndQuestion();
+        // 最後のポーリングから1秒以内は実行しない（デバウンス効果）
+        if (Date.now() - lastPollTime < 1000) return;
+
+        lastPollTime = Date.now();
+        fetchRoomAndQuestion(false); // force=falseでローディングを表示しない
       }, pollingFrequency);
 
       return () => {
@@ -156,6 +159,7 @@ export default function QuizScreen() {
   const fetchAnswers = async () => {
     if (!roomId || !currentQuestionId) return;
 
+    // 回答取得ではローディングを表示しない（UIをスムーズに保つため）
     try {
       // 現在の問題に対する回答を取得
       const { data, error } = await supabase
@@ -201,8 +205,9 @@ export default function QuizScreen() {
   const fetchRoomAndQuestion = async (force = false) => {
     if (!roomId) return;
 
-    // 短い間隔での連続呼び出しの場合はローディングを表示しない
-    const showLoading = !loading && force;
+    // 初回読み込みの場合のみローディングを表示し、定期的なポーリングでは表示しない
+    // また、すでにデータがある場合はローディングを表示しない
+    const showLoading = !loading && force && (!room || !currentQuestionId);
     if (showLoading) setLoading(true);
 
     try {
@@ -224,11 +229,6 @@ export default function QuizScreen() {
       if (statusChanged) {
         console.log(
           `Room status changed from ${room?.status} to ${roomData.status} (${timestamp})`
-        );
-        setDebugInfo(
-          `ステータス変更: ${new Date().toLocaleTimeString()} - ${room?.status} → ${
-            roomData.status
-          }`
         );
       }
 
@@ -285,13 +285,26 @@ export default function QuizScreen() {
         console.log(`問題データなし (${timestamp})`);
       }
 
-      // 最新の状態を反映するため強制的な再レンダリング
-      setLastUpdated(Date.now());
+      // 必要な場合のみ最新状態を反映（変更があった場合や強制更新時のみ）
+      if (
+        statusChanged ||
+        force ||
+        (questionData?.length > 0 && currentQuestionId !== questionData[0].id)
+      ) {
+        setLastUpdated(Date.now());
+      }
 
       // 参加者かつactiveステータスなのに問題がない場合は念のため再取得
-      if (!isHost && roomData.status === 'active' && !currentQuestionId && !force) {
+      // (ただしこの再取得もあまり頻繁に行わないように調整)
+      if (
+        !isHost &&
+        roomData.status === 'active' &&
+        !currentQuestionId &&
+        !force &&
+        Date.now() - lastUpdated > 3000
+      ) {
         console.log('不整合を検出: active状態なのに問題IDがありません。再取得します。');
-        setTimeout(() => fetchRoomAndQuestion(true), 1000);
+        setTimeout(() => fetchRoomAndQuestion(true), 1500);
       }
     } catch (err: any) {
       console.error('データ取得エラー:', err);
@@ -356,7 +369,7 @@ export default function QuizScreen() {
 
       // ローカルステートを即時更新
       setCurrentQuestionId(questionData.id);
-      setDebugInfo(`問題作成完了: ${new Date().toLocaleTimeString()}`);
+      console.log(`問題作成完了: ${new Date().toLocaleTimeString()}`);
 
       // 強制的にデータ再取得
       await fetchRoomAndQuestion(true);
@@ -621,10 +634,7 @@ export default function QuizScreen() {
     <View style={styles.container}>
       <Text style={styles.title}>エラー</Text>
       <Text>予期しない状態です。アプリを再起動してください。</Text>
-      <Text style={styles.debugInfo}>
-        roomId: {roomId}, isHost: {String(isHost)}, status: {room?.status}, questionId:{' '}
-        {currentQuestionId}
-      </Text>
+      {/* デバッグ情報はすべて非表示にしました */}
       <Button title="ホームに戻る" onPress={() => router.push('/')} />
     </View>
   );
