@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Button } from 'react-native';
+import { View, Text, Button } from 'react-native';
 import { useUserStore } from '@/stores/userStore';
 import { supabase } from '@/lib/supabase';
 import { router } from 'expo-router';
@@ -48,24 +48,14 @@ export default function HomeScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      {nickname ? <Text>こんにちは、{nickname} さん！</Text> : <Text>ニックネームを取得中...</Text>}
+    <View className="flex-1 items-center justify-center gap-4 px-4">
+      {nickname ? (
+        <Text className="text-xl font-bold text-blue-500">こんにちは、{nickname} さん！</Text>
+      ) : (
+        <Text>ニックネームを取得中...</Text>
+      )}
       <Button title="ルーム作成" onPress={handleCreateRoom} />
       <Button title="ルーム参加" onPress={handleJoinRoom} />
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 16,
-    paddingHorizontal: 16,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-});

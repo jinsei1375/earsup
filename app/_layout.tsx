@@ -2,8 +2,10 @@ import { useUserStore } from '@/stores/userStore';
 import { useEffect, useState } from 'react';
 import { Slot, useRouter, useRootNavigationState, usePathname } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { SafeAreaView, StyleSheet, View } from 'react-native';
+import { SafeAreaView, View } from 'react-native';
 import AppHeader from '@/components/AppHeader';
+// グローバルCSSのインポート
+import '@/assets/css/global.css';
 
 export default function RootLayout() {
   const userId = useUserStore((s) => s.userId);
@@ -61,21 +63,11 @@ export default function RootLayout() {
   const { title, showBack } = getHeaderConfig();
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView className="flex-1 bg-white">
       <AppHeader title={title} showBackButton={showBack} onBackPress={() => router.back()} />
-      <View style={styles.container}>
+      <View className="flex-1">
         <Slot />
       </View>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  container: {
-    flex: 1,
-  },
-});

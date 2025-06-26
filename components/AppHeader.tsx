@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -26,49 +26,20 @@ export default function AppHeader({
   };
 
   return (
-    <View style={styles.header}>
-      <View style={styles.leftContainer}>
+    <View className="h-[60px] flex-row items-center justify-between px-4 border-b border-gray-200 bg-white w-full">
+      <View className="w-[60px] items-start">
         {showBackButton && (
-          <TouchableOpacity onPress={handleBackPress} style={styles.backButton}>
+          <TouchableOpacity onPress={handleBackPress} className="p-2">
             <Ionicons name="arrow-back" size={24} color="#000" />
           </TouchableOpacity>
         )}
       </View>
 
-      <Text style={styles.title}>{title}</Text>
+      <Text className="text-lg font-bold flex-1 text-center">{title}</Text>
 
-      <View style={styles.rightContainer}>{rightComponent}</View>
+      <View className="w-[60px] items-end">{rightComponent}</View>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  header: {
-    height: 60,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-    backgroundColor: '#fff',
-    width: '100%',
-  },
-  leftContainer: {
-    width: 60,
-    alignItems: 'flex-start',
-  },
-  backButton: {
-    padding: 8,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    flex: 1,
-    textAlign: 'center',
-  },
-  rightContainer: {
-    width: 60,
-    alignItems: 'flex-end',
-  },
-});
+// NativeWindを使用するためスタイルシートは削除しました
