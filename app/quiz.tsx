@@ -15,6 +15,7 @@ import { useUserStore } from '@/stores/userStore';
 
 // 定数定義
 const POLLING_INTERVAL = 3000; // 3秒ごとにポーリング
+const ANSWERS_DEBOUNCE_MS = 500; // 回答取得のデバウンス時間
 
 export default function QuizScreen() {
   const params = useLocalSearchParams<{ roomId: string; role: string }>();
@@ -34,6 +35,9 @@ export default function QuizScreen() {
   const [autoPlay, setAutoPlay] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(Date.now());
   const [participants, setParticipants] = useState<Array<{ id: string; nickname: string }>>([]);
+  const [realtimeConnected, setRealtimeConnected] = useState(false);
+  const [connectionRetries, setConnectionRetries] = useState(0);
+  const [lastAnswersFetch, setLastAnswersFetch] = useState(0);
   const [answers, setAnswers] = useState<
     Array<{
       id: string;
@@ -55,7 +59,7 @@ export default function QuizScreen() {
       fetchRoomAndQuestion(true);
 
       // リアルタイム更新を設定（改善版）
-      const channelName = `room-quiz-${roomId}-${Date.now()}`;
+      const channelName = `room-quiz-${roomId}`;
       console.log(`リアルタイムチャンネル設定: ${channelName}`);
 
       const roomSubscription = supabase
@@ -99,7 +103,7 @@ export default function QuizScreen() {
             event: '*',
             schema: 'public',
             table: 'answers',
-            filter: currentQuestionId ? `question_id=eq.${currentQuestionId}` : undefined,
+            filter: `room_id=eq.${roomId}`,
           },
           (payload: any) => {
             console.log('Answer changed:', payload);
@@ -117,6 +121,15 @@ export default function QuizScreen() {
         )
         .subscribe((status) => {
           console.log(`Supabase realtime status: ${status}`);
+          const isConnected = status === 'SUBSCRIBED';
+          setRealtimeConnected(isConnected);
+          
+          if (isConnected) {
+            setConnectionRetries(0); // リセット
+          } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+            // 接続エラーの場合、ポーリング頻度を上げる
+            console.log('リアルタイム接続エラー、ポーリング頻度を上げます');
+          }
         });
 
       // リアルタイム更新が主要な手段、ポーリングはバックアップ
@@ -154,9 +167,16 @@ export default function QuizScreen() {
     }
   }, [questionText, isHost]);
 
-  // 回答一覧を取得する関数
-  const fetchAnswers = async () => {
+  // 回答一覧を取得する関数（デバウンス付き）
+  const fetchAnswers = async (force = false) => {
     if (!roomId || !currentQuestionId) return;
+
+    // デバウンス処理（強制更新でない場合）
+    const now = Date.now();
+    if (!force && now - lastAnswersFetch < ANSWERS_DEBOUNCE_MS) {
+      return;
+    }
+    setLastAnswersFetch(now);
 
     // 回答取得ではローディングを表示しない（UIをスムーズに保つため）
     try {
@@ -431,7 +451,7 @@ export default function QuizScreen() {
       console.log('回答を送信しました:', { answer, isCorrect: isCorrectAnswer });
 
       // 回答データを再取得
-      fetchAnswers();
+      fetchAnswers(true);
     } catch (err: any) {
       setError(err.message || '回答の送信中にエラーが発生しました。');
     } finally {
@@ -515,7 +535,12 @@ export default function QuizScreen() {
       <View className="flex-1 p-6 items-center justify-center">
         <Text className="text-xl font-bold mb-4">リスニングクイズ</Text>
 
-        {/* デバッグ情報と状態表示を削除 */}
+        {/* リアルタイム接続状況表示 */}
+        <View className="flex-row items-center mb-3">
+          <Text className={`text-sm ${realtimeConnected ? 'text-green-600' : 'text-gray-500'}`}>
+            ● {realtimeConnected ? 'リアルタイム更新中' : 'ポーリング更新中'}
+          </Text>
+        </View>
 
         {!isQuizActive || !hasQuestion ? (
           // 問題未作成またはホスト待機中
