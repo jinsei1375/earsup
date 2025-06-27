@@ -5,7 +5,6 @@ import {
   Text,
   TextInput,
   Button,
-  StyleSheet,
   ActivityIndicator,
   ScrollView,
 } from 'react-native';
@@ -457,10 +456,11 @@ export default function QuizScreen() {
   // ホスト用の問題作成画面
   if (isHost && (!currentQuestionId || room?.status === 'ready')) {
     return (
-      <View style={styles.container}>
-        <Text style={styles.title}>問題を作成</Text>
+      <View className="flex-1 p-6 items-center justify-center">
+        <Text className="text-xl font-bold mb-4">問題を作成</Text>
         <TextInput
-          style={[styles.input, styles.textArea]}
+          className="border border-gray-300 p-3 rounded-lg my-4 w-full h-[120px]"
+          style={{ textAlignVertical: 'top' }}
           placeholder="英語フレーズを入力してください"
           value={questionText}
           onChangeText={setQuestionText}
@@ -472,8 +472,8 @@ export default function QuizScreen() {
           onPress={handleCreateQuestion}
           disabled={!questionText.trim() || loading}
         />
-        {loading && <ActivityIndicator style={styles.loader} />}
-        {error && <Text style={styles.errorText}>{error}</Text>}
+        {loading && <ActivityIndicator className="mt-4" />}
+        {error && <Text className="mt-4 text-red-500">{error}</Text>}
       </View>
     );
   }
@@ -481,18 +481,18 @@ export default function QuizScreen() {
   // ホスト用の問題表示・管理画面
   if (isHost && currentQuestionId) {
     return (
-      <View style={styles.container}>
-        <Text style={styles.title}>出題中</Text>
-        <Text style={styles.questionText}>{questionText}</Text>
+      <View className="flex-1 p-6 items-center justify-center">
+        <Text className="text-xl font-bold mb-4">出題中</Text>
+        <Text className="text-lg my-4 text-center">{questionText}</Text>
         <Button
           title={`音声を再生する (${3 - playCount}回残り)`}
           onPress={handlePlayQuestion}
           disabled={playCount >= 3 || !questionText}
         />
-        <View style={styles.spacer} />
+        <View className="h-[30px]" />
         <Button title="クイズを終了する" onPress={handleEndQuiz} color="red" />
-        {loading && <ActivityIndicator style={styles.loader} />}
-        {error && <Text style={styles.errorText}>{error}</Text>}
+        {loading && <ActivityIndicator className="mt-4" />}
+        {error && <Text className="mt-4 text-red-500">{error}</Text>}
       </View>
     );
   }
@@ -512,8 +512,8 @@ export default function QuizScreen() {
     });
 
     return (
-      <View style={styles.container}>
-        <Text style={styles.title}>リスニングクイズ</Text>
+      <View className="flex-1 p-6 items-center justify-center">
+        <Text className="text-xl font-bold mb-4">リスニングクイズ</Text>
 
         {/* デバッグ情報と状態表示を削除 */}
 
@@ -526,10 +526,10 @@ export default function QuizScreen() {
         ) : (
           // 出題中・回答可能
           <>
-            <Text style={styles.questionInfo}>問題が出題されました!</Text>
+            <Text className="text-lg font-bold text-green-500 my-4">問題が出題されました!</Text>
 
             <TextInput
-              style={styles.input}
+              className="border border-gray-300 p-3 rounded-lg my-4 w-full"
               placeholder="聞こえたフレーズを入力"
               value={answer}
               onChangeText={setAnswer}
@@ -543,7 +543,7 @@ export default function QuizScreen() {
             />
 
             {showResult && (
-              <View style={styles.result}>
+              <View className="mt-6 items-center">
                 <Text>{isCorrect ? '正解！' : '不正解'}</Text>
                 <Text>正解: {questionText}</Text>
               </View>
@@ -551,44 +551,19 @@ export default function QuizScreen() {
           </>
         )}
 
-        {loading && <ActivityIndicator style={styles.loader} />}
-        {error && <Text style={styles.errorText}>{error}</Text>}
+        {loading && <ActivityIndicator className="mt-4" />}
+        {error && <Text className="mt-4 text-red-500">{error}</Text>}
       </View>
     );
   }
 
-  // ホスト用の問題作成画面
-  if (isHost && (!currentQuestionId || room?.status === 'ready')) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.title}>問題を作成</Text>
-
-        <TextInput
-          style={[styles.input, styles.textArea]}
-          placeholder="英語フレーズを入力してください"
-          value={questionText}
-          onChangeText={setQuestionText}
-          multiline
-          numberOfLines={4}
-        />
-        <Button
-          title="この問題を出題する"
-          onPress={handleCreateQuestion}
-          disabled={!questionText.trim() || loading}
-        />
-        {loading && <ActivityIndicator style={styles.loader} />}
-        {error && <Text style={styles.errorText}>{error}</Text>}
-      </View>
-    );
-  }
-
-  // ホスト用の問題表示・管理画面
+  // ホスト用の問題表示・管理画面（回答一覧付き）
   if (isHost && currentQuestionId) {
     return (
-      <View style={styles.container}>
-        <Text style={styles.title}>出題中</Text>
+      <View className="flex-1 p-6 items-center justify-center">
+        <Text className="text-xl font-bold mb-4">出題中</Text>
 
-        <Text style={styles.questionText}>{questionText}</Text>
+        <Text className="text-lg my-4 text-center">{questionText}</Text>
         <Button
           title={`音声を再生する (${3 - playCount}回残り)`}
           onPress={handlePlayQuestion}
@@ -596,23 +571,24 @@ export default function QuizScreen() {
         />
 
         {/* 回答一覧 */}
-        <View style={styles.answersContainer}>
-          <Text style={styles.answersTitle}>回答一覧 ({answers.length}件)</Text>
+        <View className="w-full my-4 max-h-[200px]">
+          <Text className="text-base font-bold mb-2">回答一覧 ({answers.length}件)</Text>
           {answers.length === 0 ? (
-            <Text style={styles.noAnswers}>まだ回答がありません</Text>
+            <Text className="italic text-gray-600 text-center mt-2">まだ回答がありません</Text>
           ) : (
-            <ScrollView style={styles.answersList}>
+            <ScrollView className="w-full max-h-[180px]">
               {answers.map((answer) => (
                 <View
                   key={answer.id}
-                  style={[
-                    styles.answerItem,
-                    answer.is_correct ? styles.correctAnswer : styles.incorrectAnswer,
-                  ]}
+                  className={`p-3 rounded-lg mb-2 border ${
+                    answer.is_correct 
+                      ? 'border-green-500 bg-green-50' 
+                      : 'border-red-500 bg-red-50'
+                  }`}
                 >
-                  <Text style={styles.answerNickname}>{answer.nickname || '不明なユーザー'}</Text>
-                  <Text style={styles.answerText}>「{answer.answer_text}」</Text>
-                  <Text style={answer.is_correct ? styles.correctText : styles.incorrectText}>
+                  <Text className="font-bold mb-1">{answer.nickname || '不明なユーザー'}</Text>
+                  <Text className="mb-1">「{answer.answer_text}」</Text>
+                  <Text className={answer.is_correct ? 'text-green-500 font-bold' : 'text-red-500 font-bold'}>
                     {answer.is_correct ? '✓ 正解' : '✗ 不正解'}
                   </Text>
                 </View>
@@ -621,18 +597,18 @@ export default function QuizScreen() {
           )}
         </View>
 
-        <View style={styles.spacer} />
+        <View className="h-[30px]" />
         <Button title="クイズを終了する" onPress={handleEndQuiz} color="red" />
-        {loading && <ActivityIndicator style={styles.loader} />}
-        {error && <Text style={styles.errorText}>{error}</Text>}
+        {loading && <ActivityIndicator className="mt-4" />}
+        {error && <Text className="mt-4 text-red-500">{error}</Text>}
       </View>
     );
   }
 
   // 想定外のケース
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>エラー</Text>
+    <View className="flex-1 items-center justify-center p-6">
+      <Text className="text-xl font-bold mb-4">エラー</Text>
       <Text>予期しない状態です。アプリを再起動してください。</Text>
       {/* デバッグ情報はすべて非表示にしました */}
       <Button title="ホームに戻る" onPress={() => router.push('/')} />
@@ -640,109 +616,4 @@ export default function QuizScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 24,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 16,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    padding: 12,
-    borderRadius: 8,
-    marginVertical: 16,
-    width: '100%',
-  },
-  textArea: {
-    height: 120,
-    textAlignVertical: 'top',
-  },
-  questionText: {
-    fontSize: 18,
-    marginVertical: 16,
-    textAlign: 'center',
-  },
-  result: {
-    marginTop: 24,
-    alignItems: 'center',
-  },
-  spacer: {
-    height: 30,
-  },
-  loader: {
-    marginTop: 16,
-  },
-  errorText: {
-    marginTop: 16,
-    color: 'red',
-  },
-  statusText: {
-    display: 'none', // ステータス表示も非表示
-  },
-  debugInfo: {
-    display: 'none', // デバッグ情報を非表示
-  },
-  questionInfo: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#4CAF50',
-    marginVertical: 16,
-  },
-  // 回答一覧のスタイル
-  answersContainer: {
-    width: '100%',
-    marginVertical: 16,
-    maxHeight: 200,
-  },
-  answersTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 8,
-  },
-  noAnswers: {
-    fontStyle: 'italic',
-    color: '#666',
-    textAlign: 'center',
-    marginTop: 8,
-  },
-  answersList: {
-    width: '100%',
-    maxHeight: 180,
-  },
-  answerItem: {
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 8,
-    borderWidth: 1,
-  },
-  correctAnswer: {
-    borderColor: '#4CAF50',
-    backgroundColor: 'rgba(76, 175, 80, 0.1)',
-  },
-  incorrectAnswer: {
-    borderColor: '#F44336',
-    backgroundColor: 'rgba(244, 67, 54, 0.1)',
-  },
-  answerNickname: {
-    fontWeight: 'bold',
-    marginBottom: 4,
-  },
-  answerText: {
-    marginBottom: 4,
-  },
-  correctText: {
-    color: '#4CAF50',
-    fontWeight: 'bold',
-  },
-  incorrectText: {
-    color: '#F44336',
-    fontWeight: 'bold',
-  },
-});
+
