@@ -4,7 +4,6 @@ import {
   Text,
   TextInput,
   Button,
-  StyleSheet,
   ActivityIndicator,
   ScrollView,
 } from 'react-native';
@@ -334,17 +333,17 @@ export default function RoomScreen() {
   // 待機画面の表示
   if (isWaitingMode) {
     return (
-      <View style={styles.container}>
-        <Text style={styles.title}>ルーム待機中</Text>
-        <Text style={styles.codeDisplay}>{room?.code || ''}</Text>
-        <View style={styles.headerRow}>
+      <View className="flex-1 p-6 items-center justify-center">
+        <Text className="text-xl font-bold mb-6">ルーム待機中</Text>
+        <Text className="text-[32px] font-bold tracking-[4px] my-5">{room?.code || ''}</Text>
+        <View className="flex-row justify-between items-center w-full mt-2.5 mb-2.5">
           <Text>参加者 ({participants.length}名)</Text>
           <Button title="更新" onPress={() => fetchRoomAndParticipants(true)} disabled={loading} />
         </View>
 
-        <ScrollView style={styles.participantsList}>
+        <ScrollView className="w-full max-h-[200px] my-5">
           {participants.map((participant) => (
-            <View key={participant.id} style={styles.participantItem}>
+            <View key={participant.id} className="p-3 border-b border-gray-200">
               <Text>
                 {participant.nickname} {participant.id === room?.host_user_id ? '(ホスト)' : ''}
               </Text>
@@ -353,9 +352,9 @@ export default function RoomScreen() {
         </ScrollView>
 
         {isHost ? (
-          <View style={styles.hostButtons}>
+          <View className="flex-row mt-5">
             <Button title="クイズを開始" onPress={handleStartQuiz} disabled={loading} />
-            <View style={styles.buttonSpacer} />
+            <View className="w-4" />
             <Button
               title="ルームを中止"
               onPress={handleCancelRoom}
@@ -364,31 +363,31 @@ export default function RoomScreen() {
             />
           </View>
         ) : (
-          <Text style={styles.waitMessage}>ホストがクイズを開始するのを待っています...</Text>
+          <Text className="mt-5 italic">ホストがクイズを開始するのを待っています...</Text>
         )}
 
-        {loading && <ActivityIndicator style={styles.loader} />}
-        {error && <Text style={styles.errorText}>{error}</Text>}
+        {loading && <ActivityIndicator className="mt-4" />}
+        {error && <Text className="mt-4 text-red-500">{error}</Text>}
       </View>
     );
   }
 
   // ルーム作成・参加画面
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>{isCreateMode ? 'ルームを作成' : 'ルームに参加'}</Text>
+    <View className="flex-1 p-6 items-center justify-center">
+      <Text className="text-xl font-bold mb-6">{isCreateMode ? 'ルームを作成' : 'ルームに参加'}</Text>
 
       {isCreateMode ? (
         <>
           <Text>合言葉</Text>
-          <Text style={styles.codeDisplay}>{code}</Text>
+          <Text className="text-[32px] font-bold tracking-[4px] my-5">{code}</Text>
           <Button title="ルームを作成" onPress={handleCreateRoom} disabled={loading} />
         </>
       ) : (
         <>
           <Text>合言葉を入力</Text>
           <TextInput
-            style={styles.input}
+            className="w-full border border-gray-300 p-3 rounded-lg my-4 text-center text-2xl"
             placeholder="例: ABC123"
             value={code}
             onChangeText={setCode}
@@ -403,74 +402,10 @@ export default function RoomScreen() {
         </>
       )}
 
-      {loading && <ActivityIndicator style={styles.loader} />}
-      {error && <Text style={styles.errorText}>{error}</Text>}
+      {loading && <ActivityIndicator className="mt-4" />}
+      {error && <Text className="mt-4 text-red-500">{error}</Text>}
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  headerRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    width: '100%',
-    marginTop: 10,
-    marginBottom: 10,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 24,
-  },
-  input: {
-    width: '100%',
-    borderWidth: 1,
-    borderColor: '#ccc',
-    padding: 12,
-    borderRadius: 8,
-    marginVertical: 16,
-    textAlign: 'center',
-    fontSize: 24,
-  },
-  codeDisplay: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    letterSpacing: 4,
-    marginVertical: 20,
-  },
-  participantsList: {
-    width: '100%',
-    maxHeight: 200,
-    marginVertical: 20,
-  },
-  participantItem: {
-    padding: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  hostButtons: {
-    flexDirection: 'row',
-    marginTop: 20,
-  },
-  buttonSpacer: {
-    width: 16,
-  },
-  waitMessage: {
-    marginTop: 20,
-    fontStyle: 'italic',
-  },
-  loader: {
-    marginTop: 16,
-  },
-  errorText: {
-    marginTop: 16,
-    color: 'red',
-  },
-});
+
