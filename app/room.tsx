@@ -23,6 +23,7 @@ export default function RoomScreen() {
   const [participants, setParticipants] = useState<Array<{ id: string; nickname: string }>>([]);
   const [room, setRoom] = useState<any>(null);
   const [isHost, setIsHost] = useState(false);
+  const [realtimeConnected, setRealtimeConnected] = useState(false);
 
   const isCreateMode = mode === 'create';
   const isJoinMode = mode === 'join';
@@ -42,7 +43,7 @@ export default function RoomScreen() {
       fetchRoomAndParticipants(true);
 
       // リアルタイム更新を設定（改善版）
-      const channelName = `room-participants-${roomId}-${Date.now()}`;
+      const channelName = `room-participants-${roomId}`;
       console.log(`参加者リアルタイムチャンネル設定: ${channelName}`);
 
       const participantsSubscription = supabase
@@ -98,6 +99,7 @@ export default function RoomScreen() {
         )
         .subscribe((status) => {
           console.log(`参加者チャンネル状態: ${status}`);
+          setRealtimeConnected(status === 'SUBSCRIBED');
         });
 
       // ポーリングによるバックアップ (ローディング表示なし)
@@ -336,6 +338,14 @@ export default function RoomScreen() {
       <View className="flex-1 p-6 items-center justify-center">
         <Text className="text-xl font-bold mb-6">ルーム待機中</Text>
         <Text className="text-[32px] font-bold tracking-[4px] my-5">{room?.code || ''}</Text>
+        
+        {/* リアルタイム接続状況表示 */}
+        <View className="flex-row items-center mb-3">
+          <Text className={`text-sm ${realtimeConnected ? 'text-green-600' : 'text-gray-500'}`}>
+            ● {realtimeConnected ? 'リアルタイム更新中' : 'ポーリング更新中'}
+          </Text>
+        </View>
+        
         <View className="flex-row justify-between items-center w-full mt-2.5 mb-2.5">
           <Text>参加者 ({participants.length}名)</Text>
           <Button title="更新" onPress={() => fetchRoomAndParticipants(true)} disabled={loading} />
