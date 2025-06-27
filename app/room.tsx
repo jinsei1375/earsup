@@ -24,6 +24,8 @@ export default function RoomScreen() {
   const [room, setRoom] = useState<any>(null);
   const [isHost, setIsHost] = useState(false);
   const [realtimeConnected, setRealtimeConnected] = useState(false);
+  const [connectionRetries, setConnectionRetries] = useState(0);
+  const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
 
   const isCreateMode = mode === 'create';
   const isJoinMode = mode === 'join';
@@ -58,6 +60,7 @@ export default function RoomScreen() {
           },
           (payload) => {
             console.log('参加者変更検知:', payload);
+            setLastUpdate(new Date());
             fetchRoomAndParticipants(false); // リアルタイム更新ではローディングを表示しない
           }
         )
@@ -69,6 +72,7 @@ export default function RoomScreen() {
             table: 'users',
           },
           () => {
+            setLastUpdate(new Date());
             fetchRoomAndParticipants(false); // リアルタイム更新ではローディングを表示しない
           }
         )
@@ -82,6 +86,7 @@ export default function RoomScreen() {
           },
           (payload: any) => {
             console.log('ルーム状態変更:', payload);
+            setLastUpdate(new Date());
 
             // ルームステータスが変わったら更新
             if (payload.new?.status === 'ready' && !isHost) {
@@ -99,7 +104,15 @@ export default function RoomScreen() {
         )
         .subscribe((status) => {
           console.log(`参加者チャンネル状態: ${status}`);
-          setRealtimeConnected(status === 'SUBSCRIBED');
+          const isConnected = status === 'SUBSCRIBED';
+          setRealtimeConnected(isConnected);
+          
+          if (isConnected) {
+            setConnectionRetries(0); // リセット
+          } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+            // 接続エラーの場合、リトライを考慮
+            console.log('リアルタイム接続エラー、ポーリングにフォールバック');
+          }
         });
 
       // ポーリングによるバックアップ (ローディング表示なし)
@@ -192,6 +205,9 @@ export default function RoomScreen() {
           setParticipants(hostData || []);
         }
       }
+      
+      // 更新時刻を記録
+      setLastUpdate(new Date());
     } catch (err: any) {
       setError(err.message || 'ルーム情報の取得中にエラーが発生しました。');
       console.error('参加者情報取得エラー:', err);
@@ -340,10 +356,15 @@ export default function RoomScreen() {
         <Text className="text-[32px] font-bold tracking-[4px] my-5">{room?.code || ''}</Text>
         
         {/* リアルタイム接続状況表示 */}
-        <View className="flex-row items-center mb-3">
+        <View className="items-center mb-3">
           <Text className={`text-sm ${realtimeConnected ? 'text-green-600' : 'text-gray-500'}`}>
             ● {realtimeConnected ? 'リアルタイム更新中' : 'ポーリング更新中'}
           </Text>
+          {lastUpdate && (
+            <Text className="text-xs text-gray-400 mt-1">
+              最終更新: {lastUpdate.toLocaleTimeString()}
+            </Text>
+          )}
         </View>
         
         <View className="flex-row justify-between items-center w-full mt-2.5 mb-2.5">

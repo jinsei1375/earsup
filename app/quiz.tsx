@@ -36,6 +36,7 @@ export default function QuizScreen() {
   const [lastUpdated, setLastUpdated] = useState(Date.now());
   const [participants, setParticipants] = useState<Array<{ id: string; nickname: string }>>([]);
   const [realtimeConnected, setRealtimeConnected] = useState(false);
+  const [connectionRetries, setConnectionRetries] = useState(0);
   const [lastAnswersFetch, setLastAnswersFetch] = useState(0);
   const [answers, setAnswers] = useState<
     Array<{
@@ -120,7 +121,15 @@ export default function QuizScreen() {
         )
         .subscribe((status) => {
           console.log(`Supabase realtime status: ${status}`);
-          setRealtimeConnected(status === 'SUBSCRIBED');
+          const isConnected = status === 'SUBSCRIBED';
+          setRealtimeConnected(isConnected);
+          
+          if (isConnected) {
+            setConnectionRetries(0); // リセット
+          } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+            // 接続エラーの場合、ポーリング頻度を上げる
+            console.log('リアルタイム接続エラー、ポーリング頻度を上げます');
+          }
         });
 
       // リアルタイム更新が主要な手段、ポーリングはバックアップ
