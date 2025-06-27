@@ -2,7 +2,7 @@
 import { supabase } from '@/lib/supabase';
 import { useUserStore } from '@/stores/userStore';
 import { useState } from 'react';
-import { View, TextInput, Button, Text, StyleSheet } from 'react-native';
+import { View, TextInput, Button, Text } from 'react-native';
 import { router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { v4 as uuidv4 } from 'uuid';
@@ -58,10 +58,10 @@ export default function NicknameScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <View className="flex-1 justify-center p-6">
       <Text>ニックネームを入力してください</Text>
       <TextInput
-        style={styles.input}
+        className="border border-gray-300 p-3 rounded-lg my-4"
         placeholder="例: EarsFan123"
         value={nickname}
         onChangeText={setNickname}
@@ -70,14 +70,3 @@ export default function NicknameScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center', padding: 24 },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    padding: 12,
-    borderRadius: 8,
-    marginVertical: 16,
-  },
-});
