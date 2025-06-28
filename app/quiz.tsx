@@ -108,8 +108,8 @@ export default function QuizScreen() {
           (payload: any) => {
             console.log('Answer changed:', payload);
 
-            // 回答が変更されたら回答一覧を更新
-            fetchAnswers();
+            // 回答が変更されたら回答一覧を静かに更新 (ローディングなし)
+            fetchAnswers(false);  // force=false でローディングを表示しない
 
             if (payload.eventType === 'INSERT') {
               const timestamp = new Date().toLocaleTimeString();
@@ -133,18 +133,26 @@ export default function QuizScreen() {
         });
 
       // リアルタイム更新が主要な手段、ポーリングはバックアップ
-      // ポーリング頻度を調整（ホストなら5秒、参加者なら3秒）
-      const pollingFrequency = isHost ? 5000 : 3000;
-
+      // リアルタイム接続状態に応じてポーリング頻度を動的に調整
+      const basePollingFrequency = isHost ? 7000 : 5000; // ポーリング間隔を長めに調整
+      
       // ポーリングによる静かな状態確認（ローディング表示なし）
       let lastPollTime = Date.now();
       const intervalId = setInterval(() => {
-        // 最後のポーリングから1秒以内は実行しない（デバウンス効果）
-        if (Date.now() - lastPollTime < 1000) return;
+        // 最後のポーリングから2秒以内は実行しない（デバウンス効果を強化）
+        if (Date.now() - lastPollTime < 2000) return;
+        
+        // クイズ出題中(active)のときはホストのポーリング頻度を下げる
+        if (room?.status === 'active' && isHost) {
+          // 既に問題が取得できているなら、ポーリング頻度を下げる（10秒に1回程度）
+          if (currentQuestionId && questionText && Date.now() - lastPollTime < 10000) {
+            return;
+          }
+        }
 
         lastPollTime = Date.now();
         fetchRoomAndQuestion(false); // force=falseでローディングを表示しない
-      }, pollingFrequency);
+      }, basePollingFrequency);
 
       return () => {
         console.log(`チャンネル${channelName}を解除します`);
@@ -177,6 +185,9 @@ export default function QuizScreen() {
       return;
     }
     setLastAnswersFetch(now);
+    
+    // 注意: 回答の取得ではローディング表示を一切行わない
+    // UIのカクつきを防ぐため
 
     // 回答取得ではローディングを表示しない（UIをスムーズに保つため）
     try {
@@ -224,9 +235,12 @@ export default function QuizScreen() {
   const fetchRoomAndQuestion = async (force = false) => {
     if (!roomId) return;
 
+    // 出題中かどうかを判断
+    const isActive = room?.status === 'active' || room?.status === 'judged';
+    
     // 初回読み込みの場合のみローディングを表示し、定期的なポーリングでは表示しない
-    // また、すでにデータがある場合はローディングを表示しない
-    const showLoading = !loading && force && (!room || !currentQuestionId);
+    // また、すでにデータがある場合やクイズ出題中は極力ローディングを表示しない
+    const showLoading = !loading && force && (!room || !currentQuestionId) && !isActive;
     if (showLoading) setLoading(true);
 
     try {
@@ -422,6 +436,7 @@ export default function QuizScreen() {
 
   const handleSubmitAnswer = async () => {
     if (!roomId || !currentQuestionId || !answer.trim()) return;
+    // 回答送信時は明示的なユーザーアクションなので、ローディングを表示してフィードバックする
     setLoading(true);
 
     try {
