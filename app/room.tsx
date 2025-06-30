@@ -6,6 +6,7 @@ import {
   Button,
   ActivityIndicator,
   ScrollView,
+  TouchableOpacity,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { supabase } from '@/lib/supabase';
@@ -26,6 +27,7 @@ export default function RoomScreen() {
   const [realtimeConnected, setRealtimeConnected] = useState(false);
   const [connectionRetries, setConnectionRetries] = useState(0);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
+  const [quizMode, setQuizMode] = useState<'first-come' | 'all-at-once'>('all-at-once');
 
   const isCreateMode = mode === 'create';
   const isJoinMode = mode === 'join';
@@ -106,7 +108,7 @@ export default function RoomScreen() {
           console.log(`参加者チャンネル状態: ${status}`);
           const isConnected = status === 'SUBSCRIBED';
           setRealtimeConnected(isConnected);
-          
+
           if (isConnected) {
             setConnectionRetries(0); // リセット
           } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
@@ -205,7 +207,7 @@ export default function RoomScreen() {
           setParticipants(hostData || []);
         }
       }
-      
+
       // 更新時刻を記録
       setLastUpdate(new Date());
     } catch (err: any) {
@@ -230,6 +232,7 @@ export default function RoomScreen() {
           code,
           host_user_id: userId,
           status: 'waiting',
+          quiz_mode: quizMode, // クイズモードを保存
         })
         .select()
         .single();
@@ -354,7 +357,7 @@ export default function RoomScreen() {
       <View className="flex-1 p-6 items-center justify-center">
         <Text className="text-xl font-bold mb-6">ルーム待機中</Text>
         <Text className="text-[32px] font-bold tracking-[4px] my-5">{room?.code || ''}</Text>
-        
+
         {/* リアルタイム接続状況表示 */}
         <View className="items-center mb-3">
           <Text className={`text-sm ${realtimeConnected ? 'text-green-600' : 'text-gray-500'}`}>
@@ -366,7 +369,7 @@ export default function RoomScreen() {
             </Text>
           )}
         </View>
-        
+
         <View className="flex-row justify-between items-center w-full mt-2.5 mb-2.5">
           <Text>参加者 ({participants.length}名)</Text>
           <Button title="更新" onPress={() => fetchRoomAndParticipants(true)} disabled={loading} />
@@ -406,12 +409,48 @@ export default function RoomScreen() {
   // ルーム作成・参加画面
   return (
     <View className="flex-1 p-6 items-center justify-center">
-      <Text className="text-xl font-bold mb-6">{isCreateMode ? 'ルームを作成' : 'ルームに参加'}</Text>
+      <Text className="text-xl font-bold mb-6">
+        {isCreateMode ? 'ルームを作成' : 'ルームに参加'}
+      </Text>
 
       {isCreateMode ? (
         <>
           <Text>合言葉</Text>
           <Text className="text-[32px] font-bold tracking-[4px] my-5">{code}</Text>
+
+          {/* クイズモード選択UI */}
+          <View className="w-full mb-6">
+            <Text className="mb-2 font-bold">クイズモード</Text>
+            <View className="flex-row justify-between">
+              <TouchableOpacity
+                onPress={() => setQuizMode('first-come')}
+                className={`flex-1 mr-2 p-3 rounded-lg border ${
+                  quizMode === 'first-come' ? 'bg-blue-100 border-blue-500' : 'border-gray-300'
+                }`}
+              >
+                <Text className={`text-center ${quizMode === 'first-come' ? 'font-bold' : ''}`}>
+                  早押しモード
+                </Text>
+                <Text className="text-xs text-center text-gray-500 mt-1">
+                  最初に回答権を得た人だけが回答できます
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => setQuizMode('all-at-once')}
+                className={`flex-1 ml-2 p-3 rounded-lg border ${
+                  quizMode === 'all-at-once' ? 'bg-blue-100 border-blue-500' : 'border-gray-300'
+                }`}
+              >
+                <Text className={`text-center ${quizMode === 'all-at-once' ? 'font-bold' : ''}`}>
+                  一斉回答モード
+                </Text>
+                <Text className="text-xs text-center text-gray-500 mt-1">
+                  全員が同時に回答できます
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
           <Button title="ルームを作成" onPress={handleCreateRoom} disabled={loading} />
         </>
       ) : (
@@ -438,5 +477,3 @@ export default function RoomScreen() {
     </View>
   );
 }
-
-
