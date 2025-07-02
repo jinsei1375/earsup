@@ -1,5 +1,5 @@
 // app/quiz.tsx
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -68,9 +68,14 @@ export default function QuizScreen() {
       // 初期データを強制的に取得
       fetchRoomAndQuestion(true);
 
-      // リアルタイム更新を設定（改善版）
-      const channelName = `room-quiz-${roomId}`;
-      console.log(`リアルタイムチャンネル設定: ${channelName}`);
+      // リアルタイム更新を設定（改善版3.0）
+      // タイムスタンプを含めない固定チャネル名で安定化
+      const channelName = `room-quiz-${roomId}-stable`;
+      console.log(
+        `リアルタイムチャンネル設定: ${channelName} (${new Date().toLocaleTimeString()})`
+      );
+
+      // 既存のチャンネルクリーンアップはsupabaseが内部で処理
 
       const roomSubscription = supabase
         .channel(channelName)
@@ -81,9 +86,48 @@ export default function QuizScreen() {
             console.log('Room changed:', payload);
             const timestamp = new Date().toLocaleTimeString();
 
-            // 状態が変わったら即時更新
+            // 状態が変わったら即時更新（改善版3.0）
             if (room?.status !== payload.new?.status) {
-              console.log(`リアルタイム検知: statusが${payload.new?.status}に変更されました`);
+              console.log(
+                `リアルタイム検知: statusが${room?.status}から${payload.new?.status}に変更されました`
+              );
+
+              // ended状態はクイズ終了専用ステータス
+              if (payload.new?.status === 'ended') {
+                console.log('ルームがended状態になりました。ホーム画面に戻ります。');
+
+                // 参加者もホーム画面に戻る
+                if (!isHost) {
+                  // ステートをリセット
+                  setCurrentQuestionId(null);
+                  setQuestionText('');
+                  setShowResult(false);
+                  setAnswer('');
+                  setIsCorrect(null);
+
+                  console.log('参加者: ホストがクイズを終了したため、ホーム画面に戻ります');
+
+                  // 複数のナビゲーション方法を試す（より確実に遷移させるため）
+                  try {
+                    // まず直接遷移を試みる
+                    router.replace('/');
+
+                    // バックアップとしてタイムアウトを設定
+                    setTimeout(() => {
+                      console.log('バックアップ: タイムアウトでのホーム画面遷移');
+                      router.push('/');
+                    }, 500);
+                  } catch (e) {
+                    console.error('ナビゲーションエラー:', e);
+                    // エラー発生時は強制的にホーム画面へ
+                    setTimeout(() => (location.href = '/'), 800);
+                  }
+
+                  return; // これ以上の処理はしない
+                }
+              }
+
+              // それ以外の状態変更の場合は最新データを取得
               fetchRoomAndQuestion(true);
             }
           }
@@ -116,16 +160,29 @@ export default function QuizScreen() {
             filter: `room_id=eq.${roomId}`,
           },
           (payload: any) => {
-            console.log('Answer changed:', payload);
-
-            // 回答が変更されたら回答一覧を静かに更新 (ローディングなし)
-            fetchAnswers(false); // force=false でローディングを表示しない
+            const timestamp = new Date().toLocaleTimeString();
+            console.log(`Answer changed (${timestamp}):`, payload);
 
             if (payload.eventType === 'INSERT') {
-              const timestamp = new Date().toLocaleTimeString();
               console.log(
-                `回答追加: ${timestamp} - ユーザーID: ${payload.new?.user_id || 'unknown'}`
+                `回答追加検知: ${timestamp} - ユーザーID: ${
+                  payload.new?.user_id || 'unknown'
+                }, 問題ID: ${payload.new?.question_id}`
               );
+
+              // 追加された回答が現在の問題に対するものか確認
+              if (payload.new?.question_id === currentQuestionId) {
+                console.log('現在の問題への回答を検知しました。回答一覧を更新します。');
+                // 明示的に回答を取得し直す (true でキャッシュを無視)
+                fetchAnswers(true);
+              } else {
+                console.log('異なる問題IDへの回答です。無視します。');
+              }
+            } else if (payload.eventType === 'UPDATE') {
+              console.log(
+                `回答更新検知: ${timestamp} - ID: ${payload.new?.id}, 判定状態: ${payload.new?.judged}, 正誤: ${payload.new?.is_correct}`
+              );
+              fetchAnswers(true);
             }
           }
         )
@@ -164,32 +221,98 @@ export default function QuizScreen() {
           }
         });
 
-      // リアルタイム更新が主要な手段、ポーリングはバックアップ
-      // リアルタイム接続状態に応じてポーリング頻度を動的に調整
-      const basePollingFrequency = isHost ? 7000 : 5000; // ポーリング間隔を長めに調整
+      // リアルタイム更新が主要な手段、ポーリングはバックアップ（改善版）
+      const basePollingFrequency = isHost ? 5000 : 3000; // ポーリング間隔を調整（頻度アップ）
+      const answersPollingFrequency = isHost ? 2000 : 4000; // 回答データ用ポーリング間隔
 
-      // ポーリングによる静かな状態確認（ローディング表示なし）
+      // ルーム/問題データ用ポーリング
       let lastPollTime = Date.now();
       const intervalId = setInterval(() => {
-        // 最後のポーリングから2秒以内は実行しない（デバウンス効果を強化）
-        if (Date.now() - lastPollTime < 2000) return;
-
-        // クイズ出題中(active)のときはホストのポーリング頻度を下げる
-        if (room?.status === 'active' && isHost) {
-          // 既に問題が取得できているなら、ポーリング頻度を下げる（10秒に1回程度）
-          if (currentQuestionId && questionText && Date.now() - lastPollTime < 10000) {
-            return;
-          }
-        }
+        // 最後のポーリングから1秒以内は実行しない（デバウンス効果）
+        if (Date.now() - lastPollTime < 1000) return;
 
         lastPollTime = Date.now();
+        const timestamp = new Date().toLocaleTimeString();
+        console.log(`ポーリング実行: ${timestamp} - isHost=${isHost}`);
+
+        // ルームと問題の情報を更新
         fetchRoomAndQuestion(false); // force=falseでローディングを表示しない
       }, basePollingFrequency);
+
+      // 参加者専用: クイズ終了状態を検出するための追加ポーリング
+      let lastStatusCheckTime = Date.now();
+      const statusCheckIntervalId = !isHost
+        ? setInterval(async () => {
+            try {
+              // 最後の確認から1.5秒以内は実行しない（デバウンス効果）
+              if (Date.now() - lastStatusCheckTime < 1500) return;
+              lastStatusCheckTime = Date.now();
+
+              const { data, error } = await supabase
+                .from('rooms')
+                .select('status')
+                .eq('id', roomId)
+                .single();
+
+              if (error) {
+                console.error('ステータス確認エラー:', error);
+                return;
+              }
+
+              // クイズ終了状態を検知
+              if (data?.status === 'ended') {
+                console.log('ポーリング検知: ルームがended状態です。ホーム画面に戻ります。');
+                
+                // roomステート更新（UI更新のため）
+                setRoom((prev: any) => ({...prev, status: 'ended'}));
+
+                // ステートをリセット
+                setCurrentQuestionId(null);
+                setQuestionText('');
+                setShowResult(false);
+                setAnswer('');
+                setIsCorrect(null);
+
+                // ナビゲーション (UI更新後に行うためタイムアウト設定)
+                setTimeout(() => {
+                  try {
+                    console.log('ポーリングナビゲーション実行');
+                    router.replace('/');
+                  } catch (e) {
+                    console.error('ナビゲーションエラー:', e);
+                    setTimeout(() => (window.location.href = '/'), 800);
+                  }
+                }, 300);
+              }
+            } catch (err) {
+              console.error('ステータス確認エラー:', err);
+            }
+          }, 2000)
+        : null;
+
+      // 回答データ専用のポーリング（特にホスト用）
+      let lastAnswersPollTime = Date.now();
+      const answersIntervalId = setInterval(() => {
+        // ホストモードで現在問題がある場合は、回答データを定期的に強制更新
+        if (
+          (isHost || showResult) &&
+          currentQuestionId &&
+          Date.now() - lastAnswersPollTime > 1500
+        ) {
+          lastAnswersPollTime = Date.now();
+          const timestamp = new Date().toLocaleTimeString();
+          console.log(`回答データポーリング実行: ${timestamp}`);
+          fetchAnswers(true); // 回答データを強制的に更新
+        }
+      }, answersPollingFrequency);
 
       return () => {
         console.log(`チャンネル${channelName}を解除します`);
         roomSubscription.unsubscribe();
         clearInterval(intervalId);
+        clearInterval(answersIntervalId);
+        if (statusCheckIntervalId) clearInterval(statusCheckIntervalId);
+        console.log('すべてのポーリングとサブスクリプションを解除しました');
       };
     }
   }, [roomId]);
@@ -206,22 +329,22 @@ export default function QuizScreen() {
       // 再生回数カウントをリセットしない (ホストの管理とは別にする)
     }
   }, [questionText, isHost]);
-  
+
   // 自分の回答の判定状態を監視する（一斉回答モード用）
   useEffect(() => {
     if (isAllAtOnceMode && showResult && userId && currentQuestionId) {
       // 一斉回答モードで既に回答済みの場合、判定結果を確認し続ける
       console.log('参加者: 判定状況監視中...');
-      
+
       // 自分の回答を見つけて判定結果を反映
-      const myAnswer = answers.find(a => a.user_id === userId);
+      const myAnswer = answers.find((a) => a.user_id === userId);
       if (myAnswer) {
-        console.log('自分の回答を検出:', { 
-          judged: myAnswer.judged, 
+        console.log('自分の回答を検出:', {
+          judged: myAnswer.judged,
           isCorrect: myAnswer.is_correct,
-          id: myAnswer.id
+          id: myAnswer.id,
         });
-        
+
         if (myAnswer.judged) {
           setIsCorrect(myAnswer.is_correct);
           console.log(`判定結果を更新: ${myAnswer.is_correct ? '正解' : '不正解'}`);
@@ -233,7 +356,7 @@ export default function QuizScreen() {
       }
     }
   }, [answers, isAllAtOnceMode, showResult, userId, currentQuestionId]);
-  
+
   // 一斉回答モード用の追加ポーリング (判定結果取得用)
   useEffect(() => {
     // 一斉回答モードで回答済みの場合のみ定期的に回答状態を確認
@@ -242,32 +365,37 @@ export default function QuizScreen() {
       const intervalId = setInterval(() => {
         fetchAnswers(true); // 強制的に回答データを更新
       }, 3000); // 3秒ごとに確認
-      
+
       return () => clearInterval(intervalId);
     }
   }, [isAllAtOnceMode, showResult, isHost]);
 
-  // 回答一覧を取得する関数（デバウンス付き）
+  // 回答一覧を取得する関数（改善版）
   const fetchAnswers = async (force = false) => {
     if (!roomId || !currentQuestionId) return;
 
-    // デバウンス処理（強制更新でない場合）
+    const timestamp = new Date().toLocaleTimeString();
+    console.log(
+      `回答データ取得開始: roomId=${roomId}, questionId=${currentQuestionId}, 強制更新=${force}, 時刻=${timestamp}`
+    );
+
+    // デバウンス処理（強制更新でない場合のみ）
     const now = Date.now();
     if (!force && now - lastAnswersFetch < ANSWERS_DEBOUNCE_MS) {
+      console.log(`デバウンス中のため取得をスキップ (${ANSWERS_DEBOUNCE_MS}ms未満)`);
       return;
     }
+
+    // 最終取得時間を更新
     setLastAnswersFetch(now);
 
-    // 注意: 回答の取得ではローディング表示を一切行わない
-    // UIのカクつきを防ぐため
-
-    // 回答取得ではローディングを表示しない（UIをスムーズに保つため）
     try {
-      // 現在の問題に対する回答を取得
+      // 現在の問題に対する回答を取得（キャッシュバスターを追加）
       const { data, error } = await supabase
         .from('answers')
         .select('id, user_id, answer_text, is_correct, judged')
         .eq('question_id', currentQuestionId)
+        .eq('room_id', roomId) // roomIdによるフィルタを追加
         .order('created_at', { ascending: true });
 
       if (error) {
@@ -275,17 +403,42 @@ export default function QuizScreen() {
         return;
       }
 
+      // デバッグ：取得した回答データを詳細ログ
+      console.log(
+        `回答データ取得成功: ${data?.length || 0}件の回答 (時刻: ${timestamp})`,
+        data.map((a) => ({
+          id: a.id.slice(0, 8) + '...',
+          user: a.user_id.slice(0, 8) + '...',
+          answer: a.answer_text,
+          judged: a.judged,
+          correct: a.is_correct,
+        }))
+      );
+
+      // データがない場合
+      if (data.length === 0) {
+        console.log('回答がまだありません');
+        setAnswers([]);
+        return;
+      }
+
       // すべての回答に対するユーザー情報を取得
-      const userIds = data.map((a) => a.user_id);
+      const userIds = [...new Set(data.map((a) => a.user_id))]; // 重複を排除
       if (userIds.length > 0) {
-        const { data: usersData } = await supabase
+        const { data: usersData, error: usersError } = await supabase
           .from('users')
           .select('id, nickname')
           .in('id', userIds);
 
+        if (usersError) {
+          console.error('ユーザー情報取得エラー:', usersError);
+        }
+
         // ニックネーム情報を結合
         if (usersData && usersData.length > 0) {
           const userMap = new Map(usersData.map((u) => [u.id, u.nickname]));
+          console.log('ユーザー情報を取得:', userMap.size, '件');
+
           // データにニックネームを追加
           const answersWithNickname = data.map((answer) => ({
             id: answer.id,
@@ -295,13 +448,15 @@ export default function QuizScreen() {
             judged: answer.judged,
             nickname: userMap.get(answer.user_id) || '不明なユーザー',
           }));
+
+          console.log('回答データをニックネーム付きでセット:', answersWithNickname.length, '件');
           setAnswers(answersWithNickname);
           return; // ここで終了
         }
       }
 
-      // ユーザー情報がない場合はそのまま設定
-      const formattedAnswers = data.map(a => ({
+      // ユーザー情報が取得できなかった場合はそのまま設定
+      const formattedAnswers = data.map((a) => ({
         id: a.id,
         user_id: a.user_id,
         answer_text: a.answer_text,
@@ -309,8 +464,9 @@ export default function QuizScreen() {
         judged: a.judged,
         nickname: undefined,
       }));
+
+      console.log('ユーザー情報なしで回答データをセット:', formattedAnswers.length, '件');
       setAnswers(formattedAnswers);
-      console.log(`${data?.length || 0}件の回答を取得しました`);
     } catch (err) {
       console.error('回答データ取得エラー:', err);
     }
@@ -384,15 +540,22 @@ export default function QuizScreen() {
             setQuestionText(questionData[0].text);
             console.log(`問題文をセット: ${questionData[0].text.slice(0, 10)}... (${timestamp})`);
 
-            // 問題が取得できたら回答も取得
+            // 問題が取得できたら回答も取得（改善版）
             if (questionData[0].id) {
               // 現在のcurrentQuestionIdに代入
-              if (currentQuestionId !== questionData[0].id) {
+              const questionIdChanged = currentQuestionId !== questionData[0].id;
+              if (questionIdChanged) {
+                console.log(`問題IDを更新: ${questionData[0].id}`);
                 setCurrentQuestionId(questionData[0].id);
-              }
 
-              // 回答データを取得
-              fetchAnswers();
+                // 問題が変わった場合は強制的に回答データを取得
+                setTimeout(() => fetchAnswers(true), 300);
+              } else {
+                // 同じ問題の場合も念のため回答データを更新（特にホスト時）
+                if (isHost) {
+                  fetchAnswers(force);
+                }
+              }
             }
           }
         }
@@ -604,7 +767,7 @@ export default function QuizScreen() {
       if (isFirstComeMode) {
         // 早押しモードでは自動判定
         const isCorrectAnswer = answer.trim().toLowerCase() === questionText.toLowerCase();
-        
+
         // ユーザーの回答を保存（自動判定付き）
         const { data, error } = await supabase
           .from('answers')
@@ -660,28 +823,46 @@ export default function QuizScreen() {
     }
   };
 
-  // 回答の正誤を判定する（ホストのみ）
+  // 回答の正誤を判定する（ホストのみ）- 改善版
   const handleJudgeAnswer = async (answerId: string, isCorrect: boolean) => {
     if (!roomId || !isHost) return;
     setLoading(true);
 
+    const timestamp = new Date().toLocaleTimeString();
+    console.log(
+      `判定処理開始: ID=${answerId}, 判定=${isCorrect ? '正解' : '不正解'}, 時刻=${timestamp}`
+    );
+
     try {
       // 回答の正誤を更新
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('answers')
         .update({
           judged: true,
-          is_correct: isCorrect
+          is_correct: isCorrect,
         })
-        .eq('id', answerId);
+        .eq('id', answerId)
+        .select() // 更新後のデータを取得
+        .single();
 
       if (error) throw error;
 
-      console.log(`回答ID ${answerId} を ${isCorrect ? '正解' : '不正解'} と判定しました`);
+      console.log(`回答ID ${answerId} を ${isCorrect ? '正解' : '不正解'} と判定しました:`, data);
 
-      // 回答データを再取得
+      // 回答データを強制的に再取得
       fetchAnswers(true);
+
+      // 成功フィードバックを表示
+      const successMsg = isCorrect ? '正解と判定しました' : '不正解と判定しました';
+      setError(null); // エラーをクリア
+
+      // 念のため少し遅延させて回答リストを再取得（非同期更新が反映されるのを待つ）
+      setTimeout(() => {
+        console.log('判定後の遅延リロード実行');
+        fetchAnswers(true);
+      }, 500);
     } catch (err: any) {
+      console.error('判定処理エラー:', err);
       setError(err.message || '正誤判定中にエラーが発生しました。');
     } finally {
       setLoading(false);
@@ -690,15 +871,98 @@ export default function QuizScreen() {
 
   const handleEndQuiz = async () => {
     if (!roomId || !isHost) return;
+    setLoading(true);
 
     try {
-      // ルームのステータスを「終了」に変更
-      await supabase.from('rooms').update({ status: 'judged' }).eq('id', roomId);
+      const timestamp = new Date().toISOString();
+      console.log(`クイズ終了処理開始: ${timestamp}`);
 
-      // ホーム画面に戻る
-      router.push('/');
+      // 現在の問題も終了状態にマークする（念のため）
+      if (currentQuestionId) {
+        try {
+          await supabase
+            .from('questions')
+            .update({
+              is_active: false,
+              updated_at: timestamp,
+            })
+            .eq('id', currentQuestionId);
+          console.log('現在の問題を非アクティブにしました');
+        } catch (err) {
+          // エラーは無視して続行
+          console.error('問題状態更新エラー:', err);
+        }
+      }
+
+      // クイズ終了専用のステータスに更新（参加者側でこのステータスを検知してホームに遷移する）
+      console.log('クイズ終了ステータスに更新しています...');
+      const { error } = await supabase
+        .from('rooms')
+        .update({
+          status: 'ended', // クイズ終了専用のステータス
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', roomId);
+
+      if (error) throw error;
+
+      console.log('ルームのステータスを "ended" に更新しました');
+
+      // ローカルステートをリセット
+      setCurrentQuestionId(null);
+      setQuestionText('');
+      setAnswers([]);
+      setPlayCount(0);
+      setShowResult(false);
+      setCurrentBuzzer(null);
+
+      console.log('クイズ終了処理完了');
+
+      // クイズ終了後にホーム画面に遷移
+      setTimeout(() => {
+        console.log('ホーム画面に遷移します');
+        router.replace('/'); // replace を使うことでバック履歴に残らないようにする
+
+        // 少し遅延させてからルームをリセット状態に戻す（全員が遷移後に実行する）
+        setTimeout(async () => {
+          try {
+            // 念のため現在の質問やバズイン情報をクリア
+            if (currentQuestionId) {
+              try {
+                // 現在の問題に関連するバズインをクリア
+                await supabase
+                  .from('buzzes')
+                  .delete()
+                  .eq('question_id', currentQuestionId);
+                console.log('問題に関連するバズインをクリアしました');
+              } catch (err) {
+                console.error('バズインクリアエラー:', err);
+              }
+            }
+            
+            // 全員がホーム画面に戻った後でルームのステータスを「待機中」に戻す
+            console.log('ルームをリセット状態に戻します');
+            await supabase
+              .from('rooms')
+              .update({
+                status: 'ready',
+                updated_at: new Date().toISOString(),
+              })
+              .eq('id', roomId);
+            console.log('ルームのステータスを "ready" に戻しました');
+          } catch (resetErr) {
+            console.error('ルームリセットエラー:', resetErr);
+          }
+        }, 2000); // 十分な時間を確保するために2000msに延長
+      }, 800);
     } catch (err: any) {
+      console.error('クイズ終了処理エラー:', err);
       setError(err.message || 'クイズ終了処理中にエラーが発生しました。');
+
+      // エラー時でもホーム画面に強制的に戻る
+      setTimeout(() => router.replace('/'), 1000);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -731,21 +995,24 @@ export default function QuizScreen() {
   if (isHost && currentQuestionId) {
     // 既にクイズ画面でホストの画面は別処理されるので、この分岐は不要になりました
     // このコードブロックはそのまま残しておきます
-  }
-
-  // 参加者用の待機画面・回答画面
+  } // 参加者用の待機画面・回答画面
   if (!isHost) {
     // 強制的に状態を確認して、activeの場合は問題表示画面を表示
+    // readyの場合は待機画面に戻る
     const isQuizActive = room?.status === 'active' || room?.status === 'judged';
-    const hasQuestion = !!currentQuestionId && !!questionText;
+    const isRoomReady = room?.status === 'ready';
+    const isQuizEnded = room?.status === 'ended';
+    const hasQuestion = !!currentQuestionId && !!questionText && isQuizActive;
 
     // 早押しモード関連の状態
-    const canBuzzIn = isFirstComeMode && !currentBuzzer;
-    const hasBuzzedIn = isFirstComeMode && currentBuzzer === userId;
-    const otherHasBuzzed = isFirstComeMode && currentBuzzer && currentBuzzer !== userId;
+    const canBuzzIn = isFirstComeMode && !currentBuzzer && isQuizActive;
+    const hasBuzzedIn = isFirstComeMode && currentBuzzer === userId && isQuizActive;
+    const otherHasBuzzed =
+      isFirstComeMode && currentBuzzer && currentBuzzer !== userId && isQuizActive;
 
     console.log('参加者画面の状態:', {
       isQuizActive,
+      isRoomReady,
       hasQuestion,
       status: room?.status,
       questionId: currentQuestionId,
@@ -765,11 +1032,47 @@ export default function QuizScreen() {
           </Text>
         </View>
 
-        {!isQuizActive || !hasQuestion ? (
-          // 問題未作成またはホスト待機中
+        {!hasQuestion || isRoomReady || isQuizEnded ? (
+          // 問題未作成、ホスト待機中、またはクイズ終了状態
           <>
-            <Text>ホストが問題を作成中です...</Text>
-            <Button title="状態を更新" onPress={() => fetchRoomAndQuestion()} />
+            {isQuizEnded ? (
+              <>
+                <Text className="text-green-600 font-bold text-lg mb-3">クイズが終了しました</Text>
+                <Text className="mb-3">ホーム画面に移動しています...</Text>
+                <ActivityIndicator size="large" color="#0000ff" />
+                {/* クイズ終了画面表示時に自動的にホームに遷移するロジック */}
+                {React.useEffect(() => {
+                  console.log('クイズ終了画面表示：自動的にホームに遷移します');
+                  // 複数の方法で遷移を試行
+                  const redirectTimer = setTimeout(() => {
+                    try {
+                      router.replace('/');
+                    } catch (e) {
+                      console.error('ナビゲーションエラー:', e);
+                      setTimeout(() => window.location.href = '/', 500);
+                    }
+                  }, 1000);
+                  return () => clearTimeout(redirectTimer);
+                }, [])}
+              </>
+            ) : (
+              <>
+                <Text>ホストが問題を作成中です...</Text>
+                <Button
+                  title="状態を更新"
+                  onPress={() => {
+                    // 状態を強制的に更新
+                    fetchRoomAndQuestion(true);
+                    // クイズ終了後の状態をリセット
+                    if (isRoomReady) {
+                      setShowResult(false);
+                      setAnswer('');
+                      setIsCorrect(null);
+                    }
+                  }}
+                />
+              </>
+            )}
           </>
         ) : (
           // 出題中・回答可能
@@ -843,20 +1146,26 @@ export default function QuizScreen() {
                 {isCorrect === null ? (
                   // まだ判定されていない場合
                   <>
-                    <Text className="text-center font-bold text-blue-800 mb-1">回答を提出しました</Text>
+                    <Text className="text-center font-bold text-blue-800 mb-1">
+                      回答を提出しました
+                    </Text>
                     <Text className="text-center text-blue-600">ホストの判定をお待ちください</Text>
                   </>
                 ) : isCorrect ? (
                   // 正解と判定された場合
                   <>
                     <Text className="text-center font-bold text-green-800 mb-1">正解！</Text>
-                    <Text className="text-center text-green-600">あなたの回答が正解と判定されました</Text>
+                    <Text className="text-center text-green-600">
+                      あなたの回答が正解と判定されました
+                    </Text>
                   </>
                 ) : (
                   // 不正解と判定された場合
                   <>
                     <Text className="text-center font-bold text-red-800 mb-1">不正解</Text>
-                    <Text className="text-center text-red-600">あなたの回答が不正解と判定されました</Text>
+                    <Text className="text-center text-red-600">
+                      あなたの回答が不正解と判定されました
+                    </Text>
                     <Text className="text-center text-black mt-2">正解: {questionText}</Text>
                   </>
                 )}
@@ -879,22 +1188,20 @@ export default function QuizScreen() {
                     </Text>
                     <Text className="mt-2">正解: {questionText}</Text>
                   </>
-                ) : (
-                  // 一斉回答モード: 判定があれば結果を表示、なければ提出完了メッセージ
-                  isCorrect === true ? (
-                    // 正解と判定された場合
-                    <>
-                      <Text className="text-green-600 font-bold text-lg">✓ 正解！</Text>
-                      <Text className="mt-2">正解: {questionText}</Text>
-                    </>
-                  ) : isCorrect === false ? (
-                    // 不正解と判定された場合
-                    <>
-                      <Text className="text-red-600 font-bold text-lg">✗ 不正解</Text>
-                      <Text className="mt-2">正解: {questionText}</Text>
-                    </>
-                  ) : null
-                )}
+                ) : // 一斉回答モード: 判定があれば結果を表示、なければ提出完了メッセージ
+                isCorrect === true ? (
+                  // 正解と判定された場合
+                  <>
+                    <Text className="text-green-600 font-bold text-lg">✓ 正解！</Text>
+                    <Text className="mt-2">正解: {questionText}</Text>
+                  </>
+                ) : isCorrect === false ? (
+                  // 不正解と判定された場合
+                  <>
+                    <Text className="text-red-600 font-bold text-lg">✗ 不正解</Text>
+                    <Text className="mt-2">正解: {questionText}</Text>
+                  </>
+                ) : null}
               </View>
             )}
           </>
@@ -953,13 +1260,27 @@ export default function QuizScreen() {
           </View>
         )}
 
-        {/* 回答一覧 */}
-        <View className="w-full my-4 max-h-[200px]">
-          <Text className="text-base font-bold mb-2">回答一覧 ({answers.length}件)</Text>
+        {/* 回答一覧 - 改善版 */}
+        <View className="w-full my-4 max-h-[250px]">
+          <View className="flex-row justify-between items-center mb-2">
+            <Text className="text-base font-bold">回答一覧 ({answers.length}件)</Text>
+            <TouchableOpacity
+              onPress={() => fetchAnswers(true)}
+              className="bg-gray-200 px-3 py-1 rounded-lg"
+            >
+              <Text className="text-sm">更新</Text>
+            </TouchableOpacity>
+          </View>
+
           {answers.length === 0 ? (
-            <Text className="italic text-gray-600 text-center mt-2">まだ回答がありません</Text>
+            <View className="bg-gray-100 p-4 rounded-lg items-center">
+              <Text className="italic text-gray-600 text-center">まだ回答がありません</Text>
+              <Text className="text-xs text-gray-500 mt-1">
+                最終更新: {new Date().toLocaleTimeString()}
+              </Text>
+            </View>
           ) : (
-            <ScrollView className="w-full max-h-[180px]">
+            <ScrollView className="w-full max-h-[230px]">
               {answers.map((answer) => (
                 <View
                   key={answer.id}
@@ -971,47 +1292,53 @@ export default function QuizScreen() {
                       : 'border-gray-300 bg-gray-50'
                   }`}
                 >
-                  <Text className="font-bold mb-1">{answer.nickname || '不明なユーザー'}</Text>
-                  <Text className="mb-1">「{answer.answer_text}」</Text>
-                  
+                  <View className="flex-row justify-between">
+                    <Text className="font-bold">{answer.nickname || '不明なユーザー'}</Text>
+                    <Text className="text-xs text-gray-500">
+                      ID: {answer.id.substring(0, 6)}...
+                    </Text>
+                  </View>
+
+                  <Text className="my-1">「{answer.answer_text}」</Text>
+
                   {isAllAtOnceMode && !answer.judged ? (
                     // 一斉回答モードで未判定の場合、判定ボタンを表示
                     <View className="flex-row justify-end mt-2">
-                      <TouchableOpacity 
+                      <TouchableOpacity
                         onPress={() => handleJudgeAnswer(answer.id, true)}
                         disabled={loading}
-                        className="bg-green-500 px-3 py-1 rounded mr-2"
+                        className="bg-green-500 px-4 py-1 rounded mr-2"
                       >
-                        <Text className="text-white">正解</Text>
+                        <Text className="text-white font-bold">正解</Text>
                       </TouchableOpacity>
-                      <TouchableOpacity 
+                      <TouchableOpacity
                         onPress={() => handleJudgeAnswer(answer.id, false)}
                         disabled={loading}
-                        className="bg-red-500 px-3 py-1 rounded"
+                        className="bg-red-500 px-4 py-1 rounded"
                       >
-                        <Text className="text-white">不正解</Text>
+                        <Text className="text-white font-bold">不正解</Text>
                       </TouchableOpacity>
                     </View>
                   ) : (
                     // 判定済みか早押しモードの場合は判定結果を表示
                     <Text
                       className={
-                        answer.is_correct 
-                          ? 'text-green-500 font-bold' 
-                          : answer.is_correct === false 
-                            ? 'text-red-500 font-bold'
-                            : 'text-gray-500 italic'
+                        answer.is_correct
+                          ? 'text-green-500 font-bold'
+                          : answer.is_correct === false
+                          ? 'text-red-500 font-bold'
+                          : 'text-gray-500 italic'
                       }
                     >
-                      {answer.judged
-                        ? answer.is_correct
-                          ? '✓ 正解'
-                          : '✗ 不正解'
-                        : '判定待ち'}
+                      {answer.judged ? (answer.is_correct ? '✓ 正解' : '✗ 不正解') : '判定待ち'}
                     </Text>
                   )}
                 </View>
               ))}
+
+              <Text className="text-xs text-gray-500 text-center italic mt-2 mb-4">
+                最終更新: {new Date().toLocaleTimeString()}
+              </Text>
             </ScrollView>
           )}
         </View>
