@@ -58,13 +58,13 @@ export interface ParticipantWithNickname extends User {
 }
 
 // Component props types
-export interface QuizScreenParams {
+export interface QuizScreenParams extends Record<string, string | undefined> {
   roomId: string;
-  role: 'host' | 'participant';
+  role: string; // 'host' | 'participant'
 }
 
-export interface RoomScreenParams {
-  mode: 'create' | 'join';
+export interface RoomScreenParams extends Record<string, string | undefined> {
+  mode: string; // 'create' | 'join'
   roomId?: string;
 }
 
