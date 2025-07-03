@@ -24,8 +24,8 @@ export const useQuizData = (options: UseQuizDataOptions) => {
   
   const lastFetchRef = useRef<number>(0);
   const lastAnswersFetchRef = useRef<number>(0);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const answersIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const answersIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const { connectionState, subscribe, unsubscribe } = useRealtimeSubscription({
     channelName: `quiz-${roomId}`,
