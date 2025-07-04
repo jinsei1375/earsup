@@ -14,14 +14,14 @@ interface UseQuizDataOptions {
 
 export const useQuizData = (options: UseQuizDataOptions) => {
   const { roomId, userId, isHost, pollingInterval = 3000, enableRealtime = true } = options;
-  
+
   const [room, setRoom] = useState<Room | null>(null);
   const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
   const [answers, setAnswers] = useState<Answer[]>([]);
   const [currentBuzzer, setCurrentBuzzer] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   const lastFetchRef = useRef<number>(0);
   const lastAnswersFetchRef = useRef<number>(0);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -34,140 +34,173 @@ export const useQuizData = (options: UseQuizDataOptions) => {
     onError: (error) => console.error('Quiz realtime error:', error),
   });
 
-  const fetchQuizData = useCallback(async (force = false) => {
-    if (!roomId) return;
+  const fetchQuizData = useCallback(
+    async (force = false) => {
+      if (!roomId) return;
 
-    const now = Date.now();
-    if (!force && (now - lastFetchRef.current) < 1000) {
-      return; // Debounce rapid calls
-    }
-    lastFetchRef.current = now;
+      const now = Date.now();
+      if (!force && now - lastFetchRef.current < 1000) {
+        return; // Debounce rapid calls
+      }
+      lastFetchRef.current = now;
 
-    const shouldShowLoading = force && !loading && !room;
-    if (shouldShowLoading) setLoading(true);
+      // Only show loading for force updates when we have no data
+      if (force) setLoading(true);
 
-    try {
-      setError(null);
-      
-      // Fetch room data
-      const roomData = await SupabaseService.getRoomById(roomId);
-      setRoom(roomData);
+      try {
+        setError(null);
 
-      // Fetch latest question
-      const questionData = await SupabaseService.getLatestQuestion(roomId);
-      setCurrentQuestion(questionData);
+        // Fetch room data
+        const roomData = await SupabaseService.getRoomById(roomId);
+        setRoom(roomData);
 
-      if (questionData) {
-        // Fetch answers for the current question
-        await fetchAnswers(true, questionData.id);
+        // Fetch latest question
+        const questionData = await SupabaseService.getLatestQuestion(roomId);
+        setCurrentQuestion(questionData);
+
+        if (questionData) {
+          // Use fetchAnswersRef to avoid circular dependency
+          const fetchAnswersFunc = fetchAnswersRef.current;
+          if (fetchAnswersFunc) {
+            await fetchAnswersFunc(true, questionData.id);
+          }
+        }
+      } catch (err: any) {
+        setError(err.message || 'クイズ情報の取得中にエラーが発生しました。');
+        console.error('Quiz data fetch error:', err);
+      } finally {
+        if (force) setLoading(false);
+      }
+    },
+    [roomId]
+  );
+
+  const fetchAnswers = useCallback(
+    async (force = false, questionId?: string) => {
+      const targetQuestionId = questionId || currentQuestion?.id;
+      if (!roomId || !targetQuestionId) return;
+
+      const now = Date.now();
+      if (!force && now - lastAnswersFetchRef.current < 500) {
+        return; // Debounce rapid calls
+      }
+      lastAnswersFetchRef.current = now;
+
+      try {
+        const answersData = await SupabaseService.getAnswersWithNicknames(targetQuestionId, roomId);
+        setAnswers(answersData);
+      } catch (err: any) {
+        console.error('Answers fetch error:', err);
+      }
+    },
+    [roomId] // Removed currentQuestion?.id from dependencies
+  );
+
+  // Create stable ref for fetchAnswers to avoid circular dependency
+  const fetchAnswersRef = useRef(fetchAnswers);
+  fetchAnswersRef.current = fetchAnswers;
+
+  // Create stable refs for functions used in useEffect
+  const fetchQuizDataRef = useRef(fetchQuizData);
+  fetchQuizDataRef.current = fetchQuizData;
+
+  const subscribeRef = useRef(subscribe);
+  subscribeRef.current = subscribe;
+
+  const unsubscribeRef = useRef(unsubscribe);
+  unsubscribeRef.current = unsubscribe;
+
+  const createQuestion = useCallback(
+    async (text: string) => {
+      if (!roomId || !isHost) throw new Error('Invalid operation');
+
+      setLoading(true);
+      try {
+        // Create question
+        const questionData = await SupabaseService.createQuestion(roomId, text);
+
+        // Update room status to active
+        await SupabaseService.updateRoomStatus(roomId, 'active');
+
+        setCurrentQuestion(questionData);
+        setRoom((prev) => (prev ? { ...prev, status: 'active' } : null));
+
+        // Refresh data
+        await fetchQuizData(true);
+
+        return questionData;
+      } catch (err: any) {
+        setError(err.message || '問題の作成中にエラーが発生しました。');
+        throw err;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [roomId, isHost, fetchQuizData]
+  );
+
+  const submitAnswer = useCallback(
+    async (answerText: string, isFirstCome = false, autoJudge = false) => {
+      if (!roomId || !userId || !currentQuestion?.id) {
+        throw new Error('Invalid operation');
       }
 
-    } catch (err: any) {
-      setError(err.message || 'クイズ情報の取得中にエラーが発生しました。');
-      console.error('Quiz data fetch error:', err);
-    } finally {
-      if (shouldShowLoading) setLoading(false);
-    }
-  }, [roomId, loading, room]);
+      setLoading(true);
+      try {
+        let judged = false;
+        let isCorrect = null;
 
-  const fetchAnswers = useCallback(async (force = false, questionId?: string) => {
-    const targetQuestionId = questionId || currentQuestion?.id;
-    if (!roomId || !targetQuestionId) return;
+        if (autoJudge) {
+          judged = true;
+          isCorrect = answerText.trim().toLowerCase() === currentQuestion.text.toLowerCase();
+        }
 
-    const now = Date.now();
-    if (!force && (now - lastAnswersFetchRef.current) < 500) {
-      return; // Debounce rapid calls
-    }
-    lastAnswersFetchRef.current = now;
+        const answerData = await SupabaseService.submitAnswer(
+          roomId,
+          userId,
+          currentQuestion.id,
+          answerText,
+          judged,
+          isCorrect
+        );
 
-    try {
-      const answersData = await SupabaseService.getAnswersWithNicknames(targetQuestionId, roomId);
-      setAnswers(answersData);
-    } catch (err: any) {
-      console.error('Answers fetch error:', err);
-    }
-  }, [roomId, currentQuestion?.id]);
+        // Refresh answers
+        const fetchAnswersFunc = fetchAnswersRef.current;
+        if (fetchAnswersFunc) {
+          await fetchAnswersFunc(true);
+        }
 
-  const createQuestion = useCallback(async (text: string) => {
-    if (!roomId || !isHost) throw new Error('Invalid operation');
-
-    setLoading(true);
-    try {
-      // Create question
-      const questionData = await SupabaseService.createQuestion(roomId, text);
-      
-      // Update room status to active
-      await SupabaseService.updateRoomStatus(roomId, 'active');
-      
-      setCurrentQuestion(questionData);
-      setRoom(prev => prev ? { ...prev, status: 'active' } : null);
-      
-      // Refresh data
-      await fetchQuizData(true);
-      
-      return questionData;
-    } catch (err: any) {
-      setError(err.message || '問題の作成中にエラーが発生しました。');
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  }, [roomId, isHost, fetchQuizData]);
-
-  const submitAnswer = useCallback(async (
-    answerText: string, 
-    isFirstCome = false, 
-    autoJudge = false
-  ) => {
-    if (!roomId || !userId || !currentQuestion?.id) {
-      throw new Error('Invalid operation');
-    }
-
-    setLoading(true);
-    try {
-      let judged = false;
-      let isCorrect = null;
-
-      if (autoJudge) {
-        judged = true;
-        isCorrect = answerText.trim().toLowerCase() === currentQuestion.text.toLowerCase();
+        return answerData;
+      } catch (err: any) {
+        setError(err.message || '回答の送信中にエラーが発生しました。');
+        throw err;
+      } finally {
+        setLoading(false);
       }
+    },
+    [roomId, userId, currentQuestion?.id] // Removed fetchAnswers from dependencies
+  );
 
-      const answerData = await SupabaseService.submitAnswer(
-        roomId,
-        userId,
-        currentQuestion.id,
-        answerText,
-        judged,
-        isCorrect
-      );
+  const judgeAnswer = useCallback(
+    async (answerId: string, isCorrect: boolean) => {
+      if (!isHost) throw new Error('Invalid operation');
 
-      // Refresh answers
-      await fetchAnswers(true);
-      
-      return answerData;
-    } catch (err: any) {
-      setError(err.message || '回答の送信中にエラーが発生しました。');
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  }, [roomId, userId, currentQuestion?.id, fetchAnswers]);
-
-  const judgeAnswer = useCallback(async (answerId: string, isCorrect: boolean) => {
-    if (!isHost) throw new Error('Invalid operation');
-
-    setLoading(true);
-    try {
-      await SupabaseService.judgeAnswer(answerId, isCorrect);
-      await fetchAnswers(true);
-    } catch (err: any) {
-      setError(err.message || '判定中にエラーが発生しました。');
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  }, [isHost, fetchAnswers]);
+      setLoading(true);
+      try {
+        await SupabaseService.judgeAnswer(answerId, isCorrect);
+        const fetchAnswersFunc = fetchAnswersRef.current;
+        if (fetchAnswersFunc) {
+          await fetchAnswersFunc(true);
+        }
+      } catch (err: any) {
+        setError(err.message || '判定中にエラーが発生しました。');
+        throw err;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [isHost] // Removed fetchAnswers from dependencies
+  );
 
   const buzzIn = useCallback(async () => {
     if (!roomId || !userId || !currentQuestion?.id) {
@@ -217,19 +250,18 @@ export const useQuizData = (options: UseQuizDataOptions) => {
     setLoading(true);
     try {
       // Update current question to inactive
-      if (currentQuestion?.id) {
-        await SupabaseService.updateQuestion(currentQuestion.id, { is_active: false });
-      }
+      // if (currentQuestion?.id) {
+      //   await SupabaseService.updateQuestion(currentQuestion.id, { is_active: false });
+      // }
 
       // Update room status to ended
       await SupabaseService.updateRoomStatus(roomId, 'ended');
-      
+
       // Clear local state
       setCurrentQuestion(null);
       setAnswers([]);
       setCurrentBuzzer(null);
-      setRoom(prev => prev ? { ...prev, status: 'ended' } : null);
-
+      setRoom((prev) => (prev ? { ...prev, status: 'ended' } : null));
     } catch (err: any) {
       setError(err.message || 'クイズ終了処理中にエラーが発生しました。');
       throw err;
@@ -251,7 +283,7 @@ export const useQuizData = (options: UseQuizDataOptions) => {
         callback: (payload: any) => {
           console.log('Room changed:', payload);
           if (payload.new?.status !== room?.status) {
-            fetchQuizData(true);
+            fetchQuizDataRef.current(true);
           }
         },
       },
@@ -262,7 +294,7 @@ export const useQuizData = (options: UseQuizDataOptions) => {
         filter: `room_id=eq.${roomId}`,
         callback: (payload: any) => {
           console.log('Question changed:', payload);
-          fetchQuizData(true);
+          fetchQuizDataRef.current(true);
         },
       },
       {
@@ -272,9 +304,7 @@ export const useQuizData = (options: UseQuizDataOptions) => {
         filter: `room_id=eq.${roomId}`,
         callback: (payload: any) => {
           console.log('Answer changed:', payload);
-          if (payload.new?.question_id === currentQuestion?.id) {
-            fetchAnswers(true);
-          }
+          fetchAnswersRef.current(true);
         },
       },
       {
@@ -293,12 +323,12 @@ export const useQuizData = (options: UseQuizDataOptions) => {
       },
     ];
 
-    subscribe(subscriptions);
+    subscribeRef.current(subscriptions);
 
     return () => {
-      unsubscribe();
+      unsubscribeRef.current();
     };
-  }, [roomId, enableRealtime, subscribe, unsubscribe, room?.status, currentQuestion?.id, fetchQuizData, fetchAnswers]);
+  }, [roomId, enableRealtime]);
 
   // Setup polling as backup
   useEffect(() => {
@@ -306,19 +336,17 @@ export const useQuizData = (options: UseQuizDataOptions) => {
 
     const startPolling = () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
-      
+
       intervalRef.current = setInterval(() => {
-        fetchQuizData(false);
+        fetchQuizDataRef.current(false);
       }, pollingInterval);
     };
 
     const startAnswersPolling = () => {
       if (answersIntervalRef.current) clearInterval(answersIntervalRef.current);
-      
+
       answersIntervalRef.current = setInterval(() => {
-        if ((isHost || answers.length > 0) && currentQuestion?.id) {
-          fetchAnswers(true);
-        }
+        fetchAnswersRef.current(true);
       }, pollingInterval / 2);
     };
 
@@ -329,14 +357,14 @@ export const useQuizData = (options: UseQuizDataOptions) => {
       if (intervalRef.current) clearInterval(intervalRef.current);
       if (answersIntervalRef.current) clearInterval(answersIntervalRef.current);
     };
-  }, [roomId, pollingInterval, isHost, answers.length, currentQuestion?.id, fetchQuizData, fetchAnswers]);
+  }, [roomId, pollingInterval]);
 
   // Initial fetch
   useEffect(() => {
     if (roomId) {
-      fetchQuizData(true);
+      fetchQuizDataRef.current(true);
     }
-  }, [roomId, fetchQuizData]);
+  }, [roomId]);
 
   return {
     room,

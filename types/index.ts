@@ -20,7 +20,6 @@ export interface Question {
   text: string;
   speaker: string;
   speed: number;
-  is_active?: boolean;
   created_at: string;
   updated_at?: string;
 }
