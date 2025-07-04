@@ -1,6 +1,18 @@
 import React from 'react';
 import { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, TouchableOpacity, Alert, Platform } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  Button,
+  TouchableOpacity,
+  Alert,
+  Platform,
+  KeyboardAvoidingView,
+  TouchableWithoutFeedback,
+  Keyboard,
+  ScrollView,
+} from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useUserStore } from '@/stores/userStore';
@@ -193,64 +205,83 @@ export default function RoomScreen() {
 
   // Room creation/joining screen
   return (
-    <View className="flex-1 p-6 items-center justify-center">
-      <Text className="text-xl font-bold mb-6">
-        {isCreateMode ? 'ルームを作成' : 'ルームに参加'}
-      </Text>
+    <KeyboardAvoidingView
+      className="flex-1"
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <ScrollView
+          contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', padding: 24 }}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View className="items-center">
+            <Text className="text-xl font-bold mb-6">
+              {isCreateMode ? 'ルームを作成' : 'ルームに参加'}
+            </Text>
 
-      {isCreateMode ? (
-        <>
-          <Text>合言葉をタップしてコピー</Text>
-          <TouchableOpacity 
-            onPress={async () => {
-              try {
-                await Clipboard.setStringAsync(code);
-                showNotification('コピー完了', '合言葉がクリップボードにコピーされました');
-              } catch (error) {
-                console.error('Copy failed:', error);
-                showNotification('エラー', 'コピーに失敗しました');
-              }
-            }}
-            className="p-4 rounded-lg border-2 border-dashed border-blue-300 bg-blue-50 my-5"
-          >
-            <Text className="text-[32px] font-bold tracking-[4px] text-blue-700 text-center">{code}</Text>
-            <Text className="text-sm text-blue-600 text-center mt-2">📋 タップしてコピー</Text>
-          </TouchableOpacity>
+            {isCreateMode ? (
+              <>
+                <Text>合言葉をタップしてコピー</Text>
+                <TouchableOpacity
+                  onPress={async () => {
+                    try {
+                      await Clipboard.setStringAsync(code);
+                      showNotification('コピー完了', '合言葉がクリップボードにコピーされました');
+                    } catch (error) {
+                      console.error('Copy failed:', error);
+                      showNotification('エラー', 'コピーに失敗しました');
+                    }
+                  }}
+                  className="p-4 rounded-lg border-2 border-dashed border-blue-300 bg-blue-50 my-5"
+                >
+                  <Text className="text-[32px] font-bold tracking-[4px] text-blue-700 text-center">
+                    {code}
+                  </Text>
+                  <Text className="text-sm text-blue-600 text-center mt-2">
+                    📋 タップしてコピー
+                  </Text>
+                </TouchableOpacity>
 
-          <QuizModeSelector
-            selectedMode={quizMode}
-            onModeChange={(mode) => {
-              // MVP開発中は一斉回答モードのみ許可
-              if (mode === 'all-at-once') {
-                setQuizMode(mode);
-              }
-            }}
-            disabled={loading}
-          />
+                <QuizModeSelector
+                  selectedMode={quizMode}
+                  onModeChange={(mode) => {
+                    // MVP開発中は一斉回答モードのみ許可
+                    if (mode === 'all-at-once') {
+                      setQuizMode(mode);
+                    }
+                  }}
+                  disabled={loading}
+                />
 
-          <Button title="ルームを作成" onPress={handleCreateRoom} disabled={loading} />
-        </>
-      ) : (
-        <>
-          <Text>合言葉を入力</Text>
-          <TextInput
-            className="w-full border border-gray-300 p-3 rounded-lg my-4 text-center text-2xl"
-            placeholder="例: ABC123"
-            value={code}
-            onChangeText={setCode}
-            autoCapitalize="characters"
-            maxLength={6}
-          />
-          <Button
-            title="ルームに参加"
-            onPress={handleJoinRoom}
-            disabled={!code.trim() || loading}
-          />
-        </>
-      )}
+                <Button title="ルームを作成" onPress={handleCreateRoom} disabled={loading} />
+              </>
+            ) : (
+              <>
+                <Text className="mb-4">合言葉を入力</Text>
+                <TextInput
+                  className="w-full border border-gray-300 p-4 rounded-lg mb-4 text-center text-2xl"
+                  placeholder="例: ABC123"
+                  value={code}
+                  onChangeText={setCode}
+                  autoCapitalize="characters"
+                  maxLength={6}
+                  returnKeyType="done"
+                  onSubmitEditing={handleJoinRoom}
+                  blurOnSubmit={true}
+                />
+                <Button
+                  title="ルームに参加"
+                  onPress={handleJoinRoom}
+                  disabled={!code.trim() || loading}
+                />
+              </>
+            )}
 
-      {loading && <LoadingSpinner />}
-      <ErrorMessage message={error} />
-    </View>
+            {loading && <LoadingSpinner />}
+            <ErrorMessage message={error} />
+          </View>
+        </ScrollView>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 }

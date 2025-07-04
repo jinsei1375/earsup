@@ -2,7 +2,17 @@
 import { supabase } from '@/lib/supabase';
 import { useUserStore } from '@/stores/userStore';
 import { useState } from 'react';
-import { View, TextInput, Button, Text } from 'react-native';
+import {
+  View,
+  TextInput,
+  Button,
+  Text,
+  KeyboardAvoidingView,
+  TouchableWithoutFeedback,
+  Keyboard,
+  Platform,
+  ScrollView,
+} from 'react-native';
 import { router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Crypto from 'expo-crypto';
@@ -58,15 +68,39 @@ export default function NicknameScreen() {
   };
 
   return (
-    <View className="flex-1 justify-center p-6">
-      <Text>ニックネームを入力してください</Text>
-      <TextInput
-        className="border border-gray-300 p-3 rounded-lg my-4"
-        placeholder="例: EarsFan123"
-        value={nickname}
-        onChangeText={setNickname}
-      />
-      <Button title="登録して始める" onPress={handleSubmit} disabled={!nickname.trim()} />
-    </View>
+    <KeyboardAvoidingView
+      className="flex-1"
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <ScrollView
+          contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', padding: 24 }}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View className="space-y-4">
+            <Text className="text-xl font-bold text-center mb-6">
+              ニックネームを入力してください
+            </Text>
+            <TextInput
+              className="border border-gray-300 p-4 rounded-lg text-lg"
+              placeholder="例: EarsFan123"
+              value={nickname}
+              onChangeText={setNickname}
+              returnKeyType="done"
+              onSubmitEditing={handleSubmit}
+              blurOnSubmit={true}
+            />
+            {error && <Text className="text-red-500 text-center">{error}</Text>}
+            <View className="mt-6">
+              <Button
+                title={loading ? '登録中...' : '登録して始める'}
+                onPress={handleSubmit}
+                disabled={!nickname.trim() || loading}
+              />
+            </View>
+          </View>
+        </ScrollView>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 }
