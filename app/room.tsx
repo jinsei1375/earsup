@@ -187,7 +187,16 @@ export default function RoomScreen() {
           <Text>合言葉</Text>
           <Text className="text-[32px] font-bold tracking-[4px] my-5">{code}</Text>
 
-          <QuizModeSelector selectedMode={quizMode} onModeChange={setQuizMode} disabled={loading} />
+          <QuizModeSelector
+            selectedMode={quizMode}
+            onModeChange={(mode) => {
+              // MVP開発中は一斉回答モードのみ許可
+              if (mode === 'all-at-once') {
+                setQuizMode(mode);
+              }
+            }}
+            disabled={loading}
+          />
 
           <Button title="ルームを作成" onPress={handleCreateRoom} disabled={loading} />
         </>
