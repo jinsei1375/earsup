@@ -1,6 +1,6 @@
 import React from 'react';
 import { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, TextInput, Button, TouchableOpacity, Alert, Platform } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useUserStore } from '@/stores/userStore';
@@ -49,6 +49,21 @@ export default function RoomScreen() {
   const isCreateMode = mode === 'create';
   const isJoinMode = mode === 'join';
   const isWaitingMode = roomId !== null;
+
+  // プラットフォーム別の通知表示
+  const showNotification = (title: string, message: string) => {
+    if (Platform.OS === 'web') {
+      console.log(`${title}: ${message}`);
+      // Web用の簡易通知表示（将来的にはtoastライブラリに置き換え可能）
+      setLocalError(null); // エラーメッセージをクリア
+      setTimeout(() => {
+        setLocalError(`✅ ${message}`);
+        setTimeout(() => setLocalError(null), 3000); // 3秒後に消去
+      }, 100);
+    } else {
+      Alert.alert(title, message);
+    }
+  };
 
   // Auto-generate room code for create mode
   useEffect(() => {
@@ -190,10 +205,10 @@ export default function RoomScreen() {
             onPress={async () => {
               try {
                 await Clipboard.setStringAsync(code);
-                Alert.alert('コピー完了', '合言葉がクリップボードにコピーされました');
+                showNotification('コピー完了', '合言葉がクリップボードにコピーされました');
               } catch (error) {
                 console.error('Copy failed:', error);
-                Alert.alert('エラー', 'コピーに失敗しました');
+                showNotification('エラー', 'コピーに失敗しました');
               }
             }}
             className="p-4 rounded-lg border-2 border-dashed border-blue-300 bg-blue-50 my-5"
