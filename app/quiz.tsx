@@ -1,6 +1,5 @@
 // app/quiz.tsx
 import React, { useState, useEffect } from 'react';
-import { View, Text, Button } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useUserStore } from '@/stores/userStore';
 import { useQuizData } from '@/hooks/useQuizData';
@@ -11,7 +10,7 @@ import { validateAnswer } from '@/utils/quizUtils';
 import type { QuizScreenParams } from '@/types';
 
 export default function QuizScreen() {
-  const params = useLocalSearchParams<QuizScreenParams>();
+  const params = useLocalSearchParams() as QuizScreenParams;
   const { roomId, role } = params;
   const router = useRouter();
   const userId = useUserStore((s) => s.userId);
@@ -53,7 +52,7 @@ export default function QuizScreen() {
       // Reset local state
       setShowResult(false);
       setIsCorrect(null);
-      
+
       // Navigate home
       setTimeout(() => {
         router.replace('/');
@@ -84,11 +83,11 @@ export default function QuizScreen() {
     try {
       const isFirstComeMode = room?.quiz_mode === 'first-come';
       const autoJudge = isFirstComeMode;
-      
+
       const answerData = await submitAnswer(answerText, isFirstComeMode, autoJudge);
-      
+
       setShowResult(true);
-      
+
       if (autoJudge && currentQuestion) {
         const correct = validateAnswer(answerText, currentQuestion.text);
         setIsCorrect(correct);
@@ -127,7 +126,7 @@ export default function QuizScreen() {
   const handleEndQuiz = async () => {
     try {
       await endQuiz();
-      
+
       // Navigate after successful end
       setTimeout(() => {
         router.replace('/');
@@ -146,20 +145,18 @@ export default function QuizScreen() {
   };
 
   // Get participants for buzz-in display
-  const participants = room ? [
-    { id: room.host_user_id, nickname: 'Host' }, // Simplified for now
-  ] : [];
+  const participants = room
+    ? [
+        { id: room.host_user_id, nickname: 'Host' }, // Simplified for now
+      ]
+    : [];
 
   // Host screens
   if (isHost) {
     // Question creation screen
     if (!currentQuestion || room?.status === 'ready') {
       return (
-        <QuestionCreator
-          onCreateQuestion={handleCreateQuestion}
-          loading={loading}
-          error={error}
-        />
+        <QuestionCreator onCreateQuestion={handleCreateQuestion} loading={loading} error={error} />
       );
     }
 

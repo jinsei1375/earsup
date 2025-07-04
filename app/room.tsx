@@ -1,11 +1,6 @@
 import React from 'react';
 import { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  Button,
-} from 'react-native';
+import { View, Text, TextInput, Button } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useUserStore } from '@/stores/userStore';
 import { SupabaseService } from '@/services/supabaseService';
@@ -19,11 +14,11 @@ import { generateRoomCode } from '@/utils/quizUtils';
 import type { RoomScreenParams } from '@/types';
 
 export default function RoomScreen() {
-  const params = useLocalSearchParams<RoomScreenParams>();
+  const params = useLocalSearchParams() as RoomScreenParams;
   const { mode, roomId: paramRoomId } = params;
   const router = useRouter();
   const userId = useUserStore((s) => s.userId);
-  
+
   // Local state for room creation/joining
   const [code, setCode] = useState('');
   const [roomId, setRoomId] = useState<string | null>(paramRoomId || null);
@@ -116,11 +111,11 @@ export default function RoomScreen() {
     try {
       setLocalLoading(true);
       await updateRoomStatus('ready');
-      
+
       // Navigate to quiz screen as host
-      router.push({ 
-        pathname: '/quiz', 
-        params: { roomId, role: 'host' } 
+      router.push({
+        pathname: '/quiz',
+        params: { roomId, role: 'host' },
       });
     } catch (err: any) {
       setLocalError(err.message || 'クイズ開始中にエラーが発生しました。');
@@ -161,11 +156,7 @@ export default function RoomScreen() {
 
         {isHost ? (
           <View className="flex-row mt-5">
-            <Button 
-              title="クイズを開始" 
-              onPress={handleStartQuiz} 
-              disabled={loading} 
-            />
+            <Button title="クイズを開始" onPress={handleStartQuiz} disabled={loading} />
             <View className="w-4" />
             <Button
               title="ルームを中止"
@@ -196,11 +187,7 @@ export default function RoomScreen() {
           <Text>合言葉</Text>
           <Text className="text-[32px] font-bold tracking-[4px] my-5">{code}</Text>
 
-          <QuizModeSelector
-            selectedMode={quizMode}
-            onModeChange={setQuizMode}
-            disabled={loading}
-          />
+          <QuizModeSelector selectedMode={quizMode} onModeChange={setQuizMode} disabled={loading} />
 
           <Button title="ルームを作成" onPress={handleCreateRoom} disabled={loading} />
         </>
