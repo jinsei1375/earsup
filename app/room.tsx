@@ -1,6 +1,7 @@
 import React from 'react';
 import { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button } from 'react-native';
+import { View, Text, TextInput, Button, TouchableOpacity, Alert } from 'react-native';
+import * as Clipboard from 'expo-clipboard';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useUserStore } from '@/stores/userStore';
 import { SupabaseService } from '@/services/supabaseService';
@@ -184,8 +185,22 @@ export default function RoomScreen() {
 
       {isCreateMode ? (
         <>
-          <Text>合言葉</Text>
-          <Text className="text-[32px] font-bold tracking-[4px] my-5">{code}</Text>
+          <Text>合言葉をタップしてコピー</Text>
+          <TouchableOpacity 
+            onPress={async () => {
+              try {
+                await Clipboard.setStringAsync(code);
+                Alert.alert('コピー完了', '合言葉がクリップボードにコピーされました');
+              } catch (error) {
+                console.error('Copy failed:', error);
+                Alert.alert('エラー', 'コピーに失敗しました');
+              }
+            }}
+            className="p-4 rounded-lg border-2 border-dashed border-blue-300 bg-blue-50 my-5"
+          >
+            <Text className="text-[32px] font-bold tracking-[4px] text-blue-700 text-center">{code}</Text>
+            <Text className="text-sm text-blue-600 text-center mt-2">📋 タップしてコピー</Text>
+          </TouchableOpacity>
 
           <QuizModeSelector
             selectedMode={quizMode}
