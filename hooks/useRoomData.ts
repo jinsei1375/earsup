@@ -13,13 +13,13 @@ interface UseRoomDataOptions {
 
 export const useRoomData = (options: UseRoomDataOptions) => {
   const { roomId, userId, pollingInterval = 5000, enableRealtime = true } = options;
-  
+
   const [room, setRoom] = useState<Room | null>(null);
   const [participants, setParticipants] = useState<ParticipantWithNickname[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isHost, setIsHost] = useState(false);
-  
+
   const lastFetchRef = useRef<number>(0);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -30,56 +30,65 @@ export const useRoomData = (options: UseRoomDataOptions) => {
     onError: (error) => console.error('Room realtime error:', error),
   });
 
-  const fetchRoomData = useCallback(async (force = false) => {
-    if (!roomId) return;
+  const fetchRoomData = useCallback(
+    async (force = false) => {
+      if (!roomId) return;
 
-    const now = Date.now();
-    if (!force && (now - lastFetchRef.current) < 1000) {
-      return; // Debounce rapid calls
-    }
-    lastFetchRef.current = now;
+      const now = Date.now();
+      if (!force && now - lastFetchRef.current < 1000) {
+        return; // Debounce rapid calls
+      }
+      lastFetchRef.current = now;
 
-    const shouldShowLoading = force && !loading && !room;
-    if (shouldShowLoading) setLoading(true);
+      // force時のみローディング表示（状態参照を削除）
+      if (force) {
+        setLoading(true);
+      }
 
-    try {
-      setError(null);
-      
-      // Fetch room data
-      const roomData = await SupabaseService.getRoomById(roomId);
-      setRoom(roomData);
-      setIsHost(roomData.host_user_id === userId);
+      try {
+        setError(null);
 
-      // Fetch participants
-      const participantsData = await SupabaseService.getParticipantsWithNicknames(
-        roomId, 
-        roomData.host_user_id
-      );
-      setParticipants(participantsData);
+        // Fetch room data
+        const roomData = await SupabaseService.getRoomById(roomId);
+        setRoom(roomData);
+        setIsHost(roomData.host_user_id === userId);
 
-    } catch (err: any) {
-      setError(err.message || 'ルーム情報の取得中にエラーが発生しました。');
-      console.error('Room data fetch error:', err);
-    } finally {
-      if (shouldShowLoading) setLoading(false);
-    }
-  }, [roomId, userId, loading, room]);
+        // Fetch participants
+        const participantsData = await SupabaseService.getParticipantsWithNicknames(
+          roomId,
+          roomData.host_user_id
+        );
+        setParticipants(participantsData);
+      } catch (err: any) {
+        setError(err.message || 'ルーム情報の取得中にエラーが発生しました。');
+        console.error('Room data fetch error:', err);
+      } finally {
+        if (force) {
+          setLoading(false);
+        }
+      }
+    },
+    [roomId, userId]
+  );
 
-  const updateRoomStatus = useCallback(async (status: Room['status']) => {
-    if (!roomId) return;
-    
-    try {
-      await SupabaseService.updateRoomStatus(roomId, status);
-      setRoom(prev => prev ? { ...prev, status } : null);
-    } catch (err: any) {
-      setError(err.message || 'ルームステータスの更新中にエラーが発生しました。');
-      throw err;
-    }
-  }, [roomId]);
+  const updateRoomStatus = useCallback(
+    async (status: Room['status']) => {
+      if (!roomId) return;
+
+      try {
+        await SupabaseService.updateRoomStatus(roomId, status);
+        setRoom((prev) => (prev ? { ...prev, status } : null));
+      } catch (err: any) {
+        setError(err.message || 'ルームステータスの更新中にエラーが発生しました。');
+        throw err;
+      }
+    },
+    [roomId]
+  );
 
   const deleteRoom = useCallback(async () => {
     if (!roomId) return;
-    
+
     try {
       await SupabaseService.deleteRoom(roomId);
     } catch (err: any) {
@@ -88,9 +97,25 @@ export const useRoomData = (options: UseRoomDataOptions) => {
     }
   }, [roomId]);
 
+  // 関数参照を安定させるためのRef
+  const fetchRoomDataRef = useRef<((force?: boolean) => Promise<void>) | null>(null);
+  fetchRoomDataRef.current = fetchRoomData;
+
   // Setup realtime subscriptions
   useEffect(() => {
     if (!roomId || !enableRealtime) return;
+
+    // デバウンス用タイマー
+    let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+
+    const debouncedFetch = () => {
+      if (debounceTimer) clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        if (fetchRoomDataRef.current) {
+          fetchRoomDataRef.current(false);
+        }
+      }, 300);
+    };
 
     const subscriptions = [
       {
@@ -100,7 +125,7 @@ export const useRoomData = (options: UseRoomDataOptions) => {
         filter: `id=eq.${roomId}`,
         callback: (payload: any) => {
           console.log('Room changed:', payload);
-          fetchRoomData(false);
+          debouncedFetch();
         },
       },
       {
@@ -110,7 +135,7 @@ export const useRoomData = (options: UseRoomDataOptions) => {
         filter: `room_id=eq.${roomId}`,
         callback: (payload: any) => {
           console.log('Participants changed:', payload);
-          fetchRoomData(false);
+          debouncedFetch();
         },
       },
       {
@@ -118,7 +143,7 @@ export const useRoomData = (options: UseRoomDataOptions) => {
         schema: 'public',
         table: 'users',
         callback: () => {
-          fetchRoomData(false);
+          debouncedFetch();
         },
       },
     ];
@@ -126,9 +151,10 @@ export const useRoomData = (options: UseRoomDataOptions) => {
     subscribe(subscriptions);
 
     return () => {
+      if (debounceTimer) clearTimeout(debounceTimer);
       unsubscribe();
     };
-  }, [roomId, enableRealtime, subscribe, unsubscribe, fetchRoomData]);
+  }, [roomId, enableRealtime]); // subscribe, unsubscribeを削除
 
   // Setup polling as backup
   useEffect(() => {
@@ -136,9 +162,11 @@ export const useRoomData = (options: UseRoomDataOptions) => {
 
     const startPolling = () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
-      
+
       intervalRef.current = setInterval(() => {
-        fetchRoomData(false);
+        if (fetchRoomDataRef.current) {
+          fetchRoomDataRef.current(false);
+        }
       }, pollingInterval);
     };
 
@@ -149,14 +177,14 @@ export const useRoomData = (options: UseRoomDataOptions) => {
         clearInterval(intervalRef.current);
       }
     };
-  }, [roomId, pollingInterval, fetchRoomData]);
+  }, [roomId, pollingInterval]);
 
   // Initial fetch
   useEffect(() => {
-    if (roomId) {
-      fetchRoomData(true);
+    if (roomId && fetchRoomDataRef.current) {
+      fetchRoomDataRef.current(true);
     }
-  }, [roomId, fetchRoomData]);
+  }, [roomId]);
 
   return {
     room,
