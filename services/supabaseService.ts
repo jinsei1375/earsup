@@ -1,20 +1,20 @@
 // services/supabaseService.ts
 import { supabase } from '@/lib/supabase';
-import type { 
-  Room, 
-  Question, 
-  Answer, 
-  Buzz, 
-  RoomParticipant, 
+import type {
+  Room,
+  Question,
+  Answer,
+  Buzz,
+  RoomParticipant,
   User,
-  ParticipantWithNickname 
+  ParticipantWithNickname,
 } from '@/types';
 
 export class SupabaseService {
   // Room operations
   static async createRoom(
-    code: string, 
-    hostUserId: string, 
+    code: string,
+    hostUserId: string,
     quizMode: 'first-come' | 'all-at-once'
   ): Promise<Room> {
     const { data, error } = await supabase
@@ -80,7 +80,7 @@ export class SupabaseService {
     speed: number = 1.0
   ): Promise<Question> {
     const timestamp = new Date().toISOString();
-    
+
     const { data, error } = await supabase
       .from('questions')
       .insert({
@@ -152,7 +152,7 @@ export class SupabaseService {
   static async getAnswersForQuestion(questionId: string, roomId: string): Promise<Answer[]> {
     const { data, error } = await supabase
       .from('answers')
-      .select('id, user_id, answer_text, is_correct, judged')
+      .select('*')
       .eq('question_id', questionId)
       .eq('room_id', roomId)
       .order('created_at', { ascending: true });
@@ -163,10 +163,10 @@ export class SupabaseService {
 
   static async getAnswersWithNicknames(questionId: string, roomId: string): Promise<Answer[]> {
     const answers = await this.getAnswersForQuestion(questionId, roomId);
-    
+
     if (answers.length === 0) return [];
 
-    const userIds = [...new Set(answers.map(a => a.user_id))];
+    const userIds = [...new Set(answers.map((a) => a.user_id))];
     const { data: usersData } = await supabase
       .from('users')
       .select('id, nickname')
@@ -174,9 +174,9 @@ export class SupabaseService {
 
     if (!usersData) return answers;
 
-    const userMap = new Map(usersData.map(u => [u.id, u.nickname]));
-    
-    return answers.map(answer => ({
+    const userMap = new Map(usersData.map((u) => [u.id, u.nickname]));
+
+    return answers.map((answer) => ({
       ...answer,
       nickname: userMap.get(answer.user_id) || '不明なユーザー',
     }));
@@ -214,7 +214,7 @@ export class SupabaseService {
   static async getExistingBuzz(roomId: string, questionId: string): Promise<Buzz | null> {
     const { data, error } = await supabase
       .from('buzzes')
-      .select('user_id')
+      .select('*')
       .eq('room_id', roomId)
       .eq('question_id', questionId)
       .maybeSingle();
@@ -235,6 +235,17 @@ export class SupabaseService {
 
   // Participant operations
   static async addParticipant(roomId: string, userId: string): Promise<void> {
+    // Check room status first - don't allow joining if quiz has started
+    try {
+      const room = await this.getRoomById(roomId);
+      if (room.status !== 'waiting') {
+        throw new Error('クイズが既に開始されているため、参加できません');
+      }
+    } catch (error) {
+      // If room doesn't exist or other error
+      throw new Error('ルームが見つからないか、アクセスできません');
+    }
+
     // Check if already exists
     const { data: existing } = await supabase
       .from('room_participants')
@@ -261,12 +272,15 @@ export class SupabaseService {
       .eq('room_id', roomId);
 
     if (error) throw error;
-    return data?.map(p => p.user_id) || [];
+    return data?.map((p) => p.user_id) || [];
   }
 
-  static async getParticipantsWithNicknames(roomId: string, hostUserId: string): Promise<ParticipantWithNickname[]> {
+  static async getParticipantsWithNicknames(
+    roomId: string,
+    hostUserId: string
+  ): Promise<ParticipantWithNickname[]> {
     const participantIds = await this.getRoomParticipants(roomId);
-    const userIds = [hostUserId, ...participantIds.filter(id => id !== hostUserId)];
+    const userIds = [hostUserId, ...participantIds.filter((id) => id !== hostUserId)];
 
     if (userIds.length === 0) return [];
 
@@ -283,10 +297,7 @@ export class SupabaseService {
   static async getUsersByIds(userIds: string[]): Promise<User[]> {
     if (userIds.length === 0) return [];
 
-    const { data, error } = await supabase
-      .from('users')
-      .select('id, nickname')
-      .in('id', userIds);
+    const { data, error } = await supabase.from('users').select('id, nickname').in('id', userIds);
 
     if (error) throw error;
     return data || [];
