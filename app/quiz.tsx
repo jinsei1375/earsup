@@ -1,11 +1,14 @@
 // app/quiz.tsx
 import React, { useState, useEffect } from 'react';
+import { View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useUserStore } from '@/stores/userStore';
 import { useQuizData } from '@/hooks/useQuizData';
 import { QuestionCreator } from '@/components/quiz/QuestionCreator';
 import { HostQuizScreen } from '@/components/quiz/HostQuizScreen';
 import { ParticipantQuizScreen } from '@/components/quiz/ParticipantQuizScreen';
+import { ExitRoomModal } from '@/components/common/ExitRoomModal';
+import { useHeaderSettings } from '@/contexts/HeaderSettingsContext';
 import { validateAnswer } from '@/utils/quizUtils';
 import type { QuizScreenParams } from '@/types';
 
@@ -14,9 +17,11 @@ export default function QuizScreen() {
   const { roomId, role } = params;
   const router = useRouter();
   const userId = useUserStore((s) => s.userId);
+  const { setSettingsConfig } = useHeaderSettings();
 
   const [showResult, setShowResult] = useState(false);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
+  const [isExitModalVisible, setIsExitModalVisible] = useState(false);
 
   const isHost = role === 'host';
 
@@ -25,6 +30,7 @@ export default function QuizScreen() {
     currentQuestion,
     answers,
     currentBuzzer,
+    participants,
     loading,
     error,
     connectionState,
@@ -36,6 +42,7 @@ export default function QuizScreen() {
     buzzIn,
     resetBuzz,
     endQuiz,
+    removeParticipant,
     setError,
   } = useQuizData({
     roomId,
@@ -59,6 +66,19 @@ export default function QuizScreen() {
       }, 1000);
     }
   }, [room?.status, router]);
+
+  // ヘッダーの設定ボタンを制御
+  useEffect(() => {
+    setSettingsConfig({
+      showSettings: true,
+      onSettingsPress: () => setIsExitModalVisible(true),
+    });
+
+    // クリーンアップ時に設定をリセット
+    return () => {
+      setSettingsConfig({});
+    };
+  }, [setSettingsConfig]);
 
   // Monitor answer judgment for participants
   useEffect(() => {
@@ -138,61 +158,98 @@ export default function QuizScreen() {
     }
   };
 
+  const handleExitRoom = async () => {
+    try {
+      if (!userId) return;
+      
+      // データベースから参加者を削除し、必要に応じてルームを終了
+      await removeParticipant(userId);
+      
+      // ホーム画面に戻る
+      router.replace('/');
+    } catch (err: any) {
+      console.error('Exit room failed:', err);
+      // エラーが発生してもホーム画面に戻る
+      router.replace('/');
+    }
+  };
+
   const handleRefreshState = () => {
     fetchQuizData(true);
     setShowResult(false);
     setIsCorrect(null);
   };
 
-  // Get participants for buzz-in display
-  const participants = room
-    ? [
-        { id: room.host_user_id, nickname: 'Host' }, // Simplified for now
-      ]
-    : [];
-
   // Host screens
   if (isHost) {
     // Question creation screen
     if (!currentQuestion || room?.status === 'ready') {
       return (
-        <QuestionCreator onCreateQuestion={handleCreateQuestion} loading={loading} error={error} />
+        <View className="flex-1">
+          <QuestionCreator onCreateQuestion={handleCreateQuestion} loading={loading} error={error} />
+          
+          <ExitRoomModal
+            isVisible={isExitModalVisible}
+            onClose={() => setIsExitModalVisible(false)}
+            onConfirmExit={handleExitRoom}
+            isHost={isHost}
+          />
+        </View>
       );
     }
 
     // Host quiz management screen
     return (
-      <HostQuizScreen
-        questionText={currentQuestion.text}
-        answers={answers}
-        currentBuzzer={currentBuzzer}
-        participants={participants}
-        isFirstComeMode={room?.quiz_mode === 'first-come'}
-        loading={loading}
-        error={error}
-        onJudgeAnswer={handleJudgeAnswer}
-        onResetBuzz={handleResetBuzz}
-        onRefreshAnswers={() => fetchAnswers(true)}
-        onEndQuiz={handleEndQuiz}
-      />
+      <View className="flex-1">
+        <HostQuizScreen
+          questionText={currentQuestion.text}
+          answers={answers}
+          currentBuzzer={currentBuzzer}
+          participants={participants}
+          isFirstComeMode={room?.quiz_mode === 'first-come'}
+          loading={loading}
+          error={error}
+          onJudgeAnswer={handleJudgeAnswer}
+          onResetBuzz={handleResetBuzz}
+          onRefreshAnswers={() => fetchAnswers(true)}
+          onEndQuiz={handleEndQuiz}
+        />
+        
+        <ExitRoomModal
+          isVisible={isExitModalVisible}
+          onClose={() => setIsExitModalVisible(false)}
+          onConfirmExit={handleExitRoom}
+          isHost={isHost}
+        />
+      </View>
     );
   }
 
   // Participant screen
   return (
-    <ParticipantQuizScreen
-      room={room}
-      questionText={currentQuestion?.text || ''}
-      currentBuzzer={currentBuzzer}
-      userId={userId}
-      connectionState={connectionState}
-      loading={loading}
-      error={error}
-      isCorrect={isCorrect}
-      showResult={showResult}
-      onBuzzIn={handleBuzzIn}
-      onSubmitAnswer={handleSubmitAnswer}
-      onRefreshState={handleRefreshState}
-    />
+    <View className="flex-1">
+      <ParticipantQuizScreen
+        room={room}
+        questionText={currentQuestion?.text || ''}
+        currentBuzzer={currentBuzzer}
+        userId={userId}
+        participants={participants}
+        connectionState={connectionState}
+        loading={loading}
+        error={error}
+        isCorrect={isCorrect}
+        showResult={showResult}
+        onBuzzIn={handleBuzzIn}
+        onSubmitAnswer={handleSubmitAnswer}
+        onRefreshState={handleRefreshState}
+      />
+      
+      <ExitRoomModal
+        isVisible={isExitModalVisible}
+        onClose={() => setIsExitModalVisible(false)}
+        onConfirmExit={handleExitRoom}
+        isHost={isHost}
+      />
+    </View>
   );
 }

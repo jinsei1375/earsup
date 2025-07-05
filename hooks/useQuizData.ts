@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { SupabaseService } from '@/services/supabaseService';
 import { useRealtimeSubscription } from './useRealtimeSubscription';
-import type { Room, Question, Answer, Buzz } from '@/types';
+import type { Room, Question, Answer, Buzz, ParticipantWithNickname } from '@/types';
 
 interface UseQuizDataOptions {
   roomId: string | null;
@@ -19,6 +19,7 @@ export const useQuizData = (options: UseQuizDataOptions) => {
   const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
   const [answers, setAnswers] = useState<Answer[]>([]);
   const [currentBuzzer, setCurrentBuzzer] = useState<string | null>(null);
+  const [participants, setParticipants] = useState<ParticipantWithNickname[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -53,6 +54,15 @@ export const useQuizData = (options: UseQuizDataOptions) => {
         // Fetch room data
         const roomData = await SupabaseService.getRoomById(roomId);
         setRoom(roomData);
+
+        // Fetch participants
+        if (roomData) {
+          const participantsData = await SupabaseService.getParticipantsWithNicknames(
+            roomId,
+            roomData.host_user_id
+          );
+          setParticipants(participantsData);
+        }
 
         // Fetch latest question
         const questionData = await SupabaseService.getLatestQuestion(roomId);
@@ -366,11 +376,37 @@ export const useQuizData = (options: UseQuizDataOptions) => {
     }
   }, [roomId]);
 
+  const removeParticipant = useCallback(
+    async (participantUserId: string) => {
+      if (!roomId || !userId) return;
+
+      try {
+        if (isHost) {
+          // ホストが退出する場合、ルームを終了
+          await SupabaseService.endRoomByHost(roomId, userId);
+        } else {
+          // 参加者が退出する場合
+          await SupabaseService.removeParticipant(roomId, participantUserId);
+          // 参加者がいなくなったかチェックしてルーム終了判定
+          await SupabaseService.checkAndEndRoomIfEmpty(roomId);
+        }
+        
+        // データを再取得
+        await fetchQuizDataRef.current(true);
+      } catch (err: any) {
+        setError(err.message || '退出処理中にエラーが発生しました。');
+        throw err;
+      }
+    },
+    [roomId, userId, isHost]
+  );
+
   return {
     room,
     currentQuestion,
     answers,
     currentBuzzer,
+    participants,
     loading,
     error,
     connectionState,
@@ -382,6 +418,7 @@ export const useQuizData = (options: UseQuizDataOptions) => {
     buzzIn,
     resetBuzz,
     endQuiz,
+    removeParticipant,
     setError,
   };
 };

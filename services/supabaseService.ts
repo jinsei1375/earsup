@@ -302,4 +302,49 @@ export class SupabaseService {
     if (error) throw error;
     return data || [];
   }
+
+  // Participant management
+  static async removeParticipant(roomId: string, userId: string): Promise<void> {
+    const { error } = await supabase
+      .from('room_participants')
+      .delete()
+      .eq('room_id', roomId)
+      .eq('user_id', userId);
+
+    if (error) throw error;
+  }
+
+  static async checkAndEndRoomIfEmpty(roomId: string): Promise<boolean> {
+    try {
+      // Get room info
+      const room = await this.getRoomById(roomId);
+      if (!room || room.status === 'ended') return false;
+
+      // Get current participants (excluding host)
+      const participantIds = await this.getRoomParticipants(roomId);
+      const nonHostParticipants = participantIds.filter(id => id !== room.host_user_id);
+
+      // If no participants left, end the room
+      if (nonHostParticipants.length === 0) {
+        await this.updateRoomStatus(roomId, 'ended');
+        return true;
+      }
+
+      return false;
+    } catch (error) {
+      console.error('Error checking room status:', error);
+      return false;
+    }
+  }
+
+  static async endRoomByHost(roomId: string, hostUserId: string): Promise<void> {
+    // Verify the user is the host
+    const room = await this.getRoomById(roomId);
+    if (room.host_user_id !== hostUserId) {
+      throw new Error('Only the host can end the room');
+    }
+
+    // End the room
+    await this.updateRoomStatus(roomId, 'ended');
+  }
 }

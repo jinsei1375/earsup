@@ -22,13 +22,15 @@ import {
   isQuizEnded,
   speakText,
 } from '@/utils/quizUtils';
-import type { Room, RealtimeConnectionState } from '@/types';
+import { ParticipantsList } from '@/components/room/ParticipantsList';
+import type { Room, RealtimeConnectionState, ParticipantWithNickname } from '@/types';
 
 interface ParticipantQuizScreenProps {
   room: Room | null;
   questionText: string;
   currentBuzzer: string | null;
   userId: string | null;
+  participants: ParticipantWithNickname[];
   connectionState: RealtimeConnectionState;
   loading: boolean;
   error: string | null;
@@ -44,6 +46,7 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
   questionText,
   currentBuzzer,
   userId,
+  participants,
   connectionState,
   loading,
   error,
@@ -107,6 +110,14 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
           <View className="items-center">
             <Text className="text-xl font-bold mb-4">リスニングクイズ</Text>
             <RealtimeStatus connectionState={connectionState} showLastUpdate={false} />
+
+            {/* 参加者リスト */}
+            <ParticipantsList
+              participants={participants}
+              hostUserId={room?.host_user_id}
+              loading={false}
+              onRefresh={onRefreshState}
+            />
 
             <Text className="text-lg font-bold text-green-500 my-4">問題が出題されました!</Text>
 
