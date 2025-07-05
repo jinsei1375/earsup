@@ -55,7 +55,7 @@ export const QuestionCreator: React.FC<QuestionCreatorProps> = ({
               multiline
               numberOfLines={4}
               returnKeyType="done"
-              onSubmitEditing={handleSubmit}
+              onSubmitEditing={() => Keyboard.dismiss()}
             />
             <Button
               title="この問題を出題する"

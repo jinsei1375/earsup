@@ -155,7 +155,7 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
                       onChangeText={setAnswer}
                       editable={!showResult}
                       returnKeyType="done"
-                      onSubmitEditing={handleSubmitAnswer}
+                      onSubmitEditing={() => Keyboard.dismiss()}
                     />
 
                     <Button
@@ -184,7 +184,7 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
                   onChangeText={setAnswer}
                   editable={!showResult}
                   returnKeyType="done"
-                  onSubmitEditing={handleSubmitAnswer}
+                  onSubmitEditing={() => Keyboard.dismiss()}
                 />
 
                 <Button

@@ -305,7 +305,7 @@ export default function RoomScreen() {
                   autoCapitalize="characters"
                   maxLength={6}
                   returnKeyType="done"
-                  onSubmitEditing={handleJoinRoom}
+                  onSubmitEditing={() => Keyboard.dismiss()}
                 />
                 <Button
                   title="ルームに参加"

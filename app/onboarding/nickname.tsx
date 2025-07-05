@@ -87,7 +87,7 @@ export default function NicknameScreen() {
               value={nickname}
               onChangeText={setNickname}
               returnKeyType="done"
-              onSubmitEditing={handleSubmit}
+              onSubmitEditing={() => Keyboard.dismiss()}
             />
             {error && <Text className="text-red-500 text-center">{error}</Text>}
             <View className="mt-6">

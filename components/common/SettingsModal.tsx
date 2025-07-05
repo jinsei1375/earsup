@@ -90,7 +90,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   maxLength={20}
                   autoFocus={true}
                   returnKeyType="done"
-                  onSubmitEditing={handleSave}
+                  onSubmitEditing={() => Keyboard.dismiss()}
                 />
                 <Text className="text-sm text-gray-500 mt-2">現在: {currentNickname}</Text>
               </View>
