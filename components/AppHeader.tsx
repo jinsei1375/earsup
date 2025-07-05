@@ -22,14 +22,12 @@ export default function AppHeader({ title, rightComponent, settingsConfig }: App
       <Text className="text-lg font-bold flex-1 text-center">{title}</Text>
 
       <View className="w-[60px] items-end">
-        {rightComponent || (showSettings && onSettingsPress ? (
-          <TouchableOpacity
-            onPress={onSettingsPress}
-            className="p-2"
-          >
-            <Ionicons name="settings-outline" size={24} color="#666" />
-          </TouchableOpacity>
-        ) : null)}
+        {rightComponent ||
+          (showSettings && onSettingsPress ? (
+            <TouchableOpacity onPress={onSettingsPress} className="p-2">
+              <Ionicons name="settings-outline" size={24} color="#666" />
+            </TouchableOpacity>
+          ) : null)}
       </View>
     </View>
   );

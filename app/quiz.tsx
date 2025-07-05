@@ -161,10 +161,10 @@ export default function QuizScreen() {
   const handleExitRoom = async () => {
     try {
       if (!userId) return;
-      
+
       // データベースから参加者を削除し、必要に応じてルームを終了
       await removeParticipant(userId);
-      
+
       // ホーム画面に戻る
       router.replace('/');
     } catch (err: any) {
@@ -186,8 +186,12 @@ export default function QuizScreen() {
     if (!currentQuestion || room?.status === 'ready') {
       return (
         <View className="flex-1">
-          <QuestionCreator onCreateQuestion={handleCreateQuestion} loading={loading} error={error} />
-          
+          <QuestionCreator
+            onCreateQuestion={handleCreateQuestion}
+            loading={loading}
+            error={error}
+          />
+
           <ExitRoomModal
             isVisible={isExitModalVisible}
             onClose={() => setIsExitModalVisible(false)}
@@ -214,7 +218,7 @@ export default function QuizScreen() {
           onRefreshAnswers={() => fetchAnswers(true)}
           onEndQuiz={handleEndQuiz}
         />
-        
+
         <ExitRoomModal
           isVisible={isExitModalVisible}
           onClose={() => setIsExitModalVisible(false)}
@@ -243,7 +247,7 @@ export default function QuizScreen() {
         onSubmitAnswer={handleSubmitAnswer}
         onRefreshState={handleRefreshState}
       />
-      
+
       <ExitRoomModal
         isVisible={isExitModalVisible}
         onClose={() => setIsExitModalVisible(false)}

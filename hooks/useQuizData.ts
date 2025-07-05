@@ -390,7 +390,7 @@ export const useQuizData = (options: UseQuizDataOptions) => {
           // 参加者がいなくなったかチェックしてルーム終了判定
           await SupabaseService.checkAndEndRoomIfEmpty(roomId);
         }
-        
+
         // データを再取得
         await fetchQuizDataRef.current(true);
       } catch (err: any) {

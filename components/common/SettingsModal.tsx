@@ -61,12 +61,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   };
 
   return (
-    <Modal
-      visible={isVisible}
-      transparent={true}
-      animationType="fade"
-      onRequestClose={handleClose}
-    >
+    <Modal visible={isVisible} transparent={true} animationType="fade" onRequestClose={handleClose}>
       <TouchableWithoutFeedback onPress={handleClose}>
         <View className="flex-1 bg-black/50 justify-center items-center p-4">
           <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -96,9 +91,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   onSubmitEditing={handleSave}
                   blurOnSubmit={true}
                 />
-                <Text className="text-sm text-gray-500 mt-2">
-                  現在: {currentNickname}
-                </Text>
+                <Text className="text-sm text-gray-500 mt-2">現在: {currentNickname}</Text>
               </View>
 
               {/* Error Message */}

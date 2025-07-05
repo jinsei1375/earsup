@@ -322,7 +322,7 @@ export class SupabaseService {
 
       // Get current participants (excluding host)
       const participantIds = await this.getRoomParticipants(roomId);
-      const nonHostParticipants = participantIds.filter(id => id !== room.host_user_id);
+      const nonHostParticipants = participantIds.filter((id) => id !== room.host_user_id);
 
       // If no participants left, end the room
       if (nonHostParticipants.length === 0) {

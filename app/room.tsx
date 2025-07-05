@@ -137,7 +137,7 @@ export default function RoomScreen() {
     if (!room || !isHost) return;
 
     // Check if there are any participants (excluding host)
-    const participantCount = participants.filter(p => p.id !== room.host_user_id).length;
+    const participantCount = participants.filter((p) => p.id !== room.host_user_id).length;
     if (participantCount === 0) {
       setLocalError('参加者が1人以上いないとクイズを開始できません。');
       return;
@@ -193,22 +193,22 @@ export default function RoomScreen() {
           <View className="mt-5">
             {/* 参加者数チェックとメッセージ */}
             {(() => {
-              const participantCount = participants.filter(p => p.id !== room?.host_user_id).length;
+              const participantCount = participants.filter(
+                (p) => p.id !== room?.host_user_id
+              ).length;
               const canStartQuiz = participantCount > 0;
-              
+
               return (
                 <>
                   {!canStartQuiz && (
-                    <Text className="text-center text-gray-600 mb-3">
-                      参加者が1人以上必要です
-                    </Text>
+                    <Text className="text-center text-gray-600 mb-3">参加者が1人以上必要です</Text>
                   )}
-                  
+
                   <View className="flex-row">
-                    <Button 
-                      title="クイズを開始" 
-                      onPress={handleStartQuiz} 
-                      disabled={loading || !canStartQuiz} 
+                    <Button
+                      title="クイズを開始"
+                      onPress={handleStartQuiz}
+                      disabled={loading || !canStartQuiz}
                     />
                     <View className="w-4" />
                     <Button

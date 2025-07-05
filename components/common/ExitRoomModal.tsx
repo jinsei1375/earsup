@@ -1,12 +1,6 @@
 // components/common/ExitRoomModal.tsx
 import React from 'react';
-import {
-  View,
-  Text,
-  Modal,
-  TouchableOpacity,
-  TouchableWithoutFeedback,
-} from 'react-native';
+import { View, Text, Modal, TouchableOpacity, TouchableWithoutFeedback } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 interface ExitRoomModalProps {
@@ -23,12 +17,7 @@ export const ExitRoomModal: React.FC<ExitRoomModalProps> = ({
   isHost = false,
 }) => {
   return (
-    <Modal
-      visible={isVisible}
-      transparent={true}
-      animationType="fade"
-      onRequestClose={onClose}
-    >
+    <Modal visible={isVisible} transparent={true} animationType="fade" onRequestClose={onClose}>
       <TouchableWithoutFeedback onPress={onClose}>
         <View className="flex-1 bg-black/50 justify-center items-center p-4">
           <TouchableWithoutFeedback>
