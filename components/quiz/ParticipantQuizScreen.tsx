@@ -63,14 +63,6 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
   const otherHasBuzzed = isFirstComeMode && currentBuzzer && currentBuzzer !== userId;
   const canAnswer = canParticipantAnswer(quizMode, currentBuzzer, userId);
 
-  // Auto-play question for participants
-  useEffect(() => {
-    if (questionText && hasQuestion) {
-      console.log('参加者自動再生を開始します:', questionText);
-      speakText(questionText, { rate: 0.9 });
-    }
-  }, [questionText, hasQuestion]);
-
   const handleSubmitAnswer = async () => {
     if (answer.trim()) {
       await onSubmitAnswer(answer.trim());

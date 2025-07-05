@@ -1,6 +1,6 @@
 // components/quiz/HostQuizScreen.tsx
 import React, { useState } from 'react';
-import { View, Text, Button } from 'react-native';
+import { View, Text, Button, TouchableOpacity } from 'react-native';
 import { AnswersList } from './AnswersList';
 import { BuzzInSection } from './BuzzInSection';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
@@ -36,13 +36,11 @@ export const HostQuizScreen: React.FC<HostQuizScreenProps> = ({
   onRefreshAnswers,
   onEndQuiz,
 }) => {
-  const [playCount, setPlayCount] = useState(0);
+  const [selectedSpeed, setSelectedSpeed] = useState(1.0);
 
   const handlePlayQuestion = () => {
-    if (playCount >= 3 || !questionText) return;
-
-    speakText(questionText, { rate: 1.0 });
-    setPlayCount((c) => c + 1);
+    if (!questionText) return;
+    speakText(questionText, { rate: selectedSpeed });
   };
 
   return (
@@ -57,10 +55,41 @@ export const HostQuizScreen: React.FC<HostQuizScreenProps> = ({
       </View>
 
       <Text className="text-lg my-4 text-center">{questionText}</Text>
+
+      {/* Speed selection */}
+      <Text className="text-sm text-gray-600 mb-2">音声再生速度:</Text>
+      <View className="flex-row flex-wrap justify-center mb-4">
+        {[
+          { speed: 0.5, label: '0.5x' },
+          { speed: 0.75, label: '0.75x' },
+          { speed: 0.9, label: '0.9x' },
+          { speed: 1.0, label: '1.0x' },
+          { speed: 1.25, label: '1.25x' },
+          { speed: 1.5, label: '1.5x' },
+        ].map(({ speed, label }) => (
+          <TouchableOpacity
+            key={speed}
+            onPress={() => setSelectedSpeed(speed)}
+            className={`px-3 py-2 m-1 rounded-lg border ${
+              selectedSpeed === speed ? 'bg-blue-500 border-blue-500' : 'bg-white border-gray-300'
+            }`}
+          >
+            <Text
+              className={`text-center font-bold ${
+                selectedSpeed === speed ? 'text-white' : 'text-gray-700'
+              }`}
+            >
+              {label}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+
+      {/* Play button */}
       <Button
-        title={`音声を再生する (${3 - playCount}回残り)`}
+        title={`音声を再生する (${selectedSpeed}x)`}
         onPress={handlePlayQuestion}
-        disabled={playCount >= 3 || !questionText}
+        disabled={!questionText}
       />
 
       {/* Buzz-in management for first-come mode */}
