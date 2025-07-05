@@ -37,6 +37,7 @@ export const HostQuizScreen: React.FC<HostQuizScreenProps> = ({
   onEndQuiz,
 }) => {
   const [selectedSpeed, setSelectedSpeed] = useState(1.0);
+  const [showSilentModeWarning, setShowSilentModeWarning] = useState(true);
 
   const handlePlayQuestion = () => {
     if (!questionText) return;
@@ -46,6 +47,23 @@ export const HostQuizScreen: React.FC<HostQuizScreenProps> = ({
   return (
     <View className="flex-1 p-6 items-center justify-center">
       <Text className="text-xl font-bold mb-4">出題中</Text>
+
+      {/* Silent mode warning */}
+      {showSilentModeWarning && (
+        <View className="mb-4 p-3 bg-yellow-100 border border-yellow-400 rounded-lg w-full">
+          <View className="flex-row justify-between items-start">
+            <View className="flex-1">
+              <Text className="text-yellow-800 text-sm font-bold mb-1">⚠️ 音声に関する注意</Text>
+              <Text className="text-yellow-700 text-xs">
+                音声が聞こえない場合は、デバイスのマナーモード（消音モード）を解除してください。
+              </Text>
+            </View>
+            <TouchableOpacity onPress={() => setShowSilentModeWarning(false)} className="ml-2">
+              <Text className="text-yellow-600 text-lg">×</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
 
       {/* Quiz mode display */}
       <View className="flex-row items-center mb-4">
