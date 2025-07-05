@@ -136,6 +136,13 @@ export default function RoomScreen() {
   const handleStartQuiz = async () => {
     if (!room || !isHost) return;
 
+    // Check if there are any participants (excluding host)
+    const participantCount = participants.filter(p => p.id !== room.host_user_id).length;
+    if (participantCount === 0) {
+      setLocalError('参加者が1人以上いないとクイズを開始できません。');
+      return;
+    }
+
     try {
       setLocalLoading(true);
       await updateRoomStatus('ready');
@@ -183,15 +190,37 @@ export default function RoomScreen() {
         />
 
         {isHost ? (
-          <View className="flex-row mt-5">
-            <Button title="クイズを開始" onPress={handleStartQuiz} disabled={loading} />
-            <View className="w-4" />
-            <Button
-              title="ルームを中止"
-              onPress={handleCancelRoom}
-              disabled={loading}
-              color="red"
-            />
+          <View className="mt-5">
+            {/* 参加者数チェックとメッセージ */}
+            {(() => {
+              const participantCount = participants.filter(p => p.id !== room?.host_user_id).length;
+              const canStartQuiz = participantCount > 0;
+              
+              return (
+                <>
+                  {!canStartQuiz && (
+                    <Text className="text-center text-gray-600 mb-3">
+                      参加者が1人以上必要です
+                    </Text>
+                  )}
+                  
+                  <View className="flex-row">
+                    <Button 
+                      title="クイズを開始" 
+                      onPress={handleStartQuiz} 
+                      disabled={loading || !canStartQuiz} 
+                    />
+                    <View className="w-4" />
+                    <Button
+                      title="ルームを中止"
+                      onPress={handleCancelRoom}
+                      disabled={loading}
+                      color="red"
+                    />
+                  </View>
+                </>
+              );
+            })()}
           </View>
         ) : (
           <Text className="mt-5 italic">ホストがクイズを開始するのを待っています...</Text>
