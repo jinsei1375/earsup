@@ -4,7 +4,6 @@ import {
   View,
   Text,
   TextInput,
-  Button,
   TouchableOpacity,
   Alert,
   Platform,
@@ -24,6 +23,7 @@ import { RealtimeStatus } from '@/components/common/RealtimeStatus';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { ErrorMessage } from '@/components/common/ErrorMessage';
 import { generateRoomCode } from '@/utils/quizUtils';
+import { Button } from '@/components/common/Button';
 import type { RoomScreenParams } from '@/types';
 
 export default function RoomScreen() {
@@ -204,18 +204,20 @@ export default function RoomScreen() {
                     <Text className="text-center text-gray-600 mb-3">参加者が1人以上必要です</Text>
                   )}
 
-                  <View className="flex-row">
+                  <View className="flex-row gap-4">
                     <Button
                       title="クイズを開始"
                       onPress={handleStartQuiz}
                       disabled={loading || !canStartQuiz}
+                      variant="primary"
+                      size="medium"
                     />
-                    <View className="w-4" />
                     <Button
                       title="ルームを中止"
                       onPress={handleCancelRoom}
                       disabled={loading}
-                      color="red"
+                      variant="danger"
+                      size="medium"
                     />
                   </View>
                 </>
@@ -250,7 +252,7 @@ export default function RoomScreen() {
 
             {isCreateMode ? (
               <>
-                <Text>合言葉をタップしてコピー</Text>
+                <Text className="mb-2">合言葉をタップしてコピー</Text>
                 <TouchableOpacity
                   onPress={async () => {
                     try {
@@ -261,7 +263,8 @@ export default function RoomScreen() {
                       showNotification('エラー', 'コピーに失敗しました');
                     }
                   }}
-                  className="p-4 rounded-lg border-2 border-dashed border-blue-300 bg-blue-50 my-5"
+                  className="p-6 rounded-xl border-2 border-dashed border-blue-400 bg-blue-50 my-5 active:bg-blue-100"
+                  activeOpacity={0.8}
                 >
                   <Text className="text-[32px] font-bold tracking-[4px] text-blue-700 text-center">
                     {code}
@@ -282,7 +285,14 @@ export default function RoomScreen() {
                   disabled={loading}
                 />
 
-                <Button title="ルームを作成" onPress={handleCreateRoom} disabled={loading} />
+                <Button
+                  title="ルームを作成"
+                  onPress={handleCreateRoom}
+                  disabled={loading}
+                  variant="primary"
+                  size="large"
+                  fullWidth
+                />
               </>
             ) : (
               <>
@@ -296,12 +306,14 @@ export default function RoomScreen() {
                   maxLength={6}
                   returnKeyType="done"
                   onSubmitEditing={handleJoinRoom}
-                  blurOnSubmit={true}
                 />
                 <Button
                   title="ルームに参加"
                   onPress={handleJoinRoom}
                   disabled={!code.trim() || loading}
+                  variant="primary"
+                  size="large"
+                  fullWidth
                 />
               </>
             )}

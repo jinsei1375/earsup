@@ -5,7 +5,6 @@ import { useState } from 'react';
 import {
   View,
   TextInput,
-  Button,
   Text,
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
@@ -16,6 +15,7 @@ import {
 import { router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Crypto from 'expo-crypto';
+import { Button } from '@/components/common/Button';
 
 export default function NicknameScreen() {
   const [nickname, setNickname] = useState('');
@@ -88,7 +88,6 @@ export default function NicknameScreen() {
               onChangeText={setNickname}
               returnKeyType="done"
               onSubmitEditing={handleSubmit}
-              blurOnSubmit={true}
             />
             {error && <Text className="text-red-500 text-center">{error}</Text>}
             <View className="mt-6">
@@ -96,6 +95,9 @@ export default function NicknameScreen() {
                 title={loading ? '登録中...' : '登録して始める'}
                 onPress={handleSubmit}
                 disabled={!nickname.trim() || loading}
+                variant="primary"
+                size="large"
+                fullWidth
               />
             </View>
           </View>

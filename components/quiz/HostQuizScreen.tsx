@@ -1,10 +1,11 @@
 // components/quiz/HostQuizScreen.tsx
 import React, { useState } from 'react';
-import { View, Text, Button, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { AnswersList } from './AnswersList';
 import { BuzzInSection } from './BuzzInSection';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { ErrorMessage } from '@/components/common/ErrorMessage';
+import { Button } from '@/components/common/Button';
 import { getQuizModeDisplayName } from '@/utils/quizUtils';
 import { speakText } from '@/utils/quizUtils';
 import type { Answer, ParticipantWithNickname } from '@/types';
@@ -58,8 +59,11 @@ export const HostQuizScreen: React.FC<HostQuizScreenProps> = ({
                 音声が聞こえない場合は、デバイスのマナーモード（消音モード）を解除してください。
               </Text>
             </View>
-            <TouchableOpacity onPress={() => setShowSilentModeWarning(false)} className="ml-2">
-              <Text className="text-yellow-600 text-lg">×</Text>
+            <TouchableOpacity
+              onPress={() => setShowSilentModeWarning(false)}
+              className="ml-2 p-2 rounded-lg border-2 border-transparent active:bg-yellow-200 items-center justify-center"
+            >
+              <Text className="text-yellow-600 text-lg font-bold">×</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -87,8 +91,10 @@ export const HostQuizScreen: React.FC<HostQuizScreenProps> = ({
           <TouchableOpacity
             key={speed}
             onPress={() => setSelectedSpeed(speed)}
-            className={`px-3 py-2 m-1 rounded-lg border ${
-              selectedSpeed === speed ? 'bg-blue-500 border-blue-500' : 'bg-white border-gray-300'
+            className={`px-4 py-3 m-1 rounded-lg border-2 items-center justify-center min-w-[60px] ${
+              selectedSpeed === speed
+                ? 'bg-blue-500 border-blue-500 active:bg-blue-600'
+                : 'bg-transparent border-gray-300 active:bg-gray-50'
             }`}
           >
             <Text
@@ -107,6 +113,9 @@ export const HostQuizScreen: React.FC<HostQuizScreenProps> = ({
         title={`音声を再生する (${selectedSpeed}x)`}
         onPress={handlePlayQuestion}
         disabled={!questionText}
+        variant="primary"
+        size="large"
+        fullWidth
       />
 
       {/* Buzz-in management for first-come mode */}
@@ -131,7 +140,7 @@ export const HostQuizScreen: React.FC<HostQuizScreenProps> = ({
       />
 
       <View className="h-[30px]" />
-      <Button title="クイズを終了する" onPress={onEndQuiz} color="red" />
+      <Button title="クイズを終了する" onPress={onEndQuiz} variant="danger" fullWidth />
       {loading && <LoadingSpinner />}
       <ErrorMessage message={error} />
     </View>

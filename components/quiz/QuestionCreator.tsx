@@ -4,7 +4,6 @@ import {
   View,
   Text,
   TextInput,
-  Button,
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
   Keyboard,
@@ -13,6 +12,7 @@ import {
 } from 'react-native';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { ErrorMessage } from '@/components/common/ErrorMessage';
+import { Button } from '@/components/common/Button';
 
 interface QuestionCreatorProps {
   onCreateQuestion: (text: string) => Promise<void>;
@@ -55,12 +55,14 @@ export const QuestionCreator: React.FC<QuestionCreatorProps> = ({
               multiline
               numberOfLines={4}
               returnKeyType="done"
-              blurOnSubmit={true}
+              onSubmitEditing={handleSubmit}
             />
             <Button
               title="この問題を出題する"
               onPress={handleSubmit}
-              disabled={!questionText.trim() || loading}
+              variant="primary"
+              size="large"
+              fullWidth
             />
             {loading && <LoadingSpinner />}
             <ErrorMessage message={error} />

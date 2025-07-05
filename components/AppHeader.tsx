@@ -1,5 +1,6 @@
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { Button } from './common/Button';
 
 export interface SettingsConfig {
   showSettings?: boolean;
@@ -24,9 +25,12 @@ export default function AppHeader({ title, rightComponent, settingsConfig }: App
       <View className="w-[60px] items-end">
         {rightComponent ||
           (showSettings && onSettingsPress ? (
-            <TouchableOpacity onPress={onSettingsPress} className="p-2">
-              <Ionicons name="settings-outline" size={24} color="#666" />
-            </TouchableOpacity>
+            <Button
+              variant="ghost"
+              size="small"
+              onPress={onSettingsPress}
+              icon={<Ionicons name="settings-outline" size={24} color="#666" />}
+            />
           ) : null)}
       </View>
     </View>

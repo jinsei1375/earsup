@@ -1,8 +1,9 @@
 // components/quiz/AnswersList.tsx
 import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView } from 'react-native';
 import type { Answer } from '@/types';
 import { truncateId } from '@/utils/quizUtils';
+import { Button } from '@/components/common/Button';
 
 interface AnswersListProps {
   answers: Answer[];
@@ -25,12 +26,7 @@ export const AnswersList: React.FC<AnswersListProps> = ({
     <View className="w-full my-4 max-h-[250px]">
       <View className="flex-row justify-between items-center mb-2">
         <Text className="text-base font-bold">回答一覧 ({answers.length}件)</Text>
-        <TouchableOpacity
-          onPress={onRefresh}
-          className="bg-gray-200 px-3 py-1 rounded-lg"
-        >
-          <Text className="text-sm">更新</Text>
-        </TouchableOpacity>
+        <Button title="更新" onPress={onRefresh} variant="ghost" size="small" />
       </View>
 
       {answers.length === 0 ? (
@@ -55,30 +51,28 @@ export const AnswersList: React.FC<AnswersListProps> = ({
             >
               <View className="flex-row justify-between">
                 <Text className="font-bold">{answer.nickname || '不明なユーザー'}</Text>
-                <Text className="text-xs text-gray-500">
-                  ID: {truncateId(answer.id, 6)}
-                </Text>
+                <Text className="text-xs text-gray-500">ID: {truncateId(answer.id, 6)}</Text>
               </View>
 
               <Text className="my-1">「{answer.answer_text}」</Text>
 
               {isHost && isAllAtOnceMode && !answer.judged ? (
                 // Host can judge answers in all-at-once mode
-                <View className="flex-row justify-end mt-2">
-                  <TouchableOpacity
+                <View className="flex-row justify-end mt-2 gap-2">
+                  <Button
+                    title="正解"
                     onPress={() => onJudgeAnswer(answer.id, true)}
                     disabled={loading}
-                    className="bg-green-500 px-4 py-1 rounded mr-2"
-                  >
-                    <Text className="text-white font-bold">正解</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
+                    variant="primary"
+                    size="small"
+                  />
+                  <Button
+                    title="不正解"
                     onPress={() => onJudgeAnswer(answer.id, false)}
                     disabled={loading}
-                    className="bg-red-500 px-4 py-1 rounded"
-                  >
-                    <Text className="text-white font-bold">不正解</Text>
-                  </TouchableOpacity>
+                    variant="danger"
+                    size="small"
+                  />
                 </View>
               ) : (
                 // Show judgment result

@@ -1,11 +1,9 @@
 // components/quiz/ParticipantQuizScreen.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
   TextInput,
-  Button,
-  TouchableOpacity,
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
   Keyboard,
@@ -15,12 +13,12 @@ import {
 import { RealtimeStatus } from '@/components/common/RealtimeStatus';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { ErrorMessage } from '@/components/common/ErrorMessage';
+import { Button } from '@/components/common/Button';
 import {
   canParticipantAnswer,
   canParticipantBuzzIn,
   isQuizActive,
   isQuizEnded,
-  speakText,
 } from '@/utils/quizUtils';
 import { ParticipantsList } from '@/components/room/ParticipantsList';
 import type { Room, RealtimeConnectionState, ParticipantWithNickname } from '@/types';
@@ -91,7 +89,13 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
         <Text className="text-xl font-bold mb-4">リスニングクイズ</Text>
         <RealtimeStatus connectionState={connectionState} showLastUpdate={false} />
         <Text>ホストが問題を作成中です...</Text>
-        <Button title="状態を更新" onPress={onRefreshState} />
+        <Button
+          title="状態を更新"
+          onPress={onRefreshState}
+          variant="primary"
+          size="small"
+          className="mt-4"
+        />
       </View>
     );
   }
@@ -126,13 +130,15 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
               <>
                 {canBuzzIn ? (
                   // Can buzz in
-                  <TouchableOpacity
+                  <Button
+                    title="押す!"
                     onPress={onBuzzIn}
                     disabled={loading}
-                    className="bg-blue-500 p-6 rounded-full my-4"
-                  >
-                    <Text className="text-white text-center text-xl font-bold">押す!</Text>
-                  </TouchableOpacity>
+                    variant="primary"
+                    size="large"
+                    fullWidth
+                    className="my-4"
+                  />
                 ) : hasBuzzedIn ? (
                   // User has buzzed in
                   <>
@@ -150,13 +156,15 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
                       editable={!showResult}
                       returnKeyType="done"
                       onSubmitEditing={handleSubmitAnswer}
-                      blurOnSubmit={true}
                     />
 
                     <Button
                       title="解答する"
                       onPress={handleSubmitAnswer}
                       disabled={!answer.trim() || showResult || loading}
+                      variant="primary"
+                      size="large"
+                      fullWidth
                     />
                   </>
                 ) : (
@@ -177,13 +185,15 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
                   editable={!showResult}
                   returnKeyType="done"
                   onSubmitEditing={handleSubmitAnswer}
-                  blurOnSubmit={true}
                 />
 
                 <Button
                   title="解答する"
                   onPress={handleSubmitAnswer}
                   disabled={!answer.trim() || showResult || loading}
+                  variant="primary"
+                  size="large"
+                  fullWidth
                 />
               </>
             ) : (

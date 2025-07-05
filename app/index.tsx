@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
-import { View, Text, Button } from 'react-native';
+import { View, Text } from 'react-native';
 import { useUserStore } from '@/stores/userStore';
 import { supabase } from '@/lib/supabase';
 import { router } from 'expo-router';
 import { SettingsModal } from '@/components/common/SettingsModal';
 import { useHeaderSettings } from '@/contexts/HeaderSettingsContext';
+import { Button } from '@/components/common/Button';
 
 export default function HomeScreen() {
   const userId = useUserStore((s) => s.userId);
@@ -82,15 +83,30 @@ export default function HomeScreen() {
   };
 
   return (
-    <View className="flex-1 items-center justify-center gap-4 px-4">
+    <View className="flex-1 items-center justify-center gap-6 px-4">
       {nickname ? (
         <Text className="text-xl font-bold text-blue-500">こんにちは、{nickname} さん！</Text>
       ) : (
         <Text>ニックネームを取得中...</Text>
       )}
-      <Button title="ルーム作成" onPress={handleCreateRoom} />
-      <Button title="ルーム参加" onPress={handleJoinRoom} />
-      
+
+      <View className="gap-4 w-full max-w-sm">
+        <Button
+          title="ルーム作成"
+          onPress={handleCreateRoom}
+          variant="primary"
+          size="large"
+          fullWidth
+        />
+        <Button
+          title="ルーム参加"
+          onPress={handleJoinRoom}
+          variant="outline"
+          size="large"
+          fullWidth
+        />
+      </View>
+
       <SettingsModal
         isVisible={isSettingsModalVisible}
         onClose={() => setIsSettingsModalVisible(false)}

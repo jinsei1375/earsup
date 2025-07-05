@@ -4,15 +4,14 @@ import {
   View,
   Text,
   TextInput,
-  Button,
   Modal,
-  TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
   TouchableWithoutFeedback,
   Keyboard,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { Button } from '@/components/common/Button';
 
 interface SettingsModalProps {
   isVisible: boolean;
@@ -72,9 +71,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               {/* Header */}
               <View className="flex-row items-center justify-between mb-4">
                 <Text className="text-xl font-bold">設定</Text>
-                <TouchableOpacity onPress={handleClose}>
-                  <Ionicons name="close" size={24} color="#666" />
-                </TouchableOpacity>
+                <Button
+                  onPress={handleClose}
+                  variant="ghost"
+                  size="small"
+                  icon={<Ionicons name="close" size={24} color="#666" />}
+                />
               </View>
 
               {/* Nickname Section */}
@@ -89,7 +91,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   autoFocus={true}
                   returnKeyType="done"
                   onSubmitEditing={handleSave}
-                  blurOnSubmit={true}
                 />
                 <Text className="text-sm text-gray-500 mt-2">現在: {currentNickname}</Text>
               </View>
@@ -103,24 +104,20 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
               {/* Action Buttons */}
               <View className="flex-row justify-center gap-4 mb-4">
-                <TouchableOpacity
+                <Button
+                  title="キャンセル"
                   onPress={handleClose}
-                  className="px-6 py-3 rounded-lg bg-gray-200 min-w-[100px]"
+                  variant="secondary"
                   disabled={loading}
-                >
-                  <Text className="text-gray-700 font-semibold text-center">キャンセル</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
+                  className="flex-1"
+                />
+                <Button
+                  title={loading ? '保存中...' : '保存'}
                   onPress={handleSave}
-                  className={`px-6 py-3 rounded-lg min-w-[100px] ${
-                    loading ? 'bg-gray-400' : 'bg-blue-500'
-                  }`}
+                  variant="primary"
                   disabled={loading}
-                >
-                  <Text className="text-white font-semibold text-center">
-                    {loading ? '保存中...' : '保存'}
-                  </Text>
-                </TouchableOpacity>
+                  className="flex-1"
+                />
               </View>
             </KeyboardAvoidingView>
           </TouchableWithoutFeedback>
