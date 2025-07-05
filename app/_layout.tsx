@@ -2,7 +2,7 @@ import { useUserStore } from '@/stores/userStore';
 import { useEffect, useState } from 'react';
 import { Slot, useRouter, useRootNavigationState, usePathname } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { SafeAreaView, View } from 'react-native';
+import { SafeAreaView, View, StatusBar } from 'react-native';
 import AppHeader from '@/components/AppHeader';
 import { HeaderSettingsProvider, useHeaderSettings } from '@/contexts/HeaderSettingsContext';
 // グローバルCSSのインポート
@@ -73,6 +73,7 @@ function RootLayoutContent() {
 
   return (
     <SafeAreaView className="flex-1 bg-white">
+      <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
       <AppHeader title={title} settingsConfig={settingsConfig} />
       <View className="flex-1">
         <Slot />
