@@ -4,16 +4,26 @@ import { Slot, useRouter, useRootNavigationState, usePathname } from 'expo-route
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaView, View } from 'react-native';
 import AppHeader from '@/components/AppHeader';
+import { HeaderSettingsProvider, useHeaderSettings } from '@/contexts/HeaderSettingsContext';
 // グローバルCSSのインポート
 import '@/assets/css/global.css';
 
 export default function RootLayout() {
+  return (
+    <HeaderSettingsProvider>
+      <RootLayoutContent />
+    </HeaderSettingsProvider>
+  );
+}
+
+function RootLayoutContent() {
   const userId = useUserStore((s) => s.userId);
   const setUserId = useUserStore((s) => s.setUserId);
   const router = useRouter();
   const rootNavigationState = useRootNavigationState();
   const pathname = usePathname();
   const [isReady, setIsReady] = useState(false);
+  const { settingsConfig } = useHeaderSettings();
 
   useEffect(() => {
     // 初回のみAsyncStorageからuserIdを復元
@@ -63,7 +73,7 @@ export default function RootLayout() {
 
   return (
     <SafeAreaView className="flex-1 bg-white">
-      <AppHeader title={title} />
+      <AppHeader title={title} settingsConfig={settingsConfig} />
       <View className="flex-1">
         <Slot />
       </View>

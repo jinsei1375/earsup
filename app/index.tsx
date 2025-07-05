@@ -3,12 +3,16 @@ import { View, Text, Button } from 'react-native';
 import { useUserStore } from '@/stores/userStore';
 import { supabase } from '@/lib/supabase';
 import { router } from 'expo-router';
+import { SettingsModal } from '@/components/common/SettingsModal';
+import { useHeaderSettings } from '@/contexts/HeaderSettingsContext';
 
 export default function HomeScreen() {
   const userId = useUserStore((s) => s.userId);
   const storeNickname = useUserStore((s) => s.nickname);
   const setUserInfo = useUserStore((s) => s.setUserInfo);
   const [nickname, setNickname] = useState<string | null>(storeNickname);
+  const [isSettingsModalVisible, setIsSettingsModalVisible] = useState(false);
+  const { setSettingsConfig } = useHeaderSettings();
 
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -40,11 +44,41 @@ export default function HomeScreen() {
     fetchUserInfo();
   }, [userId, storeNickname]);
 
+  // ヘッダーの設定ボタンを制御
+  useEffect(() => {
+    setSettingsConfig({
+      showSettings: true,
+      onSettingsPress: () => setIsSettingsModalVisible(true),
+    });
+
+    // クリーンアップ時に設定をリセット
+    return () => {
+      setSettingsConfig({});
+    };
+  }, [setSettingsConfig]);
+
   const handleCreateRoom = () => {
     router.push({ pathname: '/room', params: { mode: 'create' } });
   };
   const handleJoinRoom = () => {
     router.push({ pathname: '/room', params: { mode: 'join' } });
+  };
+
+  const handleNicknameChange = async (newNickname: string) => {
+    if (!userId) throw new Error('ユーザーIDが見つかりません');
+
+    const { error } = await supabase
+      .from('users')
+      .update({ nickname: newNickname })
+      .eq('id', userId);
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    // ストアと状態を更新
+    setUserInfo(userId, newNickname);
+    setNickname(newNickname);
   };
 
   return (
@@ -56,6 +90,13 @@ export default function HomeScreen() {
       )}
       <Button title="ルーム作成" onPress={handleCreateRoom} />
       <Button title="ルーム参加" onPress={handleJoinRoom} />
+      
+      <SettingsModal
+        isVisible={isSettingsModalVisible}
+        onClose={() => setIsSettingsModalVisible(false)}
+        currentNickname={nickname || ''}
+        onNicknameChange={handleNicknameChange}
+      />
     </View>
   );
 }
