@@ -38,37 +38,43 @@ export const QuestionCreator: React.FC<QuestionCreatorProps> = ({
     <KeyboardAvoidingView
       className="flex-1"
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 140 : 20}
     >
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <ScrollView
-          contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', padding: 24 }}
-          keyboardShouldPersistTaps="handled"
-        >
+      <ScrollView
+        contentContainerStyle={{ flexGrow: 1, padding: 24, paddingTop: 60, paddingBottom: 40 }}
+        keyboardShouldPersistTaps="handled"
+        automaticallyAdjustKeyboardInsets={true}
+        showsVerticalScrollIndicator={false}
+      >
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <View className="items-center">
             <Text className="text-xl font-bold mb-4">問題を作成</Text>
-            <TextInput
-              className="border border-gray-300 p-4 rounded-lg my-4 w-full h-[120px] text-lg"
-              style={{ textAlignVertical: 'top' }}
-              placeholder="英語フレーズを入力してください"
-              value={questionText}
-              onChangeText={setQuestionText}
-              multiline
-              numberOfLines={4}
-              returnKeyType="done"
-              onSubmitEditing={() => Keyboard.dismiss()}
-            />
-            <Button
-              title="この問題を出題する"
-              onPress={handleSubmit}
-              variant="primary"
-              size="large"
-              fullWidth
-            />
+            <View className="w-full">
+              <TextInput
+                className="border border-gray-300 p-4 rounded-lg my-4 w-full h-[120px] text-lg"
+                style={{ textAlignVertical: 'top' }}
+                placeholder="英語フレーズを入力してください"
+                value={questionText}
+                onChangeText={setQuestionText}
+                multiline
+                numberOfLines={4}
+                returnKeyType="done"
+                onSubmitEditing={() => Keyboard.dismiss()}
+              />
+              <Button
+                title="この問題を出題する"
+                onPress={handleSubmit}
+                variant="primary"
+                size="large"
+                fullWidth
+                disabled={!questionText.trim() || loading}
+              />
+            </View>
             {loading && <LoadingSpinner />}
             <ErrorMessage message={error} />
           </View>
-        </ScrollView>
-      </TouchableWithoutFeedback>
+        </TouchableWithoutFeedback>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 };

@@ -106,12 +106,14 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
       className="flex-1"
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <ScrollView
-          contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', padding: 24 }}
-          keyboardShouldPersistTaps="handled"
-        >
-          <View className="items-center">
+      <ScrollView
+        contentContainerStyle={{ flexGrow: 1, padding: 24, paddingBottom: 20 }}
+        keyboardShouldPersistTaps="handled"
+        automaticallyAdjustKeyboardInsets={true}
+        showsVerticalScrollIndicator={false}
+      >
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <View className="items-center pt-8">
             <Text className="text-xl font-bold mb-4">リスニングクイズ</Text>
             <RealtimeStatus connectionState={connectionState} showLastUpdate={false} />
 
@@ -148,24 +150,26 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
                       </Text>
                     </View>
 
-                    <TextInput
-                      className="border border-gray-300 p-4 rounded-lg my-4 w-full text-lg"
-                      placeholder="聞こえたフレーズを入力"
-                      value={answer}
-                      onChangeText={setAnswer}
-                      editable={!showResult}
-                      returnKeyType="done"
-                      onSubmitEditing={() => Keyboard.dismiss()}
-                    />
+                    <View className="w-full mt-4 mb-6">
+                      <TextInput
+                        className="border border-gray-300 p-4 rounded-lg my-3 w-full text-lg"
+                        placeholder="聞こえたフレーズを入力"
+                        value={answer}
+                        onChangeText={setAnswer}
+                        editable={!showResult}
+                        returnKeyType="done"
+                        onSubmitEditing={() => Keyboard.dismiss()}
+                      />
 
-                    <Button
-                      title="解答する"
-                      onPress={handleSubmitAnswer}
-                      disabled={!answer.trim() || showResult || loading}
-                      variant="primary"
-                      size="large"
-                      fullWidth
-                    />
+                      <Button
+                        title="解答する"
+                        onPress={handleSubmitAnswer}
+                        disabled={!answer.trim() || showResult || loading}
+                        variant="primary"
+                        size="large"
+                        fullWidth
+                      />
+                    </View>
                   </>
                 ) : (
                   // Someone else has buzzed in
@@ -176,9 +180,9 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
               </>
             ) : !showResult ? (
               // All-at-once mode - hasn't answered yet
-              <>
+              <View className="w-full mt-4 mb-6">
                 <TextInput
-                  className="border border-gray-300 p-4 rounded-lg my-4 w-full text-lg"
+                  className="border border-gray-300 p-4 rounded-lg my-3 w-full text-lg"
                   placeholder="聞こえたフレーズを入力"
                   value={answer}
                   onChangeText={setAnswer}
@@ -195,7 +199,7 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
                   size="large"
                   fullWidth
                 />
-              </>
+              </View>
             ) : (
               // All-at-once mode - has answered
               <View className="bg-blue-100 p-4 rounded-lg my-4 w-full">
@@ -247,8 +251,8 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
             {loading && <LoadingSpinner />}
             <ErrorMessage message={error} />
           </View>
-        </ScrollView>
-      </TouchableWithoutFeedback>
+        </TouchableWithoutFeedback>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 };
