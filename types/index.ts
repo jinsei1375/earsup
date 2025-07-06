@@ -51,6 +51,20 @@ export interface RoomParticipant {
   joined_at: string;
 }
 
+export interface SampleSentence {
+  id: string;
+  category_id: string;
+  text: string;
+  translation: string;
+  created_at: string;
+}
+
+export interface SampleCategory {
+  id: string;
+  name: string;
+  created_at: string;
+}
+
 export interface ParticipantWithNickname extends User {
   id: string;
   nickname: string;

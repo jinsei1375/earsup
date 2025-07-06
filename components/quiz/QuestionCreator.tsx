@@ -13,6 +13,7 @@ import {
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { ErrorMessage } from '@/components/common/ErrorMessage';
 import { Button } from '@/components/common/Button';
+import { SampleSentenceModal } from './SampleSentenceModal';
 
 interface QuestionCreatorProps {
   onCreateQuestion: (text: string) => Promise<void>;
@@ -26,12 +27,17 @@ export const QuestionCreator: React.FC<QuestionCreatorProps> = ({
   error,
 }) => {
   const [questionText, setQuestionText] = useState('');
+  const [isSampleModalVisible, setIsSampleModalVisible] = useState(false);
 
   const handleSubmit = async () => {
     if (questionText.trim()) {
       await onCreateQuestion(questionText.trim());
       setQuestionText(''); // Clear after successful creation
     }
+  };
+
+  const handleSampleSentenceSelect = (sentence: string) => {
+    setQuestionText(sentence);
   };
 
   return (
@@ -50,8 +56,17 @@ export const QuestionCreator: React.FC<QuestionCreatorProps> = ({
           <View className="items-center">
             <Text className="text-xl font-bold mb-4">問題を作成</Text>
             <View className="w-full">
+              <View className="flex-row justify-between items-center mb-2">
+                <Text className="text-base font-medium">英語フレーズ</Text>
+                <Button
+                  title="サンプル文"
+                  onPress={() => setIsSampleModalVisible(true)}
+                  variant="outline"
+                  size="small"
+                />
+              </View>
               <TextInput
-                className="border border-gray-300 p-4 rounded-lg my-4 w-full h-[120px] text-lg"
+                className="border border-gray-300 p-4 rounded-lg my-2 w-full h-[120px] text-lg"
                 style={{ textAlignVertical: 'top' }}
                 placeholder="英語フレーズを入力してください"
                 value={questionText}
@@ -75,6 +90,13 @@ export const QuestionCreator: React.FC<QuestionCreatorProps> = ({
           </View>
         </TouchableWithoutFeedback>
       </ScrollView>
+
+      <SampleSentenceModal
+        isVisible={isSampleModalVisible}
+        onClose={() => setIsSampleModalVisible(false)}
+        onSelectSentence={handleSampleSentenceSelect}
+        hasCurrentText={!!questionText.trim()}
+      />
     </KeyboardAvoidingView>
   );
 };
