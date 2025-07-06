@@ -64,16 +64,23 @@ export const useQuizData = (options: UseQuizDataOptions) => {
           setParticipants(participantsData);
         }
 
-        // Fetch latest question
-        const questionData = await SupabaseService.getLatestQuestion(roomId);
-        setCurrentQuestion(questionData);
+        // Fetch latest question (only if room is active)
+        if (roomData?.status === 'active') {
+          const questionData = await SupabaseService.getLatestQuestion(roomId);
+          setCurrentQuestion(questionData);
 
-        if (questionData) {
-          // Use fetchAnswersRef to avoid circular dependency
-          const fetchAnswersFunc = fetchAnswersRef.current;
-          if (fetchAnswersFunc) {
-            await fetchAnswersFunc(true, questionData.id);
+          if (questionData) {
+            // Use fetchAnswersRef to avoid circular dependency
+            const fetchAnswersFunc = fetchAnswersRef.current;
+            if (fetchAnswersFunc) {
+              await fetchAnswersFunc(true, questionData.id);
+            }
           }
+        } else if (roomData?.status === 'waiting' || roomData?.status === 'ready') {
+          // Clear question state when room is waiting for new question
+          setCurrentQuestion(null);
+          setAnswers([]);
+          setCurrentBuzzer(null);
         }
       } catch (err: any) {
         setError(err.message || 'クイズ情報の取得中にエラーが発生しました。');
@@ -297,6 +304,29 @@ export const useQuizData = (options: UseQuizDataOptions) => {
     }
   }, [roomId, isHost, currentQuestion?.id]);
 
+  const nextQuestion = useCallback(async () => {
+    if (!roomId || !isHost) throw new Error('Invalid operation');
+
+    setLoading(true);
+    try {
+      // 問題作成画面に戻るためにルームステータスを待機状態に戻す
+      await SupabaseService.updateRoomStatus(roomId, 'waiting');
+      
+      // ローカル状態をクリア（新しい問題の準備）
+      setCurrentQuestion(null);
+      setAnswers([]);
+      setCurrentBuzzer(null);
+      setRoom((prev) => (prev ? { ...prev, status: 'waiting' } : null));
+
+      // データ再取得は必要なし（問題作成画面に戻るため）
+    } catch (err: any) {
+      setError(err.message || '次の問題への移行中にエラーが発生しました。');
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, [roomId, isHost]);
+
   // Setup realtime subscriptions
   useEffect(() => {
     if (!roomId || !enableRealtime) return;
@@ -435,6 +465,7 @@ export const useQuizData = (options: UseQuizDataOptions) => {
     buzzIn,
     resetBuzz,
     endQuiz,
+    nextQuestion,
     removeParticipant,
     setError,
   };

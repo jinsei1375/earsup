@@ -22,6 +22,7 @@ interface HostQuizScreenProps {
   onResetBuzz: () => Promise<void>;
   onRefreshAnswers: () => void;
   onEndQuiz: () => Promise<void>;
+  onNextQuestion: () => Promise<void>;
 }
 
 export const HostQuizScreen: React.FC<HostQuizScreenProps> = ({
@@ -36,6 +37,7 @@ export const HostQuizScreen: React.FC<HostQuizScreenProps> = ({
   onResetBuzz,
   onRefreshAnswers,
   onEndQuiz,
+  onNextQuestion,
 }) => {
   const [selectedSpeed, setSelectedSpeed] = useState(1.0);
   const [showSilentModeWarning, setShowSilentModeWarning] = useState(true);
@@ -44,6 +46,9 @@ export const HostQuizScreen: React.FC<HostQuizScreenProps> = ({
     if (!questionText) return;
     speakText(questionText, { rate: selectedSpeed });
   };
+
+  // 全ての回答が判定されているかチェック
+  const allAnswersJudged = answers.length > 0 && answers.every((answer) => answer.judged);
 
   return (
     <View className="flex-1 p-6 items-center justify-center">
@@ -140,7 +145,26 @@ export const HostQuizScreen: React.FC<HostQuizScreenProps> = ({
       />
 
       <View className="h-[30px]" />
-      <Button title="クイズを終了する" onPress={onEndQuiz} variant="danger" fullWidth />
+
+      {/* 次の問題へボタン（全ての回答が判定されている場合のみ表示） */}
+      {allAnswersJudged && (
+        <Button
+          title="次の問題へ"
+          onPress={onNextQuestion}
+          variant="primary"
+          fullWidth
+          disabled={loading}
+          className="mb-4"
+        />
+      )}
+
+      <Button
+        title="クイズを終了する"
+        onPress={onEndQuiz}
+        variant="danger"
+        fullWidth
+        disabled={loading}
+      />
       {loading && <LoadingSpinner />}
       <ErrorMessage message={error} />
     </View>

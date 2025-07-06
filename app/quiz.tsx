@@ -1,6 +1,6 @@
 // app/quiz.tsx
 import React, { useState, useEffect } from 'react';
-import { View } from 'react-native';
+import { View, Text } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useUserStore } from '@/stores/userStore';
 import { useQuizData } from '@/hooks/useQuizData';
@@ -8,6 +8,8 @@ import { QuestionCreator } from '@/components/quiz/QuestionCreator';
 import { HostQuizScreen } from '@/components/quiz/HostQuizScreen';
 import { ParticipantQuizScreen } from '@/components/quiz/ParticipantQuizScreen';
 import { ExitRoomModal } from '@/components/common/ExitRoomModal';
+import { LoadingSpinner } from '@/components/common/LoadingSpinner';
+import { ErrorMessage } from '@/components/common/ErrorMessage';
 import { useHeaderSettings } from '@/contexts/HeaderSettingsContext';
 import { validateAnswer } from '@/utils/quizUtils';
 import type { QuizScreenParams } from '@/types';
@@ -42,6 +44,7 @@ export default function QuizScreen() {
     buzzIn,
     resetBuzz,
     endQuiz,
+    nextQuestion,
     removeParticipant,
     setError,
   } = useQuizData({
@@ -90,6 +93,14 @@ export default function QuizScreen() {
       }
     }
   }, [answers, isHost, userId, currentQuestion?.id]);
+
+  // Reset participant result state when question changes or room goes to waiting
+  useEffect(() => {
+    if (!isHost && (!currentQuestion || room?.status === 'waiting' || room?.status === 'ready')) {
+      setShowResult(false);
+      setIsCorrect(null);
+    }
+  }, [isHost, currentQuestion, room?.status]);
 
   const handleCreateQuestion = async (text: string) => {
     try {
@@ -180,10 +191,18 @@ export default function QuizScreen() {
     setIsCorrect(null);
   };
 
+  const handleNextQuestion = async () => {
+    try {
+      await nextQuestion();
+    } catch (err) {
+      console.error('Next question failed:', err);
+    }
+  };
+
   // Host screens
   if (isHost) {
     // Question creation screen
-    if (!currentQuestion || room?.status === 'ready') {
+    if (!currentQuestion || room?.status === 'ready' || room?.status === 'waiting') {
       return (
         <View className="flex-1">
           <QuestionCreator
@@ -217,6 +236,7 @@ export default function QuizScreen() {
           onResetBuzz={handleResetBuzz}
           onRefreshAnswers={() => fetchAnswers(true)}
           onEndQuiz={handleEndQuiz}
+          onNextQuestion={handleNextQuestion}
         />
 
         <ExitRoomModal
@@ -230,30 +250,55 @@ export default function QuizScreen() {
   }
 
   // Participant screen
-  return (
-    <View className="flex-1">
-      <ParticipantQuizScreen
-        room={room}
-        questionText={currentQuestion?.text || ''}
-        currentBuzzer={currentBuzzer}
-        userId={userId}
-        participants={participants}
-        connectionState={connectionState}
-        loading={loading}
-        error={error}
-        isCorrect={isCorrect}
-        showResult={showResult}
-        onBuzzIn={handleBuzzIn}
-        onSubmitAnswer={handleSubmitAnswer}
-        onRefreshState={handleRefreshState}
-      />
+  if (!isHost) {
+    // Show waiting screen when no question or room is waiting/ready
+    if (!currentQuestion || room?.status === 'waiting' || room?.status === 'ready') {
+      return (
+        <View className="flex-1 p-6 items-center justify-center">
+          <Text className="text-xl font-bold mb-4">待機中</Text>
+          <Text className="text-base text-gray-600 text-center mb-4">
+            ホストが次の問題を準備中です。しばらくお待ちください。
+          </Text>
+          
+          {loading && <LoadingSpinner />}
+          <ErrorMessage message={error} />
+          
+          <ExitRoomModal
+            isVisible={isExitModalVisible}
+            onClose={() => setIsExitModalVisible(false)}
+            onConfirmExit={handleExitRoom}
+            isHost={isHost}
+          />
+        </View>
+      );
+    }
 
-      <ExitRoomModal
-        isVisible={isExitModalVisible}
-        onClose={() => setIsExitModalVisible(false)}
-        onConfirmExit={handleExitRoom}
-        isHost={isHost}
-      />
-    </View>
-  );
+    // Show quiz screen when there's an active question
+    return (
+      <View className="flex-1">
+        <ParticipantQuizScreen
+          room={room}
+          questionText={currentQuestion?.text || ''}
+          currentBuzzer={currentBuzzer}
+          userId={userId}
+          participants={participants}
+          connectionState={connectionState}
+          loading={loading}
+          error={error}
+          isCorrect={isCorrect}
+          showResult={showResult}
+          onBuzzIn={handleBuzzIn}
+          onSubmitAnswer={handleSubmitAnswer}
+          onRefreshState={handleRefreshState}
+        />
+
+        <ExitRoomModal
+          isVisible={isExitModalVisible}
+          onClose={() => setIsExitModalVisible(false)}
+          onConfirmExit={handleExitRoom}
+          isHost={isHost}
+        />
+      </View>
+    );
+  }
 }
