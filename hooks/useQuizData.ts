@@ -195,21 +195,38 @@ export const useQuizData = (options: UseQuizDataOptions) => {
     async (answerId: string, isCorrect: boolean) => {
       if (!isHost) throw new Error('Invalid operation');
 
-      setLoading(true);
+      // 楽観的UI更新：即座にUIを更新
+      setAnswers(prevAnswers => 
+        prevAnswers.map(answer => 
+          answer.id === answerId 
+            ? { ...answer, judged: true, is_correct: isCorrect }
+            : answer
+        )
+      );
+
       try {
         await SupabaseService.judgeAnswer(answerId, isCorrect);
+        
+        // データベース更新後に最新データを取得（リアルタイム更新のバックアップ）
         const fetchAnswersFunc = fetchAnswersRef.current;
         if (fetchAnswersFunc) {
           await fetchAnswersFunc(true);
         }
       } catch (err: any) {
+        // エラー時は楽観的更新を戻す
+        setAnswers(prevAnswers => 
+          prevAnswers.map(answer => 
+            answer.id === answerId 
+              ? { ...answer, judged: false, is_correct: null }
+              : answer
+          )
+        );
+        
         setError(err.message || '判定中にエラーが発生しました。');
         throw err;
-      } finally {
-        setLoading(false);
       }
     },
-    [isHost] // Removed fetchAnswers from dependencies
+    [isHost]
   );
 
   const buzzIn = useCallback(async () => {
