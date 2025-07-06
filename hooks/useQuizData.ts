@@ -203,17 +203,15 @@ export const useQuizData = (options: UseQuizDataOptions) => {
       if (!isHost) throw new Error('Invalid operation');
 
       // 楽観的UI更新：即座にUIを更新
-      setAnswers(prevAnswers => 
-        prevAnswers.map(answer => 
-          answer.id === answerId 
-            ? { ...answer, judged: true, is_correct: isCorrect }
-            : answer
+      setAnswers((prevAnswers) =>
+        prevAnswers.map((answer) =>
+          answer.id === answerId ? { ...answer, judged: true, is_correct: isCorrect } : answer
         )
       );
 
       try {
         await SupabaseService.judgeAnswer(answerId, isCorrect);
-        
+
         // データベース更新後に最新データを取得（リアルタイム更新のバックアップ）
         const fetchAnswersFunc = fetchAnswersRef.current;
         if (fetchAnswersFunc) {
@@ -221,14 +219,12 @@ export const useQuizData = (options: UseQuizDataOptions) => {
         }
       } catch (err: any) {
         // エラー時は楽観的更新を戻す
-        setAnswers(prevAnswers => 
-          prevAnswers.map(answer => 
-            answer.id === answerId 
-              ? { ...answer, judged: false, is_correct: null }
-              : answer
+        setAnswers((prevAnswers) =>
+          prevAnswers.map((answer) =>
+            answer.id === answerId ? { ...answer, judged: false, is_correct: null } : answer
           )
         );
-        
+
         setError(err.message || '判定中にエラーが発生しました。');
         throw err;
       }
@@ -311,7 +307,7 @@ export const useQuizData = (options: UseQuizDataOptions) => {
     try {
       // 問題作成画面に戻るためにルームステータスを待機状態に戻す
       await SupabaseService.updateRoomStatus(roomId, 'waiting');
-      
+
       // ローカル状態をクリア（新しい問題の準備）
       setCurrentQuestion(null);
       setAnswers([]);

@@ -259,10 +259,10 @@ export default function QuizScreen() {
           <Text className="text-base text-gray-600 text-center mb-4">
             ホストが次の問題を準備中です。しばらくお待ちください。
           </Text>
-          
+
           {loading && <LoadingSpinner />}
           <ErrorMessage message={error} />
-          
+
           <ExitRoomModal
             isVisible={isExitModalVisible}
             onClose={() => setIsExitModalVisible(false)}
