@@ -23,7 +23,7 @@ export const AnswersList: React.FC<AnswersListProps> = ({
   onRefresh,
 }) => {
   return (
-    <View className="w-full my-4 max-h-[250px]">
+    <View className="w-full my-4 max-h-[400px]">
       <View className="flex-row justify-between items-center mb-2">
         <Text className="text-base font-bold">回答一覧 ({answers.length}件)</Text>
         <Button title="更新" onPress={onRefresh} variant="ghost" size="small" />
@@ -37,7 +37,12 @@ export const AnswersList: React.FC<AnswersListProps> = ({
           </Text>
         </View>
       ) : (
-        <ScrollView className="w-full max-h-[230px]">
+        <ScrollView
+          className="w-full"
+          style={{ maxHeight: 350 }}
+          nestedScrollEnabled={true}
+          showsVerticalScrollIndicator={true}
+        >
           {answers.map((answer) => (
             <View
               key={answer.id}

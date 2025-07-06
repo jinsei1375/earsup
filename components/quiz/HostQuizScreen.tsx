@@ -51,8 +51,8 @@ export const HostQuizScreen: React.FC<HostQuizScreenProps> = ({
   const allAnswersJudged = answers.length > 0 && answers.every((answer) => answer.judged);
 
   return (
-    <View className="flex-1 p-6 items-center justify-center">
-      <Text className="text-xl font-bold mb-4">出題中</Text>
+    <View className="flex-1 p-6">
+      <Text className="text-xl font-bold mb-4 text-center">出題中</Text>
 
       {/* Silent mode warning */}
       {showSilentModeWarning && (

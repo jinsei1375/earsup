@@ -1,6 +1,7 @@
 // app/quiz.tsx
 import React, { useState, useEffect } from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, ScrollView } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useUserStore } from '@/stores/userStore';
 import { useQuizData } from '@/hooks/useQuizData';
@@ -204,12 +205,18 @@ export default function QuizScreen() {
     // Question creation screen
     if (!currentQuestion || room?.status === 'ready' || room?.status === 'waiting') {
       return (
-        <View className="flex-1">
-          <QuestionCreator
-            onCreateQuestion={handleCreateQuestion}
-            loading={loading}
-            error={error}
-          />
+        <SafeAreaView className="flex-1 bg-white">
+          <ScrollView
+            className="flex-1"
+            contentContainerStyle={{ flexGrow: 1 }}
+            showsVerticalScrollIndicator={false}
+          >
+            <QuestionCreator
+              onCreateQuestion={handleCreateQuestion}
+              loading={loading}
+              error={error}
+            />
+          </ScrollView>
 
           <ExitRoomModal
             isVisible={isExitModalVisible}
@@ -217,27 +224,33 @@ export default function QuizScreen() {
             onConfirmExit={handleExitRoom}
             isHost={isHost}
           />
-        </View>
+        </SafeAreaView>
       );
     }
 
     // Host quiz management screen
     return (
-      <View className="flex-1">
-        <HostQuizScreen
-          questionText={currentQuestion.text}
-          answers={answers}
-          currentBuzzer={currentBuzzer}
-          participants={participants}
-          isFirstComeMode={room?.quiz_mode === 'first-come'}
-          loading={loading}
-          error={error}
-          onJudgeAnswer={handleJudgeAnswer}
-          onResetBuzz={handleResetBuzz}
-          onRefreshAnswers={() => fetchAnswers(true)}
-          onEndQuiz={handleEndQuiz}
-          onNextQuestion={handleNextQuestion}
-        />
+      <SafeAreaView className="flex-1 bg-white">
+        <ScrollView
+          className="flex-1"
+          contentContainerStyle={{ flexGrow: 1 }}
+          showsVerticalScrollIndicator={false}
+        >
+          <HostQuizScreen
+            questionText={currentQuestion.text}
+            answers={answers}
+            currentBuzzer={currentBuzzer}
+            participants={participants}
+            isFirstComeMode={room?.quiz_mode === 'first-come'}
+            loading={loading}
+            error={error}
+            onJudgeAnswer={handleJudgeAnswer}
+            onResetBuzz={handleResetBuzz}
+            onRefreshAnswers={() => fetchAnswers(true)}
+            onEndQuiz={handleEndQuiz}
+            onNextQuestion={handleNextQuestion}
+          />
+        </ScrollView>
 
         <ExitRoomModal
           isVisible={isExitModalVisible}
@@ -245,7 +258,7 @@ export default function QuizScreen() {
           onConfirmExit={handleExitRoom}
           isHost={isHost}
         />
-      </View>
+      </SafeAreaView>
     );
   }
 
@@ -254,43 +267,51 @@ export default function QuizScreen() {
     // Show waiting screen when no question or room is waiting/ready
     if (!currentQuestion || room?.status === 'waiting' || room?.status === 'ready') {
       return (
-        <View className="flex-1 p-6 items-center justify-center">
-          <Text className="text-xl font-bold mb-4">待機中</Text>
-          <Text className="text-base text-gray-600 text-center mb-4">
-            ホストが次の問題を準備中です。しばらくお待ちください。
-          </Text>
+        <SafeAreaView className="flex-1 bg-white">
+          <View className="flex-1 p-6 items-center justify-center">
+            <Text className="text-xl font-bold mb-4">待機中</Text>
+            <Text className="text-base text-gray-600 text-center mb-4">
+              ホストが問題を準備中です。しばらくお待ちください。
+            </Text>
 
-          {loading && <LoadingSpinner />}
-          <ErrorMessage message={error} />
+            {loading && <LoadingSpinner />}
+            <ErrorMessage message={error} />
 
-          <ExitRoomModal
-            isVisible={isExitModalVisible}
-            onClose={() => setIsExitModalVisible(false)}
-            onConfirmExit={handleExitRoom}
-            isHost={isHost}
-          />
-        </View>
+            <ExitRoomModal
+              isVisible={isExitModalVisible}
+              onClose={() => setIsExitModalVisible(false)}
+              onConfirmExit={handleExitRoom}
+              isHost={isHost}
+            />
+          </View>
+        </SafeAreaView>
       );
     }
 
     // Show quiz screen when there's an active question
     return (
-      <View className="flex-1">
-        <ParticipantQuizScreen
-          room={room}
-          questionText={currentQuestion?.text || ''}
-          currentBuzzer={currentBuzzer}
-          userId={userId}
-          participants={participants}
-          connectionState={connectionState}
-          loading={loading}
-          error={error}
-          isCorrect={isCorrect}
-          showResult={showResult}
-          onBuzzIn={handleBuzzIn}
-          onSubmitAnswer={handleSubmitAnswer}
-          onRefreshState={handleRefreshState}
-        />
+      <SafeAreaView className="flex-1 bg-white">
+        <ScrollView
+          className="flex-1"
+          contentContainerStyle={{ flexGrow: 1 }}
+          showsVerticalScrollIndicator={false}
+        >
+          <ParticipantQuizScreen
+            room={room}
+            questionText={currentQuestion?.text || ''}
+            currentBuzzer={currentBuzzer}
+            userId={userId}
+            participants={participants}
+            connectionState={connectionState}
+            loading={loading}
+            error={error}
+            isCorrect={isCorrect}
+            showResult={showResult}
+            onBuzzIn={handleBuzzIn}
+            onSubmitAnswer={handleSubmitAnswer}
+            onRefreshState={handleRefreshState}
+          />
+        </ScrollView>
 
         <ExitRoomModal
           isVisible={isExitModalVisible}
@@ -298,7 +319,7 @@ export default function QuizScreen() {
           onConfirmExit={handleExitRoom}
           isHost={isHost}
         />
-      </View>
+      </SafeAreaView>
     );
   }
 }
