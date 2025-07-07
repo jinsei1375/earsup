@@ -241,6 +241,7 @@ export default function QuizScreen() {
             answers={answers}
             currentBuzzer={currentBuzzer}
             participants={participants}
+            hostUserId={room?.host_user_id || ''}
             isFirstComeMode={room?.quiz_mode === 'first-come'}
             loading={loading}
             error={error}
@@ -302,6 +303,7 @@ export default function QuizScreen() {
             currentBuzzer={currentBuzzer}
             userId={userId}
             participants={participants}
+            answers={answers}
             connectionState={connectionState}
             loading={loading}
             error={error}

@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { AnswersList } from './AnswersList';
 import { BuzzInSection } from './BuzzInSection';
+import { ParticipantsList } from '@/components/room/ParticipantsList';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { ErrorMessage } from '@/components/common/ErrorMessage';
 import { Button } from '@/components/common/Button';
@@ -15,6 +16,7 @@ interface HostQuizScreenProps {
   answers: Answer[];
   currentBuzzer: string | null;
   participants: ParticipantWithNickname[];
+  hostUserId: string; // Added for participant stats
   isFirstComeMode: boolean;
   loading: boolean;
   error: string | null;
@@ -30,6 +32,7 @@ export const HostQuizScreen: React.FC<HostQuizScreenProps> = ({
   answers,
   currentBuzzer,
   participants,
+  hostUserId,
   isFirstComeMode,
   loading,
   error,
@@ -80,6 +83,15 @@ export const HostQuizScreen: React.FC<HostQuizScreenProps> = ({
           {getQuizModeDisplayName(isFirstComeMode ? 'first-come' : 'all-at-once')}
         </Text>
       </View>
+
+      {/* Participant stats */}
+      <ParticipantsList
+        participants={participants}
+        hostUserId={hostUserId}
+        loading={false}
+        onRefresh={() => {}} // No refresh needed in host view
+        answers={answers}
+      />
 
       <Text className="text-lg my-4 text-center">{questionText}</Text>
 
