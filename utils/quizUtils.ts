@@ -126,24 +126,27 @@ export interface ParticipantStats {
 
 export const calculateParticipantStats = (
   participants: ParticipantWithNickname[],
-  answers: Answer[]
+  answers: Answer[],
+  hostUserId?: string
 ): ParticipantStats[] => {
-  return participants.map((participant) => {
-    const userAnswers = answers.filter(
-      (answer) => answer.user_id === participant.id && answer.judged
-    );
-    
-    const correctAnswers = userAnswers.filter(
-      (answer) => answer.is_correct === true
-    ).length;
-    
-    return {
-      userId: participant.id,
-      nickname: participant.nickname,
-      correctAnswers,
-      totalAnswers: userAnswers.length,
-    };
-  });
+  return participants
+    .filter((participant) => participant.id !== hostUserId) // Exclude host from stats
+    .map((participant) => {
+      const userAnswers = answers.filter(
+        (answer) => answer.user_id === participant.id && answer.judged
+      );
+      
+      const correctAnswers = userAnswers.filter(
+        (answer) => answer.is_correct === true
+      ).length;
+      
+      return {
+        userId: participant.id,
+        nickname: participant.nickname,
+        correctAnswers,
+        totalAnswers: userAnswers.length,
+      };
+    });
 };
 
 export const formatParticipantStats = (stats: ParticipantStats): string => {

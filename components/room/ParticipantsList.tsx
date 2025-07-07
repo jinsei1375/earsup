@@ -21,7 +21,7 @@ export const ParticipantsList: React.FC<ParticipantsListProps> = ({
 }) => {
   // Calculate stats only if answers are provided (during quiz)
   const participantStats = answers.length > 0 
-    ? calculateParticipantStats(participants, answers)
+    ? calculateParticipantStats(participants, answers, hostUserId)
     : null;
 
   return (
