@@ -35,6 +35,7 @@ export default function QuizScreen() {
     allRoomAnswers,
     currentBuzzer,
     participants,
+    stamps,
     loading,
     error,
     connectionState,
@@ -45,6 +46,7 @@ export default function QuizScreen() {
     judgeAnswer,
     buzzIn,
     resetBuzz,
+    sendStamp,
     endQuiz,
     nextQuestion,
     removeParticipant,
@@ -145,6 +147,14 @@ export default function QuizScreen() {
       await buzzIn();
     } catch (err) {
       console.error('Buzz in failed:', err);
+    }
+  };
+
+  const handleSendStamp = async (stampType: string) => {
+    try {
+      await sendStamp(stampType);
+    } catch (err) {
+      console.error('Send stamp failed:', err);
     }
   };
 
@@ -314,6 +324,8 @@ export default function QuizScreen() {
             onBuzzIn={handleBuzzIn}
             onSubmitAnswer={handleSubmitAnswer}
             onRefreshState={handleRefreshState}
+            stamps={stamps}
+            onSendStamp={handleSendStamp}
           />
         </ScrollView>
 

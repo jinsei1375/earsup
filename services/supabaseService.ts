@@ -8,6 +8,7 @@ import type {
   RoomParticipant,
   User,
   ParticipantWithNickname,
+  Stamp,
 } from '@/types';
 
 export class SupabaseService {
@@ -392,6 +393,57 @@ export class SupabaseService {
     return answers.map((answer) => ({
       ...answer,
       nickname: userMap.get(answer.user_id) || '不明なユーザー',
+    }));
+  }
+
+  // Stamp operations
+  static async sendStamp(roomId: string, userId: string, stampType: string): Promise<Stamp> {
+    const { data, error } = await supabase
+      .from('stamps')
+      .insert({
+        room_id: roomId,
+        user_id: userId,
+        stamp_type: stampType,
+        created_at: new Date().toISOString(),
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  }
+
+  static async getRecentStamps(roomId: string, limit: number = 10): Promise<Stamp[]> {
+    const { data, error } = await supabase
+      .from('stamps')
+      .select('*')
+      .eq('room_id', roomId)
+      .order('created_at', { ascending: false })
+      .limit(limit);
+
+    if (error) throw error;
+    return data || [];
+  }
+
+  static async getRecentStampsWithNicknames(roomId: string, limit: number = 10): Promise<Stamp[]> {
+    const stamps = await this.getRecentStamps(roomId, limit);
+    
+    if (!stamps.length) return stamps;
+
+    // Get user nicknames
+    const { data: users, error: usersError } = await supabase
+      .from('users')
+      .select('id, nickname')
+      .in('id', [...new Set(stamps.map((s) => s.user_id))])
+      .throwOnError();
+
+    if (usersError) return stamps;
+
+    const userMap = new Map(users?.map((user) => [user.id, user.nickname]) || []);
+
+    return stamps.map((stamp) => ({
+      ...stamp,
+      nickname: userMap.get(stamp.user_id) || '不明なユーザー',
     }));
   }
 }
