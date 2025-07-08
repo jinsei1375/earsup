@@ -48,7 +48,7 @@ function RootLayoutContent() {
   // パス名に基づいてヘッダーのタイトルを決定
   // バックボタンは使用せず、各画面で明示的な遷移ボタンを設置する
   const getHeaderTitle = () => {
-    if (!pathname) return 'EarSup';
+    if (!pathname) return 'EarsUp';
 
     // URLからクエリパラメータを取得
     const segments = pathname.split('/');
@@ -56,7 +56,7 @@ function RootLayoutContent() {
 
     switch (pathname) {
       case '/':
-        return 'EarSup';
+        return 'EarsUp';
       case '/room':
         return 'ルーム';
       case '/quiz':

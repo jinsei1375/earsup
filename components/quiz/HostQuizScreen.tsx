@@ -101,11 +101,11 @@ export const HostQuizScreen: React.FC<HostQuizScreenProps> = ({
       <Text className="text-sm text-gray-600 mb-2">音声再生速度:</Text>
       <View className="flex-row flex-wrap justify-center mb-4">
         {[
-          { speed: 0.75, label: '0.6x' },
-          { speed: 0.9, label: '0.8x' },
+          { speed: 0.75, label: '0.75x' },
+          { speed: 0.9, label: '0.9x' },
           { speed: 1.0, label: '1.0x' },
-          { speed: 1.1, label: '1.2x' },
-          { speed: 1.25, label: '1.4x' },
+          { speed: 1.1, label: '1.1x' },
+          { speed: 1.25, label: '1.25x' },
         ].map(({ speed, label }) => (
           <TouchableOpacity
             key={speed}
