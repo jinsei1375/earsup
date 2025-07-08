@@ -1,5 +1,6 @@
 // utils/quizUtils.ts
 import * as Speech from 'expo-speech';
+import type { Answer, ParticipantWithNickname } from '@/types';
 
 export const generateRoomCode = (): string => {
   return Math.random().toString(36).slice(-6).toUpperCase();
@@ -114,4 +115,40 @@ export const shouldShowLoadingSpinner = (
 
 export const truncateId = (id: string, length: number = 8): string => {
   return id.length > length ? `${id.slice(0, length)}...` : id;
+};
+
+export interface ParticipantStats {
+  userId: string;
+  nickname: string;
+  correctAnswers: number;
+  totalAnswers: number;
+}
+
+export const calculateParticipantStats = (
+  participants: ParticipantWithNickname[],
+  answers: Answer[],
+  hostUserId?: string
+): ParticipantStats[] => {
+  return participants
+    .filter((participant) => participant.id !== hostUserId) // Exclude host from stats
+    .map((participant) => {
+      const userAnswers = answers.filter(
+        (answer) => answer.user_id === participant.id && answer.judged
+      );
+      
+      const correctAnswers = userAnswers.filter(
+        (answer) => answer.is_correct === true
+      ).length;
+      
+      return {
+        userId: participant.id,
+        nickname: participant.nickname,
+        correctAnswers,
+        totalAnswers: userAnswers.length,
+      };
+    });
+};
+
+export const formatParticipantStats = (stats: ParticipantStats): string => {
+  return `${stats.correctAnswers}/${stats.totalAnswers}`;
 };
