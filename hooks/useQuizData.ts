@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { SupabaseService } from '@/services/supabaseService';
 import { useRealtimeSubscription } from './useRealtimeSubscription';
-import type { Room, Question, Answer, Buzz, ParticipantWithNickname } from '@/types';
+import type { Room, Question, Answer, Buzz, ParticipantWithNickname, Stamp } from '@/types';
 
 interface UseQuizDataOptions {
   roomId: string | null;
@@ -21,6 +21,7 @@ export const useQuizData = (options: UseQuizDataOptions) => {
   const [allRoomAnswers, setAllRoomAnswers] = useState<Answer[]>([]); // 累積回答
   const [currentBuzzer, setCurrentBuzzer] = useState<string | null>(null);
   const [participants, setParticipants] = useState<ParticipantWithNickname[]>([]);
+  const [stamps, setStamps] = useState<Stamp[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -67,6 +68,9 @@ export const useQuizData = (options: UseQuizDataOptions) => {
 
         // Fetch all room answers for cumulative scoring
         await fetchAllRoomAnswers();
+
+        // Fetch stamps
+        await fetchStamps();
 
         // Fetch latest question (only if room is active)
         if (roomData?.status === 'active') {
@@ -126,6 +130,20 @@ export const useQuizData = (options: UseQuizDataOptions) => {
         setAllRoomAnswers(allAnswersData);
       } catch (err: any) {
         console.error('All room answers fetch error:', err);
+      }
+    },
+    [roomId]
+  );
+
+  const fetchStamps = useCallback(
+    async (force = false) => {
+      if (!roomId) return;
+
+      try {
+        const stampsData = await SupabaseService.getRecentStampsWithNicknames(roomId, 10);
+        setStamps(stampsData);
+      } catch (err: any) {
+        console.error('Stamps fetch error:', err);
       }
     },
     [roomId]
@@ -295,6 +313,21 @@ export const useQuizData = (options: UseQuizDataOptions) => {
     }
   }, [roomId, currentQuestion?.id, isHost]);
 
+  const sendStamp = useCallback(async (stampType: string) => {
+    if (!roomId || !userId) {
+      throw new Error('Invalid operation');
+    }
+
+    try {
+      await SupabaseService.sendStamp(roomId, userId, stampType);
+      // Refresh stamps to show the new one
+      await fetchStamps(true);
+    } catch (err: any) {
+      setError(err.message || 'スタンプ送信中にエラーが発生しました。');
+      throw err;
+    }
+  }, [roomId, userId, fetchStamps]);
+
   const endQuiz = useCallback(async () => {
     if (!roomId || !isHost) throw new Error('Invalid operation');
 
@@ -396,6 +429,18 @@ export const useQuizData = (options: UseQuizDataOptions) => {
           }
         },
       },
+      {
+        event: '*',
+        schema: 'public',
+        table: 'stamps',
+        filter: `room_id=eq.${roomId}`,
+        callback: (payload: any) => {
+          console.log('Stamp changed:', payload);
+          if (payload.eventType === 'INSERT') {
+            fetchStamps(true);
+          }
+        },
+      },
     ];
 
     subscribeRef.current(subscriptions);
@@ -473,6 +518,7 @@ export const useQuizData = (options: UseQuizDataOptions) => {
     allRoomAnswers,
     currentBuzzer,
     participants,
+    stamps,
     loading,
     error,
     connectionState,
@@ -483,6 +529,7 @@ export const useQuizData = (options: UseQuizDataOptions) => {
     judgeAnswer,
     buzzIn,
     resetBuzz,
+    sendStamp,
     endQuiz,
     nextQuestion,
     removeParticipant,

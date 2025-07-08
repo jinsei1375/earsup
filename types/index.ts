@@ -96,3 +96,13 @@ export interface RealtimeConnectionState {
   retries: number;
   lastUpdate: Date | null;
 }
+
+// Stamp types
+export interface Stamp {
+  id: string;
+  room_id: string;
+  user_id: string;
+  stamp_type: string;
+  created_at: string;
+  nickname?: string;
+}

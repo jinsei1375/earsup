@@ -21,7 +21,9 @@ import {
   isQuizEnded,
 } from '@/utils/quizUtils';
 import { ParticipantsList } from '@/components/room/ParticipantsList';
-import type { Room, RealtimeConnectionState, ParticipantWithNickname, Answer } from '@/types';
+import { StampSelector } from '@/components/quiz/StampSelector';
+import { StampDisplay } from '@/components/quiz/StampDisplay';
+import type { Room, RealtimeConnectionState, ParticipantWithNickname, Answer, Stamp } from '@/types';
 
 interface ParticipantQuizScreenProps {
   room: Room | null;
@@ -38,6 +40,9 @@ interface ParticipantQuizScreenProps {
   onBuzzIn: () => Promise<void>;
   onSubmitAnswer: (answer: string) => Promise<void>;
   onRefreshState: () => void;
+  // Stamp-related props
+  stamps: Stamp[];
+  onSendStamp: (stampType: string) => Promise<void>;
 }
 
 export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
@@ -55,8 +60,11 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
   onBuzzIn,
   onSubmitAnswer,
   onRefreshState,
+  stamps,
+  onSendStamp,
 }) => {
   const [answer, setAnswer] = useState('');
+  const [stampModalVisible, setStampModalVisible] = useState(false);
 
   const quizMode = room?.quiz_mode || 'all-at-once';
   const isFirstComeMode = quizMode === 'first-come';
@@ -127,6 +135,21 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
               onRefresh={onRefreshState}
               answers={allRoomAnswers}
             />
+
+            {/* スタンプ機能 */}
+            <View className="w-full my-4">
+              <View className="flex-row justify-between items-center mb-2">
+                <Text className="text-sm font-medium text-gray-700">リアクション</Text>
+                <Button
+                  title="スタンプ"
+                  onPress={() => setStampModalVisible(true)}
+                  variant="outline"
+                  size="small"
+                  disabled={loading}
+                />
+              </View>
+              <StampDisplay stamps={stamps} />
+            </View>
 
             <Text className="text-lg font-bold text-green-500 my-4">問題が出題されました!</Text>
 
@@ -256,6 +279,14 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
           </View>
         </TouchableWithoutFeedback>
       </ScrollView>
+      
+      {/* スタンプ選択モーダル */}
+      <StampSelector
+        visible={stampModalVisible}
+        onClose={() => setStampModalVisible(false)}
+        onSelectStamp={onSendStamp}
+        loading={loading}
+      />
     </KeyboardAvoidingView>
   );
 };
