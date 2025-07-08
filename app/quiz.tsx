@@ -32,6 +32,7 @@ export default function QuizScreen() {
     room,
     currentQuestion,
     answers,
+    allRoomAnswers,
     currentBuzzer,
     participants,
     loading,
@@ -239,6 +240,7 @@ export default function QuizScreen() {
           <HostQuizScreen
             questionText={currentQuestion.text}
             answers={answers}
+            allRoomAnswers={allRoomAnswers}
             currentBuzzer={currentBuzzer}
             participants={participants}
             hostUserId={room?.host_user_id || ''}
@@ -303,7 +305,7 @@ export default function QuizScreen() {
             currentBuzzer={currentBuzzer}
             userId={userId}
             participants={participants}
-            answers={answers}
+            allRoomAnswers={allRoomAnswers}
             connectionState={connectionState}
             loading={loading}
             error={error}

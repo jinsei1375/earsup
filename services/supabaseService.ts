@@ -347,4 +347,51 @@ export class SupabaseService {
     // End the room
     await this.updateRoomStatus(roomId, 'ended');
   }
+
+  // New Answer operations
+  static async getAllAnswersForRoom(roomId: string): Promise<Answer[]> {
+    // Get all questions for this room
+    const { data: questions, error: questionsError } = await supabase
+      .from('questions')
+      .select('id')
+      .eq('room_id', roomId)
+      .throwOnError();
+
+    if (questionsError || !questions?.length) return [];
+
+    const questionIds = questions.map((q) => q.id);
+
+    // Get all answers for all questions in this room
+    const { data: answers, error: answersError } = await supabase
+      .from('answers')
+      .select('*')
+      .in('question_id', questionIds)
+      .eq('judged', true) // Only get judged answers for scoring
+      .order('created_at', { ascending: false })
+      .throwOnError();
+
+    if (answersError) return [];
+    return answers || [];
+  }
+
+  static async getAllAnswersWithNicknamesForRoom(roomId: string): Promise<Answer[]> {
+    const answers = await this.getAllAnswersForRoom(roomId);
+    if (!answers.length) return [];
+
+    // Get user nicknames
+    const { data: users, error: usersError } = await supabase
+      .from('users')
+      .select('id, nickname')
+      .in('id', [...new Set(answers.map((a) => a.user_id))])
+      .throwOnError();
+
+    if (usersError) return answers;
+
+    const userMap = new Map(users?.map((user) => [user.id, user.nickname]) || []);
+
+    return answers.map((answer) => ({
+      ...answer,
+      nickname: userMap.get(answer.user_id) || '不明なユーザー',
+    }));
+  }
 }

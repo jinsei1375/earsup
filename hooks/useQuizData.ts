@@ -18,6 +18,7 @@ export const useQuizData = (options: UseQuizDataOptions) => {
   const [room, setRoom] = useState<Room | null>(null);
   const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
   const [answers, setAnswers] = useState<Answer[]>([]);
+  const [allRoomAnswers, setAllRoomAnswers] = useState<Answer[]>([]); // 累積回答
   const [currentBuzzer, setCurrentBuzzer] = useState<string | null>(null);
   const [participants, setParticipants] = useState<ParticipantWithNickname[]>([]);
   const [loading, setLoading] = useState(false);
@@ -63,6 +64,9 @@ export const useQuizData = (options: UseQuizDataOptions) => {
           );
           setParticipants(participantsData);
         }
+
+        // Fetch all room answers for cumulative scoring
+        await fetchAllRoomAnswers();
 
         // Fetch latest question (only if room is active)
         if (roomData?.status === 'active') {
@@ -111,6 +115,20 @@ export const useQuizData = (options: UseQuizDataOptions) => {
       }
     },
     [roomId] // Removed currentQuestion?.id from dependencies
+  );
+
+  const fetchAllRoomAnswers = useCallback(
+    async (force = false) => {
+      if (!roomId) return;
+
+      try {
+        const allAnswersData = await SupabaseService.getAllAnswersWithNicknamesForRoom(roomId);
+        setAllRoomAnswers(allAnswersData);
+      } catch (err: any) {
+        console.error('All room answers fetch error:', err);
+      }
+    },
+    [roomId]
   );
 
   // Create stable ref for fetchAnswers to avoid circular dependency
@@ -217,6 +235,9 @@ export const useQuizData = (options: UseQuizDataOptions) => {
         if (fetchAnswersFunc) {
           await fetchAnswersFunc(true);
         }
+
+        // 累積回答も更新
+        await fetchAllRoomAnswers();
       } catch (err: any) {
         // エラー時は楽観的更新を戻す
         setAnswers((prevAnswers) =>
@@ -358,6 +379,7 @@ export const useQuizData = (options: UseQuizDataOptions) => {
         callback: (payload: any) => {
           console.log('Answer changed:', payload);
           fetchAnswersRef.current(true);
+          fetchAllRoomAnswers(); // 累積回答も更新
         },
       },
       {
@@ -448,6 +470,7 @@ export const useQuizData = (options: UseQuizDataOptions) => {
     room,
     currentQuestion,
     answers,
+    allRoomAnswers,
     currentBuzzer,
     participants,
     loading,

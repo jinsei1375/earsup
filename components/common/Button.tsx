@@ -87,8 +87,8 @@ export const CustomButton: React.FC<ButtonProps> = ({
       activeOpacity={disabled ? 1 : 0.8}
     >
       {children || (
-        <View className={`flex-row items-center justify-center ${icon ? 'gap-2' : ''}`}>
-          {icon}
+        <View className="flex-row items-center justify-center">
+          {icon && <View className="mr-2">{icon}</View>}
           {title && <Text className={textClassName}>{title}</Text>}
         </View>
       )}

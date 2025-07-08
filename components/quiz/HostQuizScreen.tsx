@@ -14,6 +14,7 @@ import type { Answer, ParticipantWithNickname } from '@/types';
 interface HostQuizScreenProps {
   questionText: string;
   answers: Answer[];
+  allRoomAnswers: Answer[]; // 累積スコア用
   currentBuzzer: string | null;
   participants: ParticipantWithNickname[];
   hostUserId: string; // Added for participant stats
@@ -30,6 +31,7 @@ interface HostQuizScreenProps {
 export const HostQuizScreen: React.FC<HostQuizScreenProps> = ({
   questionText,
   answers,
+  allRoomAnswers,
   currentBuzzer,
   participants,
   hostUserId,
@@ -90,7 +92,7 @@ export const HostQuizScreen: React.FC<HostQuizScreenProps> = ({
         hostUserId={hostUserId}
         loading={false}
         onRefresh={() => {}} // No refresh needed in host view
-        answers={answers}
+        answers={allRoomAnswers}
       />
 
       <Text className="text-lg my-4 text-center">{questionText}</Text>

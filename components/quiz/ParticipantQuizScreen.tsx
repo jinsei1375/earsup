@@ -29,7 +29,7 @@ interface ParticipantQuizScreenProps {
   currentBuzzer: string | null;
   userId: string | null;
   participants: ParticipantWithNickname[];
-  answers: Answer[]; // Added for participant stats
+  allRoomAnswers: Answer[]; // Changed to allRoomAnswers for cumulative stats
   connectionState: RealtimeConnectionState;
   loading: boolean;
   error: string | null;
@@ -46,7 +46,7 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
   currentBuzzer,
   userId,
   participants,
-  answers,
+  allRoomAnswers,
   connectionState,
   loading,
   error,
@@ -125,7 +125,7 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
               hostUserId={room?.host_user_id}
               loading={false}
               onRefresh={onRefreshState}
-              answers={answers}
+              answers={allRoomAnswers}
             />
 
             <Text className="text-lg font-bold text-green-500 my-4">問題が出題されました!</Text>

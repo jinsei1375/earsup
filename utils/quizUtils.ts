@@ -10,10 +10,13 @@ export const validateAnswer = (answer: string, correctAnswer: string): boolean =
   return answer.trim().toLowerCase() === correctAnswer.trim().toLowerCase();
 };
 
-export const speakText = (text: string, options?: {
-  language?: string;
-  rate?: number;
-}): void => {
+export const speakText = (
+  text: string,
+  options?: {
+    language?: string;
+    rate?: number;
+  }
+): void => {
   Speech.speak(text, {
     language: options?.language || 'en-US',
     rate: options?.rate || 1.0,
@@ -43,7 +46,7 @@ export const debounce = <T extends (...args: any[]) => any>(
   delay: number
 ): ((...args: Parameters<T>) => void) => {
   let timeoutId: ReturnType<typeof setTimeout>;
-  
+
   return (...args: Parameters<T>) => {
     clearTimeout(timeoutId);
     timeoutId = setTimeout(() => func(...args), delay);
@@ -70,10 +73,7 @@ export const canParticipantAnswer = (
   return false;
 };
 
-export const canParticipantBuzzIn = (
-  quizMode: string,
-  currentBuzzer: string | null
-): boolean => {
+export const canParticipantBuzzIn = (quizMode: string, currentBuzzer: string | null): boolean => {
   return quizMode === 'first-come' && !currentBuzzer;
 };
 
@@ -122,7 +122,43 @@ export interface ParticipantStats {
   nickname: string;
   correctAnswers: number;
   totalAnswers: number;
+  currentStreak: number;
+  maxStreak: number;
 }
+
+// Calculate consecutive correct answers (current streak)
+export const calculateStreakStats = (
+  answers: Answer[],
+  userId: string
+): { currentStreak: number; maxStreak: number } => {
+  const userAnswers = answers
+    .filter((answer) => answer.user_id === userId && answer.judged)
+    .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+
+  let currentStreak = 0;
+  let maxStreak = 0;
+  let tempStreak = 0;
+
+  for (const answer of userAnswers) {
+    if (answer.is_correct) {
+      tempStreak++;
+      maxStreak = Math.max(maxStreak, tempStreak);
+    } else {
+      tempStreak = 0;
+    }
+  }
+
+  // Calculate current streak (from the end)
+  for (let i = userAnswers.length - 1; i >= 0; i--) {
+    if (userAnswers[i].is_correct) {
+      currentStreak++;
+    } else {
+      break;
+    }
+  }
+
+  return { currentStreak, maxStreak };
+};
 
 export const calculateParticipantStats = (
   participants: ParticipantWithNickname[],
@@ -135,16 +171,18 @@ export const calculateParticipantStats = (
       const userAnswers = answers.filter(
         (answer) => answer.user_id === participant.id && answer.judged
       );
-      
-      const correctAnswers = userAnswers.filter(
-        (answer) => answer.is_correct === true
-      ).length;
-      
+
+      const correctAnswers = userAnswers.filter((answer) => answer.is_correct === true).length;
+
+      const streakStats = calculateStreakStats(answers, participant.id);
+
       return {
         userId: participant.id,
         nickname: participant.nickname,
         correctAnswers,
         totalAnswers: userAnswers.length,
+        currentStreak: streakStats.currentStreak,
+        maxStreak: streakStats.maxStreak,
       };
     });
 };
