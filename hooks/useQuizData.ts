@@ -70,7 +70,7 @@ export const useQuizData = (options: UseQuizDataOptions) => {
         await fetchAllRoomAnswers();
 
         // Fetch stamps
-        await fetchStamps();
+        // await fetchStamps();
 
         // Fetch latest question (only if room is active)
         if (roomData?.status === 'active') {
@@ -313,20 +313,23 @@ export const useQuizData = (options: UseQuizDataOptions) => {
     }
   }, [roomId, currentQuestion?.id, isHost]);
 
-  const sendStamp = useCallback(async (stampType: string) => {
-    if (!roomId || !userId) {
-      throw new Error('Invalid operation');
-    }
+  const sendStamp = useCallback(
+    async (stampType: string) => {
+      if (!roomId || !userId) {
+        throw new Error('Invalid operation');
+      }
 
-    try {
-      await SupabaseService.sendStamp(roomId, userId, stampType);
-      // Refresh stamps to show the new one
-      await fetchStamps(true);
-    } catch (err: any) {
-      setError(err.message || 'スタンプ送信中にエラーが発生しました。');
-      throw err;
-    }
-  }, [roomId, userId, fetchStamps]);
+      try {
+        await SupabaseService.sendStamp(roomId, userId, stampType);
+        // Refresh stamps to show the new one
+        // await fetchStamps(true);
+      } catch (err: any) {
+        setError(err.message || 'スタンプ送信中にエラーが発生しました。');
+        throw err;
+      }
+    },
+    [roomId, userId, fetchStamps]
+  );
 
   const endQuiz = useCallback(async () => {
     if (!roomId || !isHost) throw new Error('Invalid operation');
@@ -437,7 +440,7 @@ export const useQuizData = (options: UseQuizDataOptions) => {
         callback: (payload: any) => {
           console.log('Stamp changed:', payload);
           if (payload.eventType === 'INSERT') {
-            fetchStamps(true);
+            // fetchStamps(true);
           }
         },
       },
