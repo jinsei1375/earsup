@@ -1,15 +1,6 @@
 // components/quiz/ParticipantQuizScreen.tsx
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  KeyboardAvoidingView,
-  TouchableWithoutFeedback,
-  Keyboard,
-  Platform,
-  ScrollView,
-} from 'react-native';
+import { View, Text, TextInput, Keyboard } from 'react-native';
 import { RealtimeStatus } from '@/components/common/RealtimeStatus';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { ErrorMessage } from '@/components/common/ErrorMessage';
@@ -144,107 +135,44 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
 
   // Quiz is active
   return (
-    <KeyboardAvoidingView
-      className="flex-1"
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
-      {/* スタンプ表示レイヤー */}
-      {/* <View
-        style={{ position: 'absolute', left: 0, top: 0, width: '100%', height: '100%' }}
-        pointerEvents="none"
-      >
-        {renderStamps()}
-      </View> */}
-      <ScrollView
-        contentContainerStyle={{ flexGrow: 1, padding: 24, paddingBottom: 20 }}
-        keyboardShouldPersistTaps="handled"
-        automaticallyAdjustKeyboardInsets={true}
-        showsVerticalScrollIndicator={false}
-      >
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <View className="items-center pt-8">
-            <Text className="text-xl font-bold mb-4">リスニングクイズ</Text>
-            <RealtimeStatus connectionState={connectionState} showLastUpdate={false} />
+    <View className="flex-1 p-6">
+      <Text className="text-xl font-bold mb-4 text-center">リスニングクイズ</Text>
+      <RealtimeStatus connectionState={connectionState} showLastUpdate={false} />
 
-            {/* 参加者リスト */}
-            <ParticipantsList
-              participants={participants}
-              hostUserId={room?.host_user_id}
-              loading={false}
-              onRefresh={onRefreshState}
-              answers={allRoomAnswers}
+      {/* 参加者リスト */}
+      <ParticipantsList
+        participants={participants}
+        hostUserId={room?.host_user_id}
+        loading={false}
+        onRefresh={onRefreshState}
+        answers={allRoomAnswers}
+      />
+
+      <Text className="text-lg font-bold text-green-500 my-4 text-center">
+        問題が出題されました!
+      </Text>
+
+      {isFirstComeMode ? (
+        // First-come mode
+        <>
+          {canBuzzIn ? (
+            // Can buzz in
+            <Button
+              title="押す!"
+              onPress={onBuzzIn}
+              disabled={loading}
+              variant="primary"
+              size="large"
+              fullWidth
+              className="my-4"
             />
+          ) : hasBuzzedIn ? (
+            // User has buzzed in
+            <>
+              <View className="bg-green-100 p-3 rounded-lg mb-4 w-full">
+                <Text className="text-green-800 text-center">あなたが回答権を獲得しました！</Text>
+              </View>
 
-            {/* スタンプ機能 */}
-            {/* <View className="w-full my-4">
-              <View className="flex-row justify-between items-center mb-2">
-                <Text className="text-sm font-medium text-gray-700">リアクション</Text>
-                <Button
-                  title="スタンプ"
-                  onPress={() => setStampModalVisible(true)}
-                  variant="outline"
-                  size="small"
-                  disabled={loading}
-                />
-              </View> */}
-            {/* <StampDisplay stamps={stamps} /> */}
-            {/* </View> */}
-
-            <Text className="text-lg font-bold text-green-500 my-4">問題が出題されました!</Text>
-
-            {isFirstComeMode ? (
-              // First-come mode
-              <>
-                {canBuzzIn ? (
-                  // Can buzz in
-                  <Button
-                    title="押す!"
-                    onPress={onBuzzIn}
-                    disabled={loading}
-                    variant="primary"
-                    size="large"
-                    fullWidth
-                    className="my-4"
-                  />
-                ) : hasBuzzedIn ? (
-                  // User has buzzed in
-                  <>
-                    <View className="bg-green-100 p-3 rounded-lg mb-4 w-full">
-                      <Text className="text-green-800 text-center">
-                        あなたが回答権を獲得しました！
-                      </Text>
-                    </View>
-
-                    <View className="w-full mt-4 mb-6">
-                      <TextInput
-                        className="border border-gray-300 p-4 rounded-lg my-3 w-full text-lg"
-                        placeholder="聞こえたフレーズを入力"
-                        value={answer}
-                        onChangeText={setAnswer}
-                        editable={!showResult}
-                        returnKeyType="done"
-                        onSubmitEditing={() => Keyboard.dismiss()}
-                      />
-
-                      <Button
-                        title="解答する"
-                        onPress={handleSubmitAnswer}
-                        disabled={!answer.trim() || showResult || loading}
-                        variant="primary"
-                        size="large"
-                        fullWidth
-                      />
-                    </View>
-                  </>
-                ) : (
-                  // Someone else has buzzed in
-                  <View className="bg-red-100 p-3 rounded-lg w-full">
-                    <Text className="text-red-800 text-center">他の参加者が回答中です</Text>
-                  </View>
-                )}
-              </>
-            ) : !showResult ? (
-              // All-at-once mode - hasn't answered yet
               <View className="w-full mt-4 mb-6">
                 <TextInput
                   className="border border-gray-300 p-4 rounded-lg my-3 w-full text-lg"
@@ -265,67 +193,78 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
                   fullWidth
                 />
               </View>
-            ) : (
-              // All-at-once mode - has answered
-              <View className="bg-blue-100 p-4 rounded-lg my-4 w-full">
-                {isCorrect === null ? (
-                  // Waiting for judgment
-                  <>
-                    <Text className="text-center font-bold text-blue-800 mb-1">
-                      回答を提出しました
-                    </Text>
-                    <Text className="text-center text-blue-600">ホストの判定をお待ちください</Text>
-                  </>
-                ) : isCorrect ? (
-                  // Correct
-                  <>
-                    <Text className="text-center font-bold text-green-800 mb-1">正解！</Text>
-                    <Text className="text-center text-green-600">
-                      あなたの回答が正解と判定されました
-                    </Text>
-                  </>
-                ) : (
-                  // Incorrect
-                  <>
-                    <Text className="text-center font-bold text-red-800 mb-1">不正解</Text>
-                    <Text className="text-center text-red-600">
-                      あなたの回答が不正解と判定されました
-                    </Text>
-                    <Text className="text-center text-black mt-2">正解: {questionText}</Text>
-                  </>
-                )}
-              </View>
-            )}
+            </>
+          ) : (
+            // Someone else has buzzed in
+            <View className="bg-red-100 p-3 rounded-lg w-full">
+              <Text className="text-red-800 text-center">他の参加者が回答中です</Text>
+            </View>
+          )}
+        </>
+      ) : !showResult ? (
+        // All-at-once mode - hasn't answered yet
+        <View className="w-full mt-4 mb-6">
+          <TextInput
+            className="border border-gray-300 p-4 rounded-lg my-3 w-full text-lg"
+            placeholder="聞こえたフレーズを入力"
+            value={answer}
+            onChangeText={setAnswer}
+            editable={!showResult}
+            returnKeyType="done"
+            onSubmitEditing={() => Keyboard.dismiss()}
+          />
 
-            {/* Result display for first-come mode */}
-            {showResult && isFirstComeMode && (
-              <View className="mt-6 items-center">
-                <Text
-                  className={
-                    isCorrect
-                      ? 'text-green-600 font-bold text-lg'
-                      : 'text-red-600 font-bold text-lg'
-                  }
-                >
-                  {isCorrect ? '✓ 正解！' : '✗ 不正解'}
-                </Text>
-                <Text className="mt-2">正解: {questionText}</Text>
-              </View>
-            )}
+          <Button
+            title="解答する"
+            onPress={handleSubmitAnswer}
+            disabled={!answer.trim() || showResult || loading}
+            variant="primary"
+            size="large"
+            fullWidth
+          />
+        </View>
+      ) : (
+        // All-at-once mode - has answered
+        <View className="bg-blue-100 p-4 rounded-lg my-4 w-full">
+          {isCorrect === null ? (
+            // Waiting for judgment
+            <>
+              <Text className="text-center font-bold text-blue-800 mb-1">回答を提出しました</Text>
+              <Text className="text-center text-blue-600">ホストの判定をお待ちください</Text>
+            </>
+          ) : isCorrect ? (
+            // Correct
+            <>
+              <Text className="text-center font-bold text-green-800 mb-1">正解！</Text>
+              <Text className="text-center text-green-600">あなたの回答が正解と判定されました</Text>
+            </>
+          ) : (
+            // Incorrect
+            <>
+              <Text className="text-center font-bold text-red-800 mb-1">不正解</Text>
+              <Text className="text-center text-red-600">あなたの回答が不正解と判定されました</Text>
+              <Text className="text-center text-black mt-2">正解: {questionText}</Text>
+            </>
+          )}
+        </View>
+      )}
 
-            {loading && <LoadingSpinner />}
-            <ErrorMessage message={error} />
-          </View>
-        </TouchableWithoutFeedback>
-      </ScrollView>
+      {/* Result display for first-come mode */}
+      {showResult && isFirstComeMode && (
+        <View className="mt-6 items-center">
+          <Text
+            className={
+              isCorrect ? 'text-green-600 font-bold text-lg' : 'text-red-600 font-bold text-lg'
+            }
+          >
+            {isCorrect ? '✓ 正解！' : '✗ 不正解'}
+          </Text>
+          <Text className="mt-2">正解: {questionText}</Text>
+        </View>
+      )}
 
-      {/* スタンプ選択モーダル */}
-      {/* <StampSelector
-        visible={stampModalVisible}
-        onClose={() => setStampModalVisible(false)}
-        onSelectStamp={onSendStamp}
-        loading={loading}
-      /> */}
-    </KeyboardAvoidingView>
+      {loading && <LoadingSpinner />}
+      <ErrorMessage message={error} />
+    </View>
   );
 };

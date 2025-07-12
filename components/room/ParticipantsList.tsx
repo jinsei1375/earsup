@@ -97,138 +97,141 @@ export const ParticipantsList: React.FC<ParticipantsListProps> = ({
         ></Button>
       </View>
 
-      <ScrollView className="w-full max-h-[300px] my-2">
-        {sortedParticipants.length === 0 ? (
-          <View className="p-6 bg-gray-50 rounded-xl items-center">
-            <Text className="text-gray-500 text-center text-base">参加者がいません</Text>
-          </View>
-        ) : (
-          sortedParticipants.map((participant, index) => {
-            const stats = participantStats?.find((s) => s.userId === participant.id);
-            const isHost = participant.id === hostUserId;
-            const rank = getRank(participant.id);
+      <View className="w-full my-2 border-2 border-gray-300 rounded-xl bg-gray-50 p-1 max-h-[300px]">
+        <ScrollView showsVerticalScrollIndicator={true} nestedScrollEnabled={true} bounces={false}>
+          {sortedParticipants.length === 0 ? (
+            <View className="p-6 bg-gray-50 rounded-xl items-center">
+              <Text className="text-gray-500 text-center text-base">参加者がいません</Text>
+            </View>
+          ) : (
+            sortedParticipants.map((participant, index) => {
+              const stats = participantStats?.find((s) => s.userId === participant.id);
+              const isHost = participant.id === hostUserId;
+              const rank = getRank(participant.id);
 
-            return (
-              <View
-                key={participant.id}
-                className={`mb-3 p-4 rounded-xl shadow-sm ${
-                  isHost
-                    ? 'bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200'
-                    : 'bg-white border border-gray-200'
-                }`}
-              >
-                <View className="flex-row justify-between items-start">
-                  <View className="flex-1">
-                    <View className="flex-row items-center mb-2">
-                      {isHost && <View className="bg-blue-500 rounded-full w-3 h-3 mr-2" />}
-                      <Text
-                        className={`text-lg ${
-                          isHost ? 'font-bold text-blue-800' : 'font-semibold text-gray-800'
-                        }`}
-                      >
-                        {participant.nickname}
-                      </Text>
-                      {isHost && (
-                        <View className="ml-2 bg-blue-500 px-3 py-1 rounded-full">
-                          <Text className="text-xs text-white font-bold">ホスト</Text>
-                        </View>
-                      )}
-                      {rank && (
-                        <View
-                          className={`ml-2 px-2 py-1 rounded-full ${
-                            rank === 1
-                              ? 'bg-yellow-100'
-                              : rank === 2
-                              ? 'bg-gray-100'
-                              : rank === 3
-                              ? 'bg-orange-100'
-                              : 'bg-blue-50'
+              return (
+                <View
+                  key={participant.id}
+                  className={`mb-3 p-4 rounded-xl shadow-sm ${
+                    isHost
+                      ? 'bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200'
+                      : 'bg-white border border-gray-200'
+                  }`}
+                >
+                  <View className="flex-row justify-between items-start">
+                    <View className="flex-1">
+                      <View className="flex-row items-center mb-2">
+                        {isHost && <View className="bg-blue-500 rounded-full w-3 h-3 mr-2" />}
+                        <Text
+                          className={`text-lg ${
+                            isHost ? 'font-bold text-blue-800' : 'font-semibold text-gray-800'
                           }`}
                         >
-                          <Text
-                            className={`text-xs font-bold ${
+                          {participant.nickname}
+                        </Text>
+                        {isHost && (
+                          <View className="ml-2 bg-blue-500 px-3 py-1 rounded-full">
+                            <Text className="text-xs text-white font-bold">ホスト</Text>
+                          </View>
+                        )}
+                        {rank && (
+                          <View
+                            className={`ml-2 px-2 py-1 rounded-full ${
                               rank === 1
-                                ? 'text-yellow-700'
+                                ? 'bg-yellow-100'
                                 : rank === 2
-                                ? 'text-gray-700'
+                                ? 'bg-gray-100'
                                 : rank === 3
-                                ? 'text-orange-700'
-                                : 'text-blue-600'
+                                ? 'bg-orange-100'
+                                : 'bg-blue-50'
                             }`}
                           >
-                            {rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : ''}
-                            {rank}位
+                            <Text
+                              className={`text-xs font-bold ${
+                                rank === 1
+                                  ? 'text-yellow-700'
+                                  : rank === 2
+                                  ? 'text-gray-700'
+                                  : rank === 3
+                                  ? 'text-orange-700'
+                                  : 'text-blue-600'
+                              }`}
+                            >
+                              {rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : ''}
+                              {rank}位
+                            </Text>
+                          </View>
+                        )}
+                      </View>
+                    </View>
+
+                    {stats && !isHost && (
+                      <View className="items-end min-w-[100px]">
+                        <View className="flex-row items-center mb-1">
+                          <Text className="text-2xl font-bold text-green-600 mr-1">
+                            {stats.correctAnswers}
                           </Text>
+                          <Text className="text-sm text-gray-500">/{stats.totalAnswers}問</Text>
                         </View>
-                      )}
-                    </View>
+
+                        {stats.totalAnswers > 0 && (
+                          <>
+                            <View className="w-20 h-2 bg-gray-200 rounded-full mb-1">
+                              <View
+                                className="h-full bg-green-500 rounded-full"
+                                style={{
+                                  width: `${getProgressWidth(
+                                    stats.correctAnswers,
+                                    stats.totalAnswers
+                                  )}%`,
+                                }}
+                              />
+                            </View>
+                            <Text className="text-xs text-green-600 font-medium mb-1">
+                              正解率 {Math.round((stats.correctAnswers / stats.totalAnswers) * 100)}
+                              %
+                            </Text>
+
+                            {/* Streak information */}
+                            <View className="flex-row items-center">
+                              {stats.currentStreak > 0 && (
+                                <View className="bg-orange-100 px-2 py-1 rounded-full mr-1">
+                                  <Text className="text-xs text-orange-700 font-bold">
+                                    🔥{stats.currentStreak}連続
+                                  </Text>
+                                </View>
+                              )}
+                              {stats.maxStreak > 1 && (
+                                <View className="bg-purple-100 px-2 py-1 rounded-full">
+                                  <Text className="text-xs text-purple-700 font-medium">
+                                    最高{stats.maxStreak}連続
+                                  </Text>
+                                </View>
+                              )}
+                            </View>
+                          </>
+                        )}
+
+                        {stats.totalAnswers === 0 && (
+                          <Text className="text-xs text-gray-400 mt-1">未回答</Text>
+                        )}
+                      </View>
+                    )}
+
+                    {!stats && !isHost && participantStats && (
+                      <View className="items-end min-w-[100px]">
+                        <View className="bg-gray-100 px-3 py-2 rounded-lg">
+                          <Text className="text-xs text-gray-500 text-center">未参加</Text>
+                        </View>
+                      </View>
+                    )}
                   </View>
-
-                  {stats && !isHost && (
-                    <View className="items-end min-w-[100px]">
-                      <View className="flex-row items-center mb-1">
-                        <Text className="text-2xl font-bold text-green-600 mr-1">
-                          {stats.correctAnswers}
-                        </Text>
-                        <Text className="text-sm text-gray-500">/{stats.totalAnswers}問</Text>
-                      </View>
-
-                      {stats.totalAnswers > 0 && (
-                        <>
-                          <View className="w-20 h-2 bg-gray-200 rounded-full mb-1">
-                            <View
-                              className="h-full bg-green-500 rounded-full"
-                              style={{
-                                width: `${getProgressWidth(
-                                  stats.correctAnswers,
-                                  stats.totalAnswers
-                                )}%`,
-                              }}
-                            />
-                          </View>
-                          <Text className="text-xs text-green-600 font-medium mb-1">
-                            正解率 {Math.round((stats.correctAnswers / stats.totalAnswers) * 100)}%
-                          </Text>
-
-                          {/* Streak information */}
-                          <View className="flex-row items-center">
-                            {stats.currentStreak > 0 && (
-                              <View className="bg-orange-100 px-2 py-1 rounded-full mr-1">
-                                <Text className="text-xs text-orange-700 font-bold">
-                                  🔥{stats.currentStreak}連続
-                                </Text>
-                              </View>
-                            )}
-                            {stats.maxStreak > 1 && (
-                              <View className="bg-purple-100 px-2 py-1 rounded-full">
-                                <Text className="text-xs text-purple-700 font-medium">
-                                  最高{stats.maxStreak}連続
-                                </Text>
-                              </View>
-                            )}
-                          </View>
-                        </>
-                      )}
-
-                      {stats.totalAnswers === 0 && (
-                        <Text className="text-xs text-gray-400 mt-1">未回答</Text>
-                      )}
-                    </View>
-                  )}
-
-                  {!stats && !isHost && participantStats && (
-                    <View className="items-end min-w-[100px]">
-                      <View className="bg-gray-100 px-3 py-2 rounded-lg">
-                        <Text className="text-xs text-gray-500 text-center">未参加</Text>
-                      </View>
-                    </View>
-                  )}
                 </View>
-              </View>
-            );
-          })
-        )}
-      </ScrollView>
+              );
+            })
+          )}
+        </ScrollView>
+      </View>
     </>
   );
 };
