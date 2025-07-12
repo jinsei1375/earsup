@@ -6,13 +6,13 @@ import { Button } from '@/components/common/Button';
 interface StampSelectorProps {
   visible: boolean;
   onClose: () => void;
-  onSelectStamp: (stampType: string) => void;
+  onSelectStamp: (stamp: { type: string; x: number; y: number }) => void;
   loading?: boolean;
   stamps?: { type: string; emoji: string; text: string }[]; // DBから取得した場合
 }
 
 // デフォルトの絵文字スタンプ
-const AVAILABLE_STAMPS = [
+export const AVAILABLE_STAMPS = [
   { type: 'amazing', emoji: '😍', text: 'すごい！' },
   { type: 'frustrated', emoji: '😤', text: '悔しい！' },
   { type: 'thumbs_up', emoji: '👍', text: 'いいね！' },
@@ -28,8 +28,16 @@ export const StampSelector: React.FC<StampSelectorProps> = ({
   loading = false,
   // stamps,
 }) => {
+  // ランダム座標生成（画面サイズに応じて調整）
+  const getRandomPosition = () => {
+    const x = Math.floor(Math.random() * 240) + 40; // left: 40~280px
+    const y = Math.floor(Math.random() * 320) + 80; // top: 80~400px
+    return { x, y };
+  };
+
   const handleStampSelect = (stampType: string) => {
-    // onSelectStamp(stampType);
+    const pos = getRandomPosition();
+    onSelectStamp({ type: stampType, ...pos });
     onClose();
   };
 

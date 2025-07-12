@@ -324,8 +324,8 @@ export default function QuizScreen() {
             onBuzzIn={handleBuzzIn}
             onSubmitAnswer={handleSubmitAnswer}
             onRefreshState={handleRefreshState}
-            stamps={stamps}
-            onSendStamp={handleSendStamp}
+            // stamps={stamps}
+            // onSendStamp={handleSendStamp}
           />
         </ScrollView>
 

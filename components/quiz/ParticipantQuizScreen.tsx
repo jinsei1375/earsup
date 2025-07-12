@@ -22,8 +22,20 @@ import {
 } from '@/utils/quizUtils';
 import { ParticipantsList } from '@/components/room/ParticipantsList';
 import { StampSelector } from '@/components/quiz/StampSelector';
-import { StampDisplay } from '@/components/quiz/StampDisplay';
-import type { Room, RealtimeConnectionState, ParticipantWithNickname, Answer, Stamp } from '@/types';
+import { AVAILABLE_STAMPS } from '@/components/quiz/StampSelector';
+import type {
+  Room,
+  RealtimeConnectionState,
+  ParticipantWithNickname,
+  Answer,
+  Stamp,
+} from '@/types';
+
+interface StampWithPosition {
+  type: string;
+  x: number;
+  y: number;
+}
 
 interface ParticipantQuizScreenProps {
   room: Room | null;
@@ -41,8 +53,8 @@ interface ParticipantQuizScreenProps {
   onSubmitAnswer: (answer: string) => Promise<void>;
   onRefreshState: () => void;
   // Stamp-related props
-  stamps: Stamp[];
-  onSendStamp: (stampType: string) => Promise<void>;
+  // stamps: StampWithPosition[];
+  // onSendStamp: (stamp: StampWithPosition) => void;
 }
 
 export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
@@ -60,8 +72,8 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
   onBuzzIn,
   onSubmitAnswer,
   onRefreshState,
-  stamps,
-  onSendStamp,
+  // stamps,
+  // onSendStamp,
 }) => {
   const [answer, setAnswer] = useState('');
   const [stampModalVisible, setStampModalVisible] = useState(false);
@@ -80,6 +92,26 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
       setAnswer('');
     }
   };
+
+  // スタンプを画面上にランダムな位置で表示
+  // const renderStamps = () =>
+  //   stamps.map((stamp, idx) => {
+  //     const emoji = AVAILABLE_STAMPS.find((s) => s.type === stamp.type)?.emoji || '❓';
+  //     return (
+  //       <View
+  //         key={idx}
+  //         style={{
+  //           position: 'absolute',
+  //           left: stamp.x,
+  //           top: stamp.y,
+  //           zIndex: 100,
+  //           pointerEvents: 'none',
+  //         }}
+  //       >
+  //         <Text style={{ fontSize: 36 }}>{emoji}</Text>
+  //       </View>
+  //     );
+  //   });
 
   // Handle quiz ending
   if (isQuizEnded(room?.status || '')) {
@@ -116,6 +148,13 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
       className="flex-1"
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
+      {/* スタンプ表示レイヤー */}
+      {/* <View
+        style={{ position: 'absolute', left: 0, top: 0, width: '100%', height: '100%' }}
+        pointerEvents="none"
+      >
+        {renderStamps()}
+      </View> */}
       <ScrollView
         contentContainerStyle={{ flexGrow: 1, padding: 24, paddingBottom: 20 }}
         keyboardShouldPersistTaps="handled"
@@ -137,7 +176,7 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
             />
 
             {/* スタンプ機能 */}
-            <View className="w-full my-4">
+            {/* <View className="w-full my-4">
               <View className="flex-row justify-between items-center mb-2">
                 <Text className="text-sm font-medium text-gray-700">リアクション</Text>
                 <Button
@@ -147,9 +186,9 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
                   size="small"
                   disabled={loading}
                 />
-              </View>
-              <StampDisplay stamps={stamps} />
-            </View>
+              </View> */}
+            {/* <StampDisplay stamps={stamps} /> */}
+            {/* </View> */}
 
             <Text className="text-lg font-bold text-green-500 my-4">問題が出題されました!</Text>
 
@@ -279,14 +318,14 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
           </View>
         </TouchableWithoutFeedback>
       </ScrollView>
-      
+
       {/* スタンプ選択モーダル */}
-      <StampSelector
+      {/* <StampSelector
         visible={stampModalVisible}
         onClose={() => setStampModalVisible(false)}
         onSelectStamp={onSendStamp}
         loading={loading}
-      />
+      /> */}
     </KeyboardAvoidingView>
   );
 };
