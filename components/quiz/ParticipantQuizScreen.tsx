@@ -165,21 +165,11 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <Text className="text-xl font-bold mb-4 text-center">リスニングクイズ</Text>
-
-        {/* 参加者リスト */}
-        <ParticipantsList
-          participants={participants}
-          hostUserId={room?.host_user_id}
-          loading={false}
-          onRefresh={onRefreshState}
-          answers={allRoomAnswers}
-        />
-
-        <Text className="text-lg font-bold text-green-500 my-4 text-center">
+        <Text className="text-lg font-bold text-green-500 mb-4 text-center">
           問題が出題されました!
         </Text>
 
+        {/* クイズコンテンツ - 優先表示 */}
         {isFirstComeMode ? (
           // First-come mode
           <>
@@ -192,7 +182,7 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
                 variant="primary"
                 size="large"
                 fullWidth
-                className="my-4"
+                className="mb-4"
               />
             ) : hasBuzzedIn ? (
               // User has buzzed in
@@ -201,10 +191,10 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
                   <Text className="text-green-800 text-center">あなたが回答権を獲得しました！</Text>
                 </View>
 
-                <View className="w-full mt-4 mb-6">
+                <View className="w-full mb-4">
                   <TextInput
                     ref={inputRef}
-                    className="border border-gray-300 p-4 rounded-lg my-3 w-full text-lg"
+                    className="border border-gray-300 p-4 rounded-lg mb-3 w-full text-lg"
                     placeholder="聞こえたフレーズを入力"
                     value={answer}
                     onChangeText={setAnswer}
@@ -227,17 +217,17 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
               </>
             ) : (
               // Someone else has buzzed in
-              <View className="bg-red-100 p-3 rounded-lg w-full">
+              <View className="bg-red-100 p-3 rounded-lg w-full mb-4">
                 <Text className="text-red-800 text-center">他の参加者が回答中です</Text>
               </View>
             )}
           </>
         ) : !showResult ? (
           // All-at-once mode - hasn't answered yet
-          <View className="w-full mt-4 mb-6">
+          <View className="w-full mb-4">
             <TextInput
               ref={inputRef}
-              className="border border-gray-300 p-4 rounded-lg my-3 w-full text-lg"
+              className="border border-gray-300 p-4 rounded-lg mb-3 w-full text-lg"
               placeholder="聞こえたフレーズを入力"
               value={answer}
               onChangeText={setAnswer}
@@ -259,7 +249,7 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
           </View>
         ) : (
           // All-at-once mode - has answered
-          <View className="bg-blue-100 p-4 rounded-lg my-4 w-full">
+          <View className="bg-blue-100 p-4 rounded-lg mb-4 w-full">
             {isCorrect === null ? (
               // Waiting for judgment
               <>
@@ -289,7 +279,7 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
 
         {/* Result display for first-come mode */}
         {showResult && isFirstComeMode && (
-          <View className="mt-6 items-center">
+          <View className="mb-4 items-center">
             <Text
               className={
                 isCorrect ? 'text-green-600 font-bold text-lg' : 'text-red-600 font-bold text-lg'
@@ -300,6 +290,19 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
             <Text className="mt-2">正解: {questionText}</Text>
           </View>
         )}
+
+        {/* 参加者リスト - コンパクト表示 */}
+        <View className="mt-4">
+          <View style={{ maxHeight: 300 }}>
+            <ParticipantsList
+              participants={participants}
+              hostUserId={room?.host_user_id}
+              loading={false}
+              onRefresh={onRefreshState}
+              answers={allRoomAnswers}
+            />
+          </View>
+        </View>
 
         {loading && <LoadingSpinner variant="dots" color="#6366F1" />}
         <ErrorMessage message={error} />

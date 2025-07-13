@@ -1,6 +1,6 @@
 // components/quiz/HostQuizScreen.tsx
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { AnswersList } from './AnswersList';
 import { BuzzInSection } from './BuzzInSection';
 import { ParticipantsList } from '@/components/room/ParticipantsList';
@@ -56,9 +56,13 @@ export const HostQuizScreen: React.FC<HostQuizScreenProps> = ({
   const allAnswersJudged = answers.length > 0 && answers.every((answer) => answer.judged);
 
   return (
-    <View className="flex-1 p-6">
-      <Text className="text-xl font-bold mb-4 text-center">出題中</Text>
-
+    <ScrollView className="flex-1 p-6 pb-10" showsVerticalScrollIndicator={false}>
+      {/* Quiz mode display */}
+      <View className="flex-row items-center justify-center mb-4">
+        <Text className="text-sm bg-blue-100 px-3 py-1 rounded-full">
+          {getQuizModeDisplayName(isFirstComeMode ? 'first-come' : 'all-at-once')}
+        </Text>
+      </View>
       {/* Silent mode warning */}
       {showSilentModeWarning && (
         <View className="mb-4 p-3 bg-yellow-100 border border-yellow-400 rounded-lg w-full">
@@ -79,23 +83,8 @@ export const HostQuizScreen: React.FC<HostQuizScreenProps> = ({
         </View>
       )}
 
-      {/* Quiz mode display */}
-      <View className="flex-row items-center mb-4">
-        <Text className="text-sm bg-blue-100 px-3 py-1 rounded-full">
-          {getQuizModeDisplayName(isFirstComeMode ? 'first-come' : 'all-at-once')}
-        </Text>
-      </View>
-
-      {/* Participant stats */}
-      <ParticipantsList
-        participants={participants}
-        hostUserId={hostUserId}
-        loading={false}
-        onRefresh={() => {}} // No refresh needed in host view
-        answers={allRoomAnswers}
-      />
-
-      <Text className="text-lg my-4 text-center">{questionText}</Text>
+      {/* メイン操作エリア - 優先表示 */}
+      <Text className="text-lg mb-4 text-center font-semibold">{questionText}</Text>
 
       {/* Speed selection */}
       <Text className="text-sm text-gray-600 mb-2">音声再生速度:</Text>
@@ -135,6 +124,7 @@ export const HostQuizScreen: React.FC<HostQuizScreenProps> = ({
         variant="primary"
         size="large"
         fullWidth
+        className="mb-4"
       />
 
       {/* Buzz-in management for first-come mode */}
@@ -178,9 +168,24 @@ export const HostQuizScreen: React.FC<HostQuizScreenProps> = ({
         variant="danger"
         fullWidth
         disabled={loading}
+        className="mb-4"
       />
+
+      {/* 参加者リスト - コンパクト表示 */}
+      <View className="my-4">
+        <View style={{ maxHeight: 300 }}>
+          <ParticipantsList
+            participants={participants}
+            hostUserId={hostUserId}
+            loading={false}
+            onRefresh={() => {}} // No refresh needed in host view
+            answers={allRoomAnswers}
+          />
+        </View>
+      </View>
+
       {loading && <LoadingSpinner variant="default" color="#3B82F6" />}
       <ErrorMessage message={error} />
-    </View>
+    </ScrollView>
   );
 };
