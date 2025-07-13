@@ -159,7 +159,6 @@ export const ParticipantsList: React.FC<ParticipantsListProps> = ({
                                   : 'text-blue-600'
                               }`}
                             >
-                              {rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : ''}
                               {rank}位
                             </Text>
                           </View>
@@ -171,8 +170,9 @@ export const ParticipantsList: React.FC<ParticipantsListProps> = ({
                       <View className="items-end min-w-[100px]">
                         <View className="flex-row items-center mb-1">
                           <Text className="text-2xl font-bold text-blue-600 mr-1">
-                            {stats.points}ポイント
+                            {stats.points}
                           </Text>
+                          <Text className="text-xs text-gray-500">ポイント</Text>
                           <Text className="text-sm text-gray-500">
                             ({stats.correctAnswers}/{stats.totalAnswers}問)
                           </Text>
