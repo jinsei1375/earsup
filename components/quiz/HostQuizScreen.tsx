@@ -7,6 +7,7 @@ import { ParticipantsList } from '@/components/room/ParticipantsList';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { ErrorMessage } from '@/components/common/ErrorMessage';
 import { Button } from '@/components/common/Button';
+import { ExitRoomModal } from '@/components/common/ExitRoomModal';
 import { getQuizModeDisplayName } from '@/utils/quizUtils';
 import { speakText } from '@/utils/quizUtils';
 import type { Answer, ParticipantWithNickname } from '@/types';
@@ -54,10 +55,16 @@ export const HostQuizScreen: React.FC<HostQuizScreenProps> = ({
 }) => {
   const [selectedSpeed, setSelectedSpeed] = useState(1.0);
   const [showSilentModeWarning, setShowSilentModeWarning] = useState(true);
+  const [showExitModal, setShowExitModal] = useState(false);
 
   const handlePlayQuestion = () => {
     if (!questionText) return;
     speakText(questionText, { rate: selectedSpeed });
+  };
+
+  const handleEndQuiz = () => {
+    setShowExitModal(false);
+    onEndQuiz();
   };
 
   // 全ての回答が判定されているかチェック
@@ -174,7 +181,7 @@ export const HostQuizScreen: React.FC<HostQuizScreenProps> = ({
 
       <Button
         title="クイズを終了する"
-        onPress={onEndQuiz}
+        onPress={() => setShowExitModal(true)}
         variant="danger"
         fullWidth
         disabled={loading}
@@ -197,6 +204,14 @@ export const HostQuizScreen: React.FC<HostQuizScreenProps> = ({
 
       {loading && <LoadingSpinner variant="default" color="#3B82F6" />}
       <ErrorMessage message={error} />
+
+      {/* クイズ終了確認モーダル */}
+      <ExitRoomModal
+        isVisible={showExitModal}
+        onClose={() => setShowExitModal(false)}
+        onConfirmExit={handleEndQuiz}
+        isHost={true}
+      />
     </ScrollView>
   );
 };

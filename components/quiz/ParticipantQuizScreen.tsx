@@ -268,26 +268,33 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
             ) : isAnswerCorrect ? (
               // Correct
               <>
-                <Text className="text-center font-bold text-green-800 mb-1">正解！</Text>
-                <Text className="text-center text-green-600">
-                  あなたの回答が正解と判定されました
+                <Text className="text-center font-bold text-green-500 mb-1">◯正解</Text>
+                <Text className="text-center font-bold text-yellow-600 text-lg mb-2">
+                  10ポイントGET！
+                </Text>
+
+                <Text className="text-center text-blue-600 mt-2">
+                  あなたの回答: 「{userAnswer?.answer_text}」
                 </Text>
               </>
             ) : isPartialAnswer ? (
               // Partial (惜しい)
               <>
-                <Text className="text-center font-bold text-orange-800 mb-1">惜しい！</Text>
-                <Text className="text-center text-orange-600">
-                  あなたの回答は惜しいと判定されました
+                <Text className="text-center font-bold text-orange-500 mb-1">△惜しい</Text>
+                <Text className="text-center font-bold text-yellow-600 text-lg mb-2">
+                  5ポイントGET！
+                </Text>
+                <Text className="text-center text-blue-600 mt-2">
+                  あなたの回答: 「{userAnswer?.answer_text}」
                 </Text>
                 <Text className="text-center text-black mt-2">正解: {questionText}</Text>
               </>
             ) : (
               // Incorrect
               <>
-                <Text className="text-center font-bold text-red-800 mb-1">不正解</Text>
-                <Text className="text-center text-red-600">
-                  あなたの回答が不正解と判定されました
+                <Text className="text-center font-bold text-red-500 mb-1">×不正解</Text>
+                <Text className="text-center text-blue-600 mt-2">
+                  あなたの回答: 「{userAnswer?.answer_text}」
                 </Text>
                 <Text className="text-center text-black mt-2">正解: {questionText}</Text>
               </>
@@ -309,6 +316,14 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
             >
               {isAnswerCorrect ? '✓ 正解！' : isPartialAnswer ? '△ 惜しい！' : '✗ 不正解'}
             </Text>
+            {(isAnswerCorrect || isPartialAnswer) && (
+              <Text className="text-yellow-600 font-bold text-lg mt-1">
+                {isAnswerCorrect ? '🎉 10ポイントGET！ 🎉' : '✨ 5ポイントGET！ ✨'}
+              </Text>
+            )}
+            {userAnswer && (
+              <Text className="text-blue-600 mt-2">あなたの回答: 「{userAnswer.answer_text}」</Text>
+            )}
             <Text className="mt-2">正解: {questionText}</Text>
           </View>
         )}
