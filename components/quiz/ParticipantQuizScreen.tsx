@@ -166,7 +166,7 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
         showsVerticalScrollIndicator={false}
       >
         <Text className="text-lg font-bold text-green-500 mb-4 text-center">
-          問題が出題されました!
+          聞こえたフレーズを入力してください
         </Text>
 
         {/* クイズコンテンツ - 優先表示 */}
@@ -239,7 +239,7 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
             />
 
             <Button
-              title="解答する"
+              title="回答する"
               onPress={handleSubmitAnswer}
               disabled={!answer.trim() || showResult || loading}
               variant="primary"
