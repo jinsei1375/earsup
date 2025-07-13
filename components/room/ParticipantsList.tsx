@@ -4,6 +4,7 @@ import { View, Text, ScrollView } from 'react-native';
 import type { ParticipantWithNickname, Answer } from '@/types';
 import { calculateParticipantStats } from '@/utils/quizUtils';
 import { Button } from '@/components/common/Button';
+import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 
 interface ParticipantsListProps {
   participants: ParticipantWithNickname[];
@@ -96,7 +97,8 @@ export const ParticipantsList: React.FC<ParticipantsListProps> = ({
           size="small"
           onPress={onRefresh}
           disabled={loading}
-        ></Button>
+        />
+        {loading && <LoadingSpinner variant="default" color="#3B82F6" size="small" />}
       </View>
 
       <View className="w-full my-2 border-2 border-gray-300 rounded-xl bg-gray-50 p-1 max-h-[300px]">

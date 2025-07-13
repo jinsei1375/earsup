@@ -309,9 +309,9 @@ export default function QuizScreen() {
             <Text className="text-base text-gray-600 text-center mb-4">
               ホストが問題を準備中です。しばらくお待ちください。
             </Text>
-            <LoadingSpinner variant="pulse" color="#8B5CF6" size="large" className="mb-4" />
+            <LoadingSpinner variant="sound-wave" color="#8B5CF6" size="large" className="mb-4" />
 
-            {loading && <LoadingSpinner />}
+            {loading && <LoadingSpinner variant="default" color="#3B82F6" />}
             <ErrorMessage message={error} />
 
             <ExitRoomModal

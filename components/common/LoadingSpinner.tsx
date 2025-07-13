@@ -21,15 +21,18 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   const dot2 = useRef(new Animated.Value(0)).current;
   const dot3 = useRef(new Animated.Value(0)).current;
   const wave1 = useRef(new Animated.Value(0.3)).current;
-  const wave2 = useRef(new Animated.Value(0.3)).current;
-  const wave3 = useRef(new Animated.Value(0.3)).current;
-  const wave4 = useRef(new Animated.Value(0.3)).current;
+  const wave2 = useRef(new Animated.Value(0.5)).current;
+  const wave3 = useRef(new Animated.Value(0.7)).current;
+  const wave4 = useRef(new Animated.Value(0.4)).current;
 
   const spinnerSize = size === 'large' ? 40 : 24;
   const dotSize = size === 'large' ? 8 : 6;
 
   useEffect(() => {
     if (variant === 'default') {
+      // アニメーション値をリセット
+      spinValue.setValue(0);
+
       // 回転アニメーション
       const spin = Animated.loop(
         Animated.timing(spinValue, {
@@ -42,6 +45,9 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
       spin.start();
       return () => spin.stop();
     } else if (variant === 'pulse') {
+      // アニメーション値をリセット
+      pulseValue.setValue(1);
+
       // パルスアニメーション
       const pulse = Animated.loop(
         Animated.sequence([
@@ -62,6 +68,11 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
       pulse.start();
       return () => pulse.stop();
     } else if (variant === 'dots') {
+      // アニメーション値をリセット
+      dot1.setValue(0);
+      dot2.setValue(0);
+      dot3.setValue(0);
+
       // ドットアニメーション
       const createDotAnimation = (dot: Animated.Value, delay: number) => {
         return Animated.loop(
@@ -91,32 +102,39 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
       dotAnimations.start();
       return () => dotAnimations.stop();
     } else if (variant === 'sound-wave') {
-      // 音波アニメーション
+      // アニメーション値をリセット
+      wave1.setValue(0.3);
+      wave2.setValue(0.5);
+      wave3.setValue(0.7);
+      wave4.setValue(0.4);
+
+      // 音波アニメーション - よりゆっくりとした動き
       const createWaveAnimation = (wave: Animated.Value, delay: number) => {
         return Animated.loop(
           Animated.sequence([
             Animated.delay(delay),
             Animated.timing(wave, {
               toValue: 1,
-              duration: 500,
-              easing: Easing.out(Easing.quad),
-              useNativeDriver: true,
+              duration: 800, // 400ms → 800msに変更
+              easing: Easing.bezier(0.4, 0.0, 0.6, 1), // より滑らかなイージング
+              useNativeDriver: false, // heightを使うためfalseに変更
             }),
             Animated.timing(wave, {
               toValue: 0.3,
-              duration: 500,
-              easing: Easing.in(Easing.quad),
-              useNativeDriver: true,
+              duration: 800, // 400ms → 800msに変更
+              easing: Easing.bezier(0.4, 0.0, 0.6, 1), // より滑らかなイージング
+              useNativeDriver: false, // heightを使うためfalseに変更
             }),
           ])
         );
       };
 
-      const waveAnimations = Animated.parallel([
+      const waveAnimations = Animated.stagger(150, [
+        // 100ms → 150msに変更
         createWaveAnimation(wave1, 0),
-        createWaveAnimation(wave2, 150),
-        createWaveAnimation(wave3, 300),
-        createWaveAnimation(wave4, 450),
+        createWaveAnimation(wave2, 0),
+        createWaveAnimation(wave3, 0),
+        createWaveAnimation(wave4, 0),
       ]);
       waveAnimations.start();
       return () => waveAnimations.stop();
@@ -157,22 +175,29 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   }
 
   if (variant === 'sound-wave') {
+    const waveWidth = size === 'large' ? 5 : 3;
+    const waveMargin = size === 'large' ? 2 : 1;
+
     return (
       <View
         className={`flex-row items-end justify-center ${className}`}
-        style={{ height: spinnerSize }}
+        style={{
+          height: spinnerSize,
+          minHeight: spinnerSize,
+        }}
       >
         {[wave1, wave2, wave3, wave4].map((wave, index) => (
           <Animated.View
             key={index}
             style={{
-              width: size === 'large' ? 4 : 3,
+              width: waveWidth,
               backgroundColor: color,
-              marginHorizontal: 1,
-              borderRadius: 2,
+              marginHorizontal: waveMargin,
+              borderRadius: waveWidth / 2,
               height: wave.interpolate({
                 inputRange: [0.3, 1],
                 outputRange: [spinnerSize * 0.3, spinnerSize],
+                extrapolate: 'clamp',
               }),
             }}
           />
@@ -210,9 +235,8 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
           height: spinnerSize,
           borderRadius: spinnerSize / 2,
           borderWidth: size === 'large' ? 3 : 2,
-          borderColor: 'transparent',
+          borderColor: '#E5E7EB', // light gray
           borderTopColor: color,
-          borderRightColor: `${color}40`, // 25% opacity
           transform: [{ rotate: spin }],
         }}
       />

@@ -157,7 +157,7 @@ export const SampleSentenceModal: React.FC<SampleSentenceModalProps> = ({
               </Text>
               {loading ? (
                 <View className="flex-1 items-center justify-center">
-                  <LoadingSpinner />
+                  <LoadingSpinner variant="default" color="#3B82F6" size="small" />
                 </View>
               ) : (
                 <ScrollView className="flex-1">

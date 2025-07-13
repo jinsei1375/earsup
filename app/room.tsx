@@ -247,11 +247,11 @@ export default function RoomScreen() {
         ) : (
           <View className="mt-5 items-center">
             <Text className="italic mb-4">ホストがクイズを開始するのを待っています...</Text>
-            <LoadingSpinner variant="pulse" color="#8B5CF6" size="large" />
+            <LoadingSpinner variant="sound-wave" color="#8B5CF6" size="large" />
           </View>
         )}
 
-        {loading && <LoadingSpinner variant="dots" color="#3B82F6" />}
+        {loading && <LoadingSpinner variant="default" color="#3B82F6" />}
         <ErrorMessage message={error} />
       </View>
     );

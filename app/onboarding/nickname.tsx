@@ -16,6 +16,7 @@ import { router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Crypto from 'expo-crypto';
 import { Button } from '@/components/common/Button';
+import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 
 export default function NicknameScreen() {
   const [nickname, setNickname] = useState('');
@@ -100,6 +101,11 @@ export default function NicknameScreen() {
                 fullWidth
               />
             </View>
+            {loading && (
+              <View className="flex items-center">
+                <LoadingSpinner variant="dots" color="#3B82F6" />
+              </View>
+            )}
           </View>
         </ScrollView>
       </TouchableWithoutFeedback>

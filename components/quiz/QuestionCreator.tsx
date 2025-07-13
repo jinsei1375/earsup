@@ -85,7 +85,7 @@ export const QuestionCreator: React.FC<QuestionCreatorProps> = ({
                 disabled={!questionText.trim() || loading}
               />
             </View>
-            {loading && <LoadingSpinner />}
+            {loading && <LoadingSpinner variant="dots" color="#3B82F6" />}
             <ErrorMessage message={error} />
           </View>
         </TouchableWithoutFeedback>

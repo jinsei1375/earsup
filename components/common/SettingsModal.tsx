@@ -5,13 +5,14 @@ import {
   Text,
   TextInput,
   Modal,
-  KeyboardAvoidingView,
-  Platform,
   TouchableWithoutFeedback,
+  Platform,
+  KeyboardAvoidingView,
   Keyboard,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Button } from '@/components/common/Button';
+import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 
 interface SettingsModalProps {
   isVisible: boolean;
@@ -119,6 +120,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   className="flex-1"
                 />
               </View>
+
+              {/* Loading Spinner */}
+              {loading && (
+                <View className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-lg">
+                  <LoadingSpinner variant="default" color="#FFFFFF" size="large" />
+                </View>
+              )}
             </KeyboardAvoidingView>
           </TouchableWithoutFeedback>
         </View>
