@@ -19,9 +19,15 @@ interface HostQuizScreenProps {
   participants: ParticipantWithNickname[];
   hostUserId: string; // Added for participant stats
   isFirstComeMode: boolean;
+  allowPartialPoints?: boolean; // 惜しい判定を許可するか
+  judgmentTypes?: Record<string, 'correct' | 'partial' | 'incorrect'>; // 判定タイプ
   loading: boolean;
   error: string | null;
-  onJudgeAnswer: (answerId: string, isCorrect: boolean) => Promise<void>;
+  onJudgeAnswer: (
+    answerId: string,
+    isCorrect: boolean,
+    judgmentType?: 'correct' | 'partial' | 'incorrect'
+  ) => Promise<void>;
   onResetBuzz: () => Promise<void>;
   onRefreshAnswers: () => void;
   onEndQuiz: () => Promise<void>;
@@ -36,6 +42,8 @@ export const HostQuizScreen: React.FC<HostQuizScreenProps> = ({
   participants,
   hostUserId,
   isFirstComeMode,
+  allowPartialPoints = false, // デフォルトで無効
+  judgmentTypes = {}, // デフォルトは空のオブジェクト
   loading,
   error,
   onJudgeAnswer,
@@ -143,6 +151,8 @@ export const HostQuizScreen: React.FC<HostQuizScreenProps> = ({
         answers={answers}
         isHost={true}
         isAllAtOnceMode={!isFirstComeMode}
+        allowPartialPoints={allowPartialPoints}
+        judgmentTypes={judgmentTypes}
         loading={loading}
         onJudgeAnswer={onJudgeAnswer}
         onRefresh={onRefreshAnswers}
@@ -180,6 +190,7 @@ export const HostQuizScreen: React.FC<HostQuizScreenProps> = ({
             loading={false}
             onRefresh={() => {}} // No refresh needed in host view
             answers={allRoomAnswers}
+            judgmentTypes={judgmentTypes}
           />
         </View>
       </View>

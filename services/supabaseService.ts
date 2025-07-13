@@ -16,7 +16,8 @@ export class SupabaseService {
   static async createRoom(
     code: string,
     hostUserId: string,
-    quizMode: 'first-come' | 'all-at-once'
+    quizMode: 'first-come' | 'all-at-once',
+    allowPartialPoints: boolean = true
   ): Promise<Room> {
     const { data, error } = await supabase
       .from('rooms')
@@ -25,6 +26,7 @@ export class SupabaseService {
         host_user_id: hostUserId,
         status: 'waiting',
         quiz_mode: quizMode,
+        allow_partial_points: allowPartialPoints,
       })
       .select()
       .single();
@@ -130,7 +132,7 @@ export class SupabaseService {
     questionId: string,
     answerText: string,
     judged: boolean = false,
-    isCorrect: boolean | null = null
+    judgmentResult: 'correct' | 'partial' | 'incorrect' | null = null
   ): Promise<Answer> {
     const { data, error } = await supabase
       .from('answers')
@@ -140,7 +142,7 @@ export class SupabaseService {
         question_id: questionId,
         answer_text: answerText,
         judged,
-        is_correct: isCorrect,
+        judge_result: judgmentResult,
         created_at: new Date().toISOString(),
       })
       .select()
@@ -183,12 +185,15 @@ export class SupabaseService {
     }));
   }
 
-  static async judgeAnswer(answerId: string, isCorrect: boolean): Promise<void> {
+  static async judgeAnswer(
+    answerId: string,
+    judgmentResult: 'correct' | 'partial' | 'incorrect'
+  ): Promise<void> {
     const { error } = await supabase
       .from('answers')
       .update({
         judged: true,
-        is_correct: isCorrect,
+        judge_result: judgmentResult,
       })
       .eq('id', answerId);
 
@@ -427,7 +432,7 @@ export class SupabaseService {
 
   static async getRecentStampsWithNicknames(roomId: string, limit: number = 10): Promise<Stamp[]> {
     const stamps = await this.getRecentStamps(roomId, limit);
-    
+
     if (!stamps.length) return stamps;
 
     // Get user nicknames

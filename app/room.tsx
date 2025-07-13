@@ -37,6 +37,7 @@ export default function RoomScreen() {
   const [localLoading, setLocalLoading] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
   const [quizMode, setQuizMode] = useState<'first-come' | 'all-at-once'>('all-at-once');
+  const [allowPartialPoints, setAllowPartialPoints] = useState(true); // デフォルトで惜しい判定を有効
 
   // Room data management
   const {
@@ -100,7 +101,7 @@ export default function RoomScreen() {
     setLocalError(null);
 
     try {
-      const roomData = await SupabaseService.createRoom(code, userId, quizMode);
+      const roomData = await SupabaseService.createRoom(code, userId, quizMode, allowPartialPoints);
       setRoomId(roomData.id);
     } catch (err: any) {
       setLocalError(err.message || 'ルーム作成中にエラーが発生しました。');
@@ -305,6 +306,8 @@ export default function RoomScreen() {
                       setQuizMode(mode);
                     }
                   }}
+                  allowPartialPoints={allowPartialPoints}
+                  onPartialPointsChange={setAllowPartialPoints}
                   disabled={loading}
                 />
 

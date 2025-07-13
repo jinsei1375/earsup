@@ -10,6 +10,7 @@ export interface Room {
   host_user_id: string;
   status: 'waiting' | 'ready' | 'active' | 'judged' | 'ended';
   quiz_mode: 'first-come' | 'all-at-once';
+  allow_partial_points?: boolean; // 惜しい判定を許可するか
   created_at: string;
   updated_at: string;
 }
@@ -31,7 +32,7 @@ export interface Answer {
   question_id: string;
   answer_text: string;
   judged: boolean;
-  is_correct: boolean | null;
+  judge_result: 'correct' | 'partial' | 'incorrect' | null; // 判定結果を直接表現
   created_at: string;
   nickname?: string;
 }

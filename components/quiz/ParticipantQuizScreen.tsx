@@ -42,6 +42,7 @@ interface ParticipantQuizScreenProps {
   userId: string | null;
   participants: ParticipantWithNickname[];
   allRoomAnswers: Answer[]; // Changed to allRoomAnswers for cumulative stats
+  judgmentTypes?: Record<string, 'correct' | 'partial' | 'incorrect'>; // 判定タイプ
   connectionState: RealtimeConnectionState;
   loading: boolean;
   error: string | null;
@@ -62,6 +63,7 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
   userId,
   participants,
   allRoomAnswers,
+  judgmentTypes = {}, // デフォルトは空のオブジェクト
   connectionState,
   loading,
   error,
@@ -84,7 +86,14 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
   const canBuzzIn = canParticipantBuzzIn(quizMode, currentBuzzer);
   const hasBuzzedIn = isFirstComeMode && currentBuzzer === userId;
   const otherHasBuzzed = isFirstComeMode && currentBuzzer && currentBuzzer !== userId;
-  const canAnswer = canParticipantAnswer(quizMode, currentBuzzer, userId);
+  const canAnswer = canParticipantAnswer(quizMode, currentBuzzer, userId); // 参加者自身の回答を取得して判定タイプを確認
+  const userAnswer = allRoomAnswers.find((answer) => answer.user_id === userId);
+  const allowPartialPoints = room?.allow_partial_points || false;
+  const userJudgmentResult = userAnswer?.judge_result;
+
+  // 判定結果の確認
+  const isAnswerCorrect = userJudgmentResult === 'correct';
+  const isPartialAnswer = allowPartialPoints && userJudgmentResult === 'partial';
 
   const handleSubmitAnswer = async () => {
     if (answer.trim()) {
@@ -256,13 +265,22 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
                 <Text className="text-center text-blue-600">ホストの判定をお待ちください</Text>
                 <LoadingSpinner size="small" variant="dots" className="mt-2" />
               </>
-            ) : isCorrect ? (
+            ) : isAnswerCorrect ? (
               // Correct
               <>
                 <Text className="text-center font-bold text-green-800 mb-1">正解！</Text>
                 <Text className="text-center text-green-600">
                   あなたの回答が正解と判定されました
                 </Text>
+              </>
+            ) : isPartialAnswer ? (
+              // Partial (惜しい)
+              <>
+                <Text className="text-center font-bold text-orange-800 mb-1">惜しい！</Text>
+                <Text className="text-center text-orange-600">
+                  あなたの回答は惜しいと判定されました
+                </Text>
+                <Text className="text-center text-black mt-2">正解: {questionText}</Text>
               </>
             ) : (
               // Incorrect
@@ -282,10 +300,14 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
           <View className="mb-4 items-center">
             <Text
               className={
-                isCorrect ? 'text-green-600 font-bold text-lg' : 'text-red-600 font-bold text-lg'
+                isAnswerCorrect
+                  ? 'text-green-600 font-bold text-lg'
+                  : isPartialAnswer
+                  ? 'text-orange-600 font-bold text-lg'
+                  : 'text-red-600 font-bold text-lg'
               }
             >
-              {isCorrect ? '✓ 正解！' : '✗ 不正解'}
+              {isAnswerCorrect ? '✓ 正解！' : isPartialAnswer ? '△ 惜しい！' : '✗ 不正解'}
             </Text>
             <Text className="mt-2">正解: {questionText}</Text>
           </View>
@@ -300,6 +322,7 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
               loading={false}
               onRefresh={onRefreshState}
               answers={allRoomAnswers}
+              judgmentTypes={judgmentTypes}
             />
           </View>
         </View>

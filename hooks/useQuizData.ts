@@ -201,11 +201,12 @@ export const useQuizData = (options: UseQuizDataOptions) => {
       setLoading(true);
       try {
         let judged = false;
-        let isCorrect = null;
+        let judgmentResult: 'correct' | 'partial' | 'incorrect' | null = null;
 
         if (autoJudge) {
           judged = true;
-          isCorrect = answerText.trim().toLowerCase() === currentQuestion.text.toLowerCase();
+          const isCorrect = answerText.trim().toLowerCase() === currentQuestion.text.toLowerCase();
+          judgmentResult = isCorrect ? 'correct' : 'incorrect';
         }
 
         const answerData = await SupabaseService.submitAnswer(
@@ -214,7 +215,7 @@ export const useQuizData = (options: UseQuizDataOptions) => {
           currentQuestion.id,
           answerText,
           judged,
-          isCorrect
+          judgmentResult
         );
 
         // Refresh answers
@@ -235,18 +236,24 @@ export const useQuizData = (options: UseQuizDataOptions) => {
   );
 
   const judgeAnswer = useCallback(
-    async (answerId: string, isCorrect: boolean) => {
+    async (answerId: string, judgmentResult: 'correct' | 'partial' | 'incorrect') => {
       if (!isHost) throw new Error('Invalid operation');
 
       // 楽観的UI更新：即座にUIを更新
       setAnswers((prevAnswers) =>
         prevAnswers.map((answer) =>
-          answer.id === answerId ? { ...answer, judged: true, is_correct: isCorrect } : answer
+          answer.id === answerId
+            ? {
+                ...answer,
+                judged: true,
+                judge_result: judgmentResult,
+              }
+            : answer
         )
       );
 
       try {
-        await SupabaseService.judgeAnswer(answerId, isCorrect);
+        await SupabaseService.judgeAnswer(answerId, judgmentResult);
 
         // データベース更新後に最新データを取得（リアルタイム更新のバックアップ）
         const fetchAnswersFunc = fetchAnswersRef.current;
@@ -260,7 +267,7 @@ export const useQuizData = (options: UseQuizDataOptions) => {
         // エラー時は楽観的更新を戻す
         setAnswers((prevAnswers) =>
           prevAnswers.map((answer) =>
-            answer.id === answerId ? { ...answer, judged: false, is_correct: null } : answer
+            answer.id === answerId ? { ...answer, judged: false, judge_result: null } : answer
           )
         );
 

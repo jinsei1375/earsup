@@ -12,6 +12,7 @@ interface ParticipantsListProps {
   loading: boolean;
   onRefresh: () => void;
   answers?: Answer[]; // Added to calculate stats
+  judgmentTypes?: Record<string, 'correct' | 'partial' | 'incorrect'>; // 判定タイプ
 }
 
 export const ParticipantsList: React.FC<ParticipantsListProps> = ({
@@ -20,10 +21,13 @@ export const ParticipantsList: React.FC<ParticipantsListProps> = ({
   loading,
   onRefresh,
   answers = [], // Default to empty array
+  judgmentTypes = {}, // デフォルトは空のオブジェクト
 }) => {
   // Calculate stats only if answers are provided (during quiz)
   const participantStats =
-    answers.length > 0 ? calculateParticipantStats(participants, answers, hostUserId) : null;
+    answers.length > 0
+      ? calculateParticipantStats(participants, answers, hostUserId, judgmentTypes)
+      : null;
 
   // Sort participants: host first, then by points (for non-hosts)
   const sortedParticipants = [...participants].sort((a, b) => {

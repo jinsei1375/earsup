@@ -3,6 +3,7 @@ import React from 'react';
 import { View, Text, ScrollView } from 'react-native';
 import { Button } from '@/components/common/Button';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
+import { calculateParticipantStats } from '@/utils/quizUtils';
 import type { ParticipantWithNickname, Answer } from '@/types';
 
 interface QuizResultScreenProps {
@@ -11,6 +12,7 @@ interface QuizResultScreenProps {
   hostUserId?: string;
   isHost: boolean;
   loading: boolean;
+  judgmentTypes?: Record<string, 'correct' | 'partial' | 'incorrect'>; // 判定タイプ
   onGoHome: () => void;
 }
 
@@ -20,26 +22,21 @@ export const QuizResultScreen: React.FC<QuizResultScreenProps> = ({
   hostUserId,
   isHost,
   loading,
+  judgmentTypes = {}, // デフォルトは空のオブジェクト
   onGoHome,
 }) => {
-  // 統計情報を計算（ポイント制：正解10ポイント、不正解0ポイント）
-  const participantStats = participants
-    .filter((participant) => participant.id !== hostUserId)
-    .map((participant) => {
-      const userAnswers = allRoomAnswers.filter((answer) => answer.user_id === participant.id);
-      const correctAnswers = userAnswers.filter((answer) => answer.is_correct === true).length;
-      const totalAnswers = userAnswers.length;
-      const points = correctAnswers * 10; // 正解1問につき10ポイント
-
-      return {
-        userId: participant.id,
-        nickname: participant.nickname,
-        correctAnswers,
-        totalAnswers,
-        points,
-        accuracy: totalAnswers > 0 ? Math.round((correctAnswers / totalAnswers) * 100) : 0,
-      };
-    })
+  // 統計情報を計算（ポイント制：正解10ポイント、惜しい5ポイント、不正解0ポイント）
+  const participantStats = calculateParticipantStats(
+    participants,
+    allRoomAnswers,
+    hostUserId,
+    judgmentTypes
+  )
+    .map((stats) => ({
+      ...stats,
+      accuracy:
+        stats.totalAnswers > 0 ? Math.round((stats.correctAnswers / stats.totalAnswers) * 100) : 0,
+    }))
     .sort((a, b) => {
       // ポイント順でソート（同点の場合は正解率順）
       if (a.points !== b.points) {
@@ -95,7 +92,8 @@ export const QuizResultScreen: React.FC<QuizResultScreenProps> = ({
                         <View className="flex-1">
                           <Text className="font-bold text-lg">{stat.nickname}</Text>
                           <Text className="text-sm text-gray-600">
-                            {stat.points}ポイント ({stat.correctAnswers}問正解 / 正解率
+                            {stat.points}ポイント ({stat.correctAnswers}問正解
+                            {stat.partialAnswers > 0 && `, ${stat.partialAnswers}問惜しい`} / 正解率
                             {stat.accuracy}
                             %)
                           </Text>

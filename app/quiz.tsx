@@ -27,6 +27,11 @@ export default function QuizScreen() {
   const [isExitModalVisible, setIsExitModalVisible] = useState(false);
   const [showQuizResult, setShowQuizResult] = useState(false);
 
+  // 判定タイプを管理するローカルstate
+  const [judgmentTypes, setJudgmentTypes] = useState<
+    Record<string, 'correct' | 'partial' | 'incorrect'>
+  >({});
+
   const isHost = role === 'host';
 
   const {
@@ -90,8 +95,9 @@ export default function QuizScreen() {
   useEffect(() => {
     if (!isHost && userId && currentQuestion?.id) {
       const myAnswer = answers.find((a) => a.user_id === userId);
-      if (myAnswer?.judged) {
-        setIsCorrect(myAnswer.is_correct);
+      if (myAnswer?.judged && myAnswer.judge_result) {
+        // judge_resultに基づいて判定結果を設定
+        setIsCorrect(myAnswer.judge_result === 'correct');
         setShowResult(true);
       }
     }
@@ -104,6 +110,17 @@ export default function QuizScreen() {
       setIsCorrect(null);
     }
   }, [isHost, currentQuestion, room?.status]);
+
+  // allRoomAnswersからjudgmentTypesを更新
+  useEffect(() => {
+    const newJudgmentTypes: Record<string, 'correct' | 'partial' | 'incorrect'> = {};
+    allRoomAnswers.forEach((answer) => {
+      if (answer.judge_result) {
+        newJudgmentTypes[answer.id] = answer.judge_result;
+      }
+    });
+    setJudgmentTypes(newJudgmentTypes);
+  }, [allRoomAnswers]);
 
   const handleCreateQuestion = async (text: string) => {
     try {
@@ -133,9 +150,20 @@ export default function QuizScreen() {
     }
   };
 
-  const handleJudgeAnswer = async (answerId: string, correct: boolean) => {
+  const handleJudgeAnswer = async (
+    answerId: string,
+    correct: boolean,
+    judgmentType?: 'correct' | 'partial' | 'incorrect'
+  ) => {
     try {
-      await judgeAnswer(answerId, correct);
+      // correctとjudgmentTypeからjudgmentResultを決定
+      const judgmentResult: 'correct' | 'partial' | 'incorrect' =
+        judgmentType || (correct ? 'correct' : 'incorrect');
+
+      // 判定タイプをローカルで保存
+      setJudgmentTypes((prev) => ({ ...prev, [answerId]: judgmentResult }));
+
+      await judgeAnswer(answerId, judgmentResult);
     } catch (err) {
       console.error('Answer judgment failed:', err);
     }
@@ -222,6 +250,7 @@ export default function QuizScreen() {
           isHost={isHost}
           loading={loading}
           onGoHome={handleGoHome}
+          judgmentTypes={judgmentTypes}
         />
 
         <ExitRoomModal
@@ -278,6 +307,8 @@ export default function QuizScreen() {
             participants={participants}
             hostUserId={room?.host_user_id || ''}
             isFirstComeMode={room?.quiz_mode === 'first-come'}
+            allowPartialPoints={room?.allow_partial_points || false}
+            judgmentTypes={judgmentTypes}
             loading={loading}
             error={error}
             onJudgeAnswer={handleJudgeAnswer}
@@ -340,6 +371,7 @@ export default function QuizScreen() {
             userId={userId}
             participants={participants}
             allRoomAnswers={allRoomAnswers}
+            judgmentTypes={judgmentTypes}
             connectionState={connectionState}
             loading={loading}
             error={error}

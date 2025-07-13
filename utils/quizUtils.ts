@@ -122,7 +122,9 @@ export interface ParticipantStats {
   nickname: string;
   correctAnswers: number;
   totalAnswers: number;
-  points: number; // 追加: ポイント制対応
+  points: number; // 正解10pt + 惜しい5pt
+  partialAnswers: number; // 惜しい答え数
+  accuracy: number; // 正解率（パーセント）
   currentStreak: number;
   maxStreak: number;
 }
@@ -141,7 +143,7 @@ export const calculateStreakStats = (
   let tempStreak = 0;
 
   for (const answer of userAnswers) {
-    if (answer.is_correct) {
+    if (answer.judge_result === 'correct') {
       tempStreak++;
       maxStreak = Math.max(maxStreak, tempStreak);
     } else {
@@ -151,7 +153,7 @@ export const calculateStreakStats = (
 
   // Calculate current streak (from the end)
   for (let i = userAnswers.length - 1; i >= 0; i--) {
-    if (userAnswers[i].is_correct) {
+    if (userAnswers[i].judge_result === 'correct') {
       currentStreak++;
     } else {
       break;
@@ -164,7 +166,8 @@ export const calculateStreakStats = (
 export const calculateParticipantStats = (
   participants: ParticipantWithNickname[],
   answers: Answer[],
-  hostUserId?: string
+  hostUserId?: string,
+  judgmentTypes?: Record<string, 'correct' | 'partial' | 'incorrect'>
 ): ParticipantStats[] => {
   return participants
     .filter((participant) => participant.id !== hostUserId) // Exclude host from stats
@@ -173,8 +176,21 @@ export const calculateParticipantStats = (
         (answer) => answer.user_id === participant.id && answer.judged
       );
 
-      const correctAnswers = userAnswers.filter((answer) => answer.is_correct === true).length;
-      const points = correctAnswers * 10; // 正解1問につき10ポイント
+      const correctAnswers = userAnswers.filter(
+        (answer) => answer.judge_result === 'correct'
+      ).length;
+
+      // 惜しい判定
+      const partialAnswers = userAnswers.filter(
+        (answer) => answer.judge_result === 'partial'
+      ).length;
+
+      // ポイント計算: 正解10pt + 惜しい5pt
+      const points = correctAnswers * 10 + partialAnswers * 5;
+
+      // 正解率計算
+      const accuracy =
+        userAnswers.length > 0 ? Math.round((correctAnswers / userAnswers.length) * 100) : 0;
 
       const streakStats = calculateStreakStats(answers, participant.id);
 
@@ -184,6 +200,8 @@ export const calculateParticipantStats = (
         correctAnswers,
         totalAnswers: userAnswers.length,
         points,
+        partialAnswers, // 惜しい答え数を追加
+        accuracy,
         currentStreak: streakStats.currentStreak,
         maxStreak: streakStats.maxStreak,
       };

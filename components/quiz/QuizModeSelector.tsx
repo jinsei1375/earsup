@@ -5,18 +5,23 @@ import { View, Text, TouchableOpacity } from 'react-native';
 interface QuizModeSelectorProps {
   selectedMode: 'first-come' | 'all-at-once';
   onModeChange: (mode: 'first-come' | 'all-at-once') => void;
+  allowPartialPoints: boolean;
+  onPartialPointsChange: (allow: boolean) => void;
   disabled?: boolean;
 }
 
 export const QuizModeSelector: React.FC<QuizModeSelectorProps> = ({
   selectedMode,
   onModeChange,
+  allowPartialPoints,
+  onPartialPointsChange,
   disabled = false,
 }) => {
   return (
     <View className="w-full mb-6">
+      {/* クイズモード選択 */}
       <Text className="mb-2 font-bold">クイズモード</Text>
-      <View className="flex-row justify-between">
+      <View className="flex-row justify-between mb-4">
         <TouchableOpacity
           onPress={() => {}} // Disabled for MVP
           disabled={true} // Always disabled for MVP
@@ -50,6 +55,31 @@ export const QuizModeSelector: React.FC<QuizModeSelectorProps> = ({
           </Text>
         </TouchableOpacity>
       </View>
+
+      {/* 惜しい判定設定 */}
+      <Text className="mb-2 font-bold">判定設定</Text>
+      <TouchableOpacity
+        onPress={() => onPartialPointsChange(!allowPartialPoints)}
+        disabled={disabled}
+        className={`p-4 rounded-lg border-2 items-center justify-center ${
+          allowPartialPoints
+            ? 'bg-green-500 border-green-500 active:bg-green-600'
+            : 'bg-transparent border-gray-300 active:bg-gray-50'
+        } ${disabled ? 'opacity-50' : ''}`}
+      >
+        <Text
+          className={`text-center font-bold ${allowPartialPoints ? 'text-white' : 'text-gray-700'}`}
+        >
+          惜しい判定を有効にする
+        </Text>
+        <Text
+          className={`text-xs text-center mt-1 ${
+            allowPartialPoints ? 'text-green-100' : 'text-gray-500'
+          }`}
+        >
+          正解: 10pt、惜しい: 5pt、不正解: 0pt
+        </Text>
+      </TouchableOpacity>
     </View>
   );
 };

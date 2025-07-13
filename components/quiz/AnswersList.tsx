@@ -9,8 +9,14 @@ interface AnswersListProps {
   answers: Answer[];
   isHost: boolean;
   isAllAtOnceMode: boolean;
+  allowPartialPoints?: boolean; // 惜しい判定を許可するか
+  judgmentTypes?: Record<string, 'correct' | 'partial' | 'incorrect'>; // 判定タイプ
   loading: boolean;
-  onJudgeAnswer: (answerId: string, isCorrect: boolean) => void;
+  onJudgeAnswer: (
+    answerId: string,
+    isCorrect: boolean,
+    judgeType?: 'correct' | 'partial' | 'incorrect'
+  ) => void;
   onRefresh: () => void;
 }
 
@@ -18,6 +24,8 @@ export const AnswersList: React.FC<AnswersListProps> = ({
   answers,
   isHost,
   isAllAtOnceMode,
+  allowPartialPoints = true,
+  judgmentTypes = {}, // デフォルトは空のオブジェクト
   loading,
   onJudgeAnswer,
   onRefresh,
@@ -43,59 +51,87 @@ export const AnswersList: React.FC<AnswersListProps> = ({
           nestedScrollEnabled={true}
           showsVerticalScrollIndicator={true}
         >
-          {answers.map((answer) => (
-            <View
-              key={answer.id}
-              className={`p-3 rounded-lg mb-2 border ${
-                answer.judged
-                  ? answer.is_correct
-                    ? 'border-green-500 bg-green-50'
-                    : 'border-red-500 bg-red-50'
-                  : 'border-gray-300 bg-gray-50'
-              }`}
-            >
-              <View className="flex-row justify-between">
-                <Text className="font-bold">{answer.nickname || '不明なユーザー'}</Text>
-                <Text className="text-xs text-gray-500">ID: {truncateId(answer.id, 6)}</Text>
-              </View>
+          {answers.map((answer) => {
+            const judgmentResult = answer.judge_result || judgmentTypes[answer.id];
+            const isPartial = judgmentResult === 'partial' && allowPartialPoints;
 
-              <Text className="my-1">「{answer.answer_text}」</Text>
+            // 背景色を判定結果に応じて決定
+            let borderColorClass = 'border-gray-300 bg-gray-50';
+            if (answer.judged) {
+              if (judgmentResult === 'correct') {
+                borderColorClass = 'border-green-500 bg-green-50';
+              } else if (isPartial) {
+                borderColorClass = 'border-orange-500 bg-orange-50';
+              } else {
+                borderColorClass = 'border-red-500 bg-red-50';
+              }
+            }
 
-              {isHost && isAllAtOnceMode && !answer.judged ? (
-                // Host can judge answers in all-at-once mode
-                <View className="flex-row justify-end mt-2 gap-2">
-                  <Button
-                    title="正解"
-                    onPress={() => onJudgeAnswer(answer.id, true)}
-                    disabled={loading}
-                    variant="primary"
-                    size="small"
-                  />
-                  <Button
-                    title="不正解"
-                    onPress={() => onJudgeAnswer(answer.id, false)}
-                    disabled={loading}
-                    variant="danger"
-                    size="small"
-                  />
+            return (
+              <View key={answer.id} className={`p-3 rounded-lg mb-2 border ${borderColorClass}`}>
+                <View className="flex-row justify-between">
+                  <Text className="font-bold">{answer.nickname || '不明なユーザー'}</Text>
+                  <Text className="text-xs text-gray-500">ID: {truncateId(answer.id, 6)}</Text>
                 </View>
-              ) : (
-                // Show judgment result
-                <Text
-                  className={
-                    answer.is_correct
-                      ? 'text-green-500 font-bold'
-                      : answer.is_correct === false
-                      ? 'text-red-500 font-bold'
-                      : 'text-gray-500 italic'
-                  }
-                >
-                  {answer.judged ? (answer.is_correct ? '✓ 正解' : '✗ 不正解') : '判定待ち'}
-                </Text>
-              )}
-            </View>
-          ))}
 
+                <Text className="my-1">「{answer.answer_text}」</Text>
+
+                {isHost && isAllAtOnceMode && !answer.judged ? (
+                  // Host can judge answers in all-at-once mode
+                  <View className="flex-row justify-end mt-2 gap-2">
+                    <Button
+                      title="正解"
+                      onPress={() => onJudgeAnswer(answer.id, true, 'correct')}
+                      disabled={loading}
+                      variant="primary"
+                      size="small"
+                    />
+                    {allowPartialPoints && (
+                      <Button
+                        title="惜しい"
+                        onPress={() => onJudgeAnswer(answer.id, false, 'partial')}
+                        disabled={loading}
+                        variant="secondary"
+                        size="small"
+                      />
+                    )}
+                    <Button
+                      title="不正解"
+                      onPress={() => onJudgeAnswer(answer.id, false, 'incorrect')}
+                      disabled={loading}
+                      variant="danger"
+                      size="small"
+                    />
+                  </View>
+                ) : (
+                  // Show judgment result
+                  (() => {
+                    const judgmentResult = answer.judge_result || judgmentTypes[answer.id];
+                    const isPartial = judgmentResult === 'partial';
+
+                    // 判定結果のテキストとスタイルを決定
+                    let resultText = '判定待ち';
+                    let className = 'text-gray-500 italic';
+
+                    if (answer.judged) {
+                      if (judgmentResult === 'correct') {
+                        resultText = '✓ 正解';
+                        className = 'text-green-500 font-bold';
+                      } else if (isPartial && allowPartialPoints) {
+                        resultText = '△ 惜しい';
+                        className = 'text-orange-500 font-bold';
+                      } else {
+                        resultText = '✗ 不正解';
+                        className = 'text-red-500 font-bold';
+                      }
+                    }
+
+                    return <Text className={className}>{resultText}</Text>;
+                  })()
+                )}
+              </View>
+            );
+          })}
           <Text className="text-xs text-gray-500 text-center italic mt-2 mb-4">
             最終更新: {new Date().toLocaleTimeString()}
           </Text>
