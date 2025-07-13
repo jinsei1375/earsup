@@ -1,7 +1,6 @@
 // components/quiz/ParticipantQuizScreen.tsx
 import React, { useState } from 'react';
 import { View, Text, TextInput, Keyboard } from 'react-native';
-import { RealtimeStatus } from '@/components/common/RealtimeStatus';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { ErrorMessage } from '@/components/common/ErrorMessage';
 import { Button } from '@/components/common/Button';
@@ -120,7 +119,6 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
     return (
       <View className="flex-1 p-6 items-center justify-center">
         <Text className="text-xl font-bold mb-4">リスニングクイズ</Text>
-        <RealtimeStatus connectionState={connectionState} showLastUpdate={false} />
         <Text className="mb-6">ホストが問題を作成中です...</Text>
         <LoadingSpinner size="large" variant="sound-wave" color="#3B82F6" className="mb-4" />
         <Button
@@ -138,7 +136,6 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
   return (
     <View className="flex-1 p-6">
       <Text className="text-xl font-bold mb-4 text-center">リスニングクイズ</Text>
-      <RealtimeStatus connectionState={connectionState} showLastUpdate={false} />
 
       {/* 参加者リスト */}
       <ParticipantsList

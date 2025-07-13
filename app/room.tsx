@@ -19,7 +19,6 @@ import { SupabaseService } from '@/services/supabaseService';
 import { useRoomData } from '@/hooks/useRoomData';
 import { QuizModeSelector } from '@/components/quiz/QuizModeSelector';
 import { ParticipantsList } from '@/components/room/ParticipantsList';
-import { RealtimeStatus } from '@/components/common/RealtimeStatus';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { ErrorMessage } from '@/components/common/ErrorMessage';
 import { generateRoomCode } from '@/utils/quizUtils';
@@ -202,8 +201,6 @@ export default function RoomScreen() {
           </Text>
           <Text className="text-sm text-blue-600 text-center mt-2">📋 タップしてコピー</Text>
         </TouchableOpacity>
-
-        <RealtimeStatus connectionState={connectionState} />
 
         <ParticipantsList
           participants={participants}

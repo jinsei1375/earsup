@@ -24,20 +24,20 @@ export const ParticipantsList: React.FC<ParticipantsListProps> = ({
   const participantStats =
     answers.length > 0 ? calculateParticipantStats(participants, answers, hostUserId) : null;
 
-  // Sort participants: host first, then by score (for non-hosts)
+  // Sort participants: host first, then by points (for non-hosts)
   const sortedParticipants = [...participants].sort((a, b) => {
     if (a.id === hostUserId) return -1;
     if (b.id === hostUserId) return 1;
 
-    // Sort by score if stats are available
+    // Sort by points if stats are available
     if (participantStats) {
       const statsA = participantStats.find((s) => s.userId === a.id);
       const statsB = participantStats.find((s) => s.userId === b.id);
 
       if (statsA && statsB) {
-        // Sort by correct answers first, then by accuracy
-        if (statsA.correctAnswers !== statsB.correctAnswers) {
-          return statsB.correctAnswers - statsA.correctAnswers;
+        // Sort by points first, then by accuracy
+        if (statsA.points !== statsB.points) {
+          return statsB.points - statsA.points;
         }
         if (statsA.totalAnswers > 0 && statsB.totalAnswers > 0) {
           const accuracyA = statsA.correctAnswers / statsA.totalAnswers;
@@ -61,9 +61,11 @@ export const ParticipantsList: React.FC<ParticipantsListProps> = ({
     const nonHostStats = participantStats
       .filter((s) => s.userId !== hostUserId)
       .sort((a, b) => {
-        if (a.correctAnswers !== b.correctAnswers) {
-          return b.correctAnswers - a.correctAnswers;
+        // Sort by points first
+        if (a.points !== b.points) {
+          return b.points - a.points;
         }
+        // Then by accuracy as tiebreaker
         if (a.totalAnswers > 0 && b.totalAnswers > 0) {
           const accuracyA = a.correctAnswers / a.totalAnswers;
           const accuracyB = b.correctAnswers / b.totalAnswers;
@@ -168,10 +170,12 @@ export const ParticipantsList: React.FC<ParticipantsListProps> = ({
                     {stats && !isHost && (
                       <View className="items-end min-w-[100px]">
                         <View className="flex-row items-center mb-1">
-                          <Text className="text-2xl font-bold text-green-600 mr-1">
-                            {stats.correctAnswers}
+                          <Text className="text-2xl font-bold text-blue-600 mr-1">
+                            {stats.points}ポイント
                           </Text>
-                          <Text className="text-sm text-gray-500">/{stats.totalAnswers}問</Text>
+                          <Text className="text-sm text-gray-500">
+                            ({stats.correctAnswers}/{stats.totalAnswers}問)
+                          </Text>
                         </View>
 
                         {stats.totalAnswers > 0 && (

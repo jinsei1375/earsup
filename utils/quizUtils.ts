@@ -122,6 +122,7 @@ export interface ParticipantStats {
   nickname: string;
   correctAnswers: number;
   totalAnswers: number;
+  points: number; // 追加: ポイント制対応
   currentStreak: number;
   maxStreak: number;
 }
@@ -173,6 +174,7 @@ export const calculateParticipantStats = (
       );
 
       const correctAnswers = userAnswers.filter((answer) => answer.is_correct === true).length;
+      const points = correctAnswers * 10; // 正解1問につき10ポイント
 
       const streakStats = calculateStreakStats(answers, participant.id);
 
@@ -181,6 +183,7 @@ export const calculateParticipantStats = (
         nickname: participant.nickname,
         correctAnswers,
         totalAnswers: userAnswers.length,
+        points,
         currentStreak: streakStats.currentStreak,
         maxStreak: streakStats.maxStreak,
       };

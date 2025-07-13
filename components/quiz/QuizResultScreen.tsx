@@ -2,9 +2,7 @@
 import React from 'react';
 import { View, Text, ScrollView } from 'react-native';
 import { Button } from '@/components/common/Button';
-import { ParticipantsList } from '@/components/room/ParticipantsList';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
-import { calculateParticipantStats } from '@/utils/quizUtils';
 import type { ParticipantWithNickname, Answer } from '@/types';
 
 interface QuizResultScreenProps {
@@ -24,22 +22,31 @@ export const QuizResultScreen: React.FC<QuizResultScreenProps> = ({
   loading,
   onGoHome,
 }) => {
-  // 統計情報を計算
-  const participantStats = calculateParticipantStats(participants, allRoomAnswers, hostUserId);
-  const nonHostStats = participantStats.filter((stat) => stat.userId !== hostUserId);
+  // 統計情報を計算（ポイント制：正解10ポイント、不正解0ポイント）
+  const participantStats = participants
+    .filter((participant) => participant.id !== hostUserId)
+    .map((participant) => {
+      const userAnswers = allRoomAnswers.filter((answer) => answer.user_id === participant.id);
+      const correctAnswers = userAnswers.filter((answer) => answer.is_correct === true).length;
+      const totalAnswers = userAnswers.length;
+      const points = correctAnswers * 10; // 正解1問につき10ポイント
 
-  // 順位付け（正解数→正解率順）
-  const rankedStats = nonHostStats.sort((a, b) => {
-    if (a.correctAnswers !== b.correctAnswers) {
-      return b.correctAnswers - a.correctAnswers;
-    }
-    if (a.totalAnswers > 0 && b.totalAnswers > 0) {
-      const accuracyA = a.correctAnswers / a.totalAnswers;
-      const accuracyB = b.correctAnswers / b.totalAnswers;
-      return accuracyB - accuracyA;
-    }
-    return 0;
-  });
+      return {
+        userId: participant.id,
+        nickname: participant.nickname,
+        correctAnswers,
+        totalAnswers,
+        points,
+        accuracy: totalAnswers > 0 ? Math.round((correctAnswers / totalAnswers) * 100) : 0,
+      };
+    })
+    .sort((a, b) => {
+      // ポイント順でソート（同点の場合は正解率順）
+      if (a.points !== b.points) {
+        return b.points - a.points;
+      }
+      return b.accuracy - a.accuracy;
+    });
 
   // 総問題数（ユニークなquestion_idの数で計算）
   const totalQuestions = new Set(allRoomAnswers.map((answer) => answer.question_id)).size;
@@ -49,102 +56,59 @@ export const QuizResultScreen: React.FC<QuizResultScreenProps> = ({
       <View className="p-6">
         {/* ヘッダー */}
         <View className="items-center mb-6">
-          <Text className="text-3xl font-bold text-green-600 mb-2">🎉 クイズ終了！</Text>
-          <Text className="text-lg text-gray-600">お疲れさまでした！</Text>
+          <Text className="text-3xl font-bold text-green-600 mb-2">🏆 最終結果</Text>
           {totalQuestions > 0 && (
             <Text className="text-sm text-gray-500 mt-1">全{totalQuestions}問</Text>
           )}
         </View>
 
-        {/* 結果サマリー */}
-        {rankedStats.length > 0 && (
+        {/* 最終結果 */}
+        {participantStats.length > 0 && (
           <View className="mb-6">
-            <Text className="text-xl font-bold mb-4 text-center">🏆 最終結果</Text>
+            {/* 全参加者のランキング */}
+            <View className="bg-gradient-to-r from-yellow-50 to-orange-50 p-4 rounded-xl">
+              <ScrollView
+                className="max-h-[300px]"
+                showsVerticalScrollIndicator={true}
+                nestedScrollEnabled={true}
+              >
+                {participantStats.map((stat, index) => {
+                  const rank = index + 1;
 
-            {/* トップ3の表彰台 */}
-            <View className="bg-gradient-to-r from-yellow-50 to-orange-50 p-4 rounded-xl mb-4">
-              {rankedStats.slice(0, 3).map((stat, index) => {
-                const participant = participants.find((p) => p.id === stat.userId);
-                const rank = index + 1;
-                const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : '🥉';
-                const accuracy =
-                  stat.totalAnswers > 0
-                    ? Math.round((stat.correctAnswers / stat.totalAnswers) * 100)
-                    : 0;
-
-                return (
-                  <View
-                    key={stat.userId}
-                    className={`flex-row items-center justify-between p-3 rounded-lg mb-2 ${
-                      rank === 1 ? 'bg-yellow-100' : rank === 2 ? 'bg-gray-100' : 'bg-orange-100'
-                    }`}
-                  >
-                    <View className="flex-row items-center flex-1">
-                      <Text className="text-2xl mr-3">{medal}</Text>
-                      <View>
-                        <Text className="font-bold text-lg">
-                          {participant?.nickname || 'Unknown'}
+                  return (
+                    <View
+                      key={stat.userId}
+                      className={`flex-row items-center justify-between p-3 rounded-lg mb-2 ${
+                        rank === 1
+                          ? 'bg-yellow-100'
+                          : rank === 2
+                          ? 'bg-gray-100'
+                          : rank === 3
+                          ? 'bg-orange-100'
+                          : 'bg-white'
+                      }`}
+                    >
+                      <View className="flex-row items-center flex-1">
+                        <Text className="text-2xl mr-3 min-w-[40px] font-bold text-gray-700">
+                          {rank}位
                         </Text>
-                        <Text className="text-sm text-gray-600">
-                          {stat.correctAnswers}問正解 / 正解率{accuracy}%
-                        </Text>
+                        <View className="flex-1">
+                          <Text className="font-bold text-lg">{stat.nickname}</Text>
+                          <Text className="text-sm text-gray-600">
+                            {stat.points}ポイント ({stat.correctAnswers}問正解 / 正解率
+                            {stat.accuracy}
+                            %)
+                          </Text>
+                        </View>
+                      </View>
+                      <View className="items-center">
+                        <Text className="text-2xl font-bold text-blue-600">{stat.points}</Text>
+                        <Text className="text-xs text-gray-500">ポイント</Text>
                       </View>
                     </View>
-                    <Text className="text-xl font-bold text-gray-700">{rank}位</Text>
-                  </View>
-                );
-              })}
-            </View>
-          </View>
-        )}
-
-        {/* 詳細な参加者リスト */}
-        <View className="mb-6">
-          <Text className="text-lg font-bold mb-3">📊 詳細結果</Text>
-          <ParticipantsList
-            participants={participants}
-            hostUserId={hostUserId}
-            loading={false}
-            onRefresh={() => {}}
-            answers={allRoomAnswers}
-          />
-        </View>
-
-        {/* 統計情報 */}
-        {rankedStats.length > 0 && (
-          <View className="bg-blue-50 p-4 rounded-xl mb-6">
-            <Text className="text-lg font-bold mb-3 text-blue-800">📈 統計情報</Text>
-            <View className="space-y-2">
-              <View className="flex-row justify-between">
-                <Text className="text-blue-700">参加者数:</Text>
-                <Text className="text-blue-700 font-bold">{rankedStats.length}名</Text>
-              </View>
-              <View className="flex-row justify-between">
-                <Text className="text-blue-700">平均正解数:</Text>
-                <Text className="text-blue-700 font-bold">
-                  {(
-                    rankedStats.reduce((sum, stat) => sum + stat.correctAnswers, 0) /
-                    rankedStats.length
-                  ).toFixed(1)}
-                  問
-                </Text>
-              </View>
-              <View className="flex-row justify-between">
-                <Text className="text-blue-700">平均正解率:</Text>
-                <Text className="text-blue-700 font-bold">
-                  {Math.round(
-                    rankedStats.reduce((sum, stat) => {
-                      return (
-                        sum +
-                        (stat.totalAnswers > 0
-                          ? (stat.correctAnswers / stat.totalAnswers) * 100
-                          : 0)
-                      );
-                    }, 0) / rankedStats.length
-                  )}
-                  %
-                </Text>
-              </View>
+                  );
+                })}
+              </ScrollView>
             </View>
           </View>
         )}
@@ -163,10 +127,6 @@ export const QuizResultScreen: React.FC<QuizResultScreenProps> = ({
               className="mb-4"
             />
           )}
-
-          <Text className="text-sm text-gray-500 text-center">
-            {isHost ? 'ホストとして' : '参加者として'}参加していただき、ありがとうございました！
-          </Text>
         </View>
       </View>
     </ScrollView>
