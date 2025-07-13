@@ -17,8 +17,19 @@ export default function AppHeader({ title, rightComponent, settingsConfig }: App
   const { showSettings = false, onSettingsPress } = settingsConfig || {};
 
   return (
-    <View className="h-[60px] flex-row items-center justify-between px-4 border-b border-gray-200 bg-white w-full">
-      <Text className="text-lg font-bold flex-1 text-center">{title}</Text>
+    <View className="h-[60px] flex-row items-center px-4 border-b border-gray-200 bg-white w-full relative">
+      {/* Center title with absolute positioning for perfect centering */}
+      <View className="absolute inset-0 items-center justify-center">
+        <Text className="text-lg font-bold">{title}</Text>
+      </View>
+
+      {/* Left spacer for symmetry */}
+      <View className="w-[60px]" />
+
+      {/* Spacer to push right component */}
+      <View className="flex-1" />
+
+      {/* Right component or settings */}
       <View className="w-[60px] items-end">
         {rightComponent ||
           (showSettings && onSettingsPress ? (
