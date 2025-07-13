@@ -9,7 +9,7 @@ export interface Room {
   code: string;
   host_user_id: string;
   status: 'waiting' | 'ready' | 'active' | 'judged' | 'ended';
-  quiz_mode: 'first-come' | 'all-at-once';
+  quiz_mode: 'all-at-once-host' | 'all-at-once-auto';
   allow_partial_points?: boolean; // 惜しい判定を許可するか
   created_at: string;
   updated_at: string;

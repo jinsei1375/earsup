@@ -36,7 +36,9 @@ export default function RoomScreen() {
   const [roomId, setRoomId] = useState<string | null>(paramRoomId || null);
   const [localLoading, setLocalLoading] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
-  const [quizMode, setQuizMode] = useState<'first-come' | 'all-at-once'>('all-at-once');
+  const [quizMode, setQuizMode] = useState<'all-at-once-host' | 'all-at-once-auto'>(
+    'all-at-once-host'
+  );
   const [allowPartialPoints, setAllowPartialPoints] = useState(true); // デフォルトで惜しい判定を有効
 
   // Room data management
@@ -301,10 +303,7 @@ export default function RoomScreen() {
                 <QuizModeSelector
                   selectedMode={quizMode}
                   onModeChange={(mode) => {
-                    // MVP開発中は一斉回答モードのみ許可
-                    if (mode === 'all-at-once') {
-                      setQuizMode(mode);
-                    }
+                    setQuizMode(mode);
                   }}
                   allowPartialPoints={allowPartialPoints}
                   onPartialPointsChange={setAllowPartialPoints}

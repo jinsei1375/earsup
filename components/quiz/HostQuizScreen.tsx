@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { AnswersList } from './AnswersList';
-import { BuzzInSection } from './BuzzInSection';
 import { ParticipantsList } from '@/components/room/ParticipantsList';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { ErrorMessage } from '@/components/common/ErrorMessage';
@@ -16,10 +15,9 @@ interface HostQuizScreenProps {
   questionText: string;
   answers: Answer[];
   allRoomAnswers: Answer[]; // 累積スコア用
-  currentBuzzer: string | null;
   participants: ParticipantWithNickname[];
   hostUserId: string; // Added for participant stats
-  isFirstComeMode: boolean;
+  quizMode: 'all-at-once-host' | 'all-at-once-auto';
   allowPartialPoints?: boolean; // 惜しい判定を許可するか
   judgmentTypes?: Record<string, 'correct' | 'partial' | 'incorrect'>; // 判定タイプ
   loading: boolean;
@@ -29,7 +27,6 @@ interface HostQuizScreenProps {
     isCorrect: boolean,
     judgmentType?: 'correct' | 'partial' | 'incorrect'
   ) => Promise<void>;
-  onResetBuzz: () => Promise<void>;
   onRefreshAnswers: () => void;
   onEndQuiz: () => Promise<void>;
   onNextQuestion: () => Promise<void>;
@@ -39,16 +36,14 @@ export const HostQuizScreen: React.FC<HostQuizScreenProps> = ({
   questionText,
   answers,
   allRoomAnswers,
-  currentBuzzer,
   participants,
   hostUserId,
-  isFirstComeMode,
+  quizMode,
   allowPartialPoints = false, // デフォルトで無効
   judgmentTypes = {}, // デフォルトは空のオブジェクト
   loading,
   error,
   onJudgeAnswer,
-  onResetBuzz,
   onRefreshAnswers,
   onEndQuiz,
   onNextQuestion,
@@ -75,7 +70,7 @@ export const HostQuizScreen: React.FC<HostQuizScreenProps> = ({
       {/* Quiz mode display */}
       <View className="flex-row items-center justify-center mb-4">
         <Text className="text-sm bg-blue-100 px-3 py-1 rounded-full">
-          {getQuizModeDisplayName(isFirstComeMode ? 'first-come' : 'all-at-once')}
+          {getQuizModeDisplayName(quizMode)}
         </Text>
       </View>
       {/* Silent mode warning */}
@@ -142,22 +137,11 @@ export const HostQuizScreen: React.FC<HostQuizScreenProps> = ({
         className="mb-4"
       />
 
-      {/* Buzz-in management for first-come mode */}
-      {isFirstComeMode && (
-        <BuzzInSection
-          currentBuzzer={currentBuzzer}
-          participants={participants}
-          isHost={true}
-          loading={loading}
-          onResetBuzz={onResetBuzz}
-        />
-      )}
-
       {/* Answers list */}
       <AnswersList
         answers={answers}
         isHost={true}
-        isAllAtOnceMode={!isFirstComeMode}
+        isAllAtOnceMode={true}
         allowPartialPoints={allowPartialPoints}
         judgmentTypes={judgmentTypes}
         loading={loading}

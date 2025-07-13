@@ -12,33 +12,13 @@ import {
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { ErrorMessage } from '@/components/common/ErrorMessage';
 import { Button } from '@/components/common/Button';
-import {
-  canParticipantAnswer,
-  canParticipantBuzzIn,
-  isQuizActive,
-  isQuizEnded,
-} from '@/utils/quizUtils';
+import { canParticipantAnswer, isQuizActive, isQuizEnded } from '@/utils/quizUtils';
 import { ParticipantsList } from '@/components/room/ParticipantsList';
-import { StampSelector } from '@/components/quiz/StampSelector';
-import { AVAILABLE_STAMPS } from '@/components/quiz/StampSelector';
-import type {
-  Room,
-  RealtimeConnectionState,
-  ParticipantWithNickname,
-  Answer,
-  Stamp,
-} from '@/types';
-
-interface StampWithPosition {
-  type: string;
-  x: number;
-  y: number;
-}
+import type { Room, RealtimeConnectionState, ParticipantWithNickname, Answer } from '@/types';
 
 interface ParticipantQuizScreenProps {
   room: Room | null;
   questionText: string;
-  currentBuzzer: string | null;
   userId: string | null;
   participants: ParticipantWithNickname[];
   allRoomAnswers: Answer[]; // Changed to allRoomAnswers for cumulative stats
@@ -48,18 +28,13 @@ interface ParticipantQuizScreenProps {
   error: string | null;
   isCorrect: boolean | null;
   showResult: boolean;
-  onBuzzIn: () => Promise<void>;
   onSubmitAnswer: (answer: string) => Promise<void>;
   onRefreshState: () => void;
-  // Stamp-related props
-  // stamps: StampWithPosition[];
-  // onSendStamp: (stamp: StampWithPosition) => void;
 }
 
 export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
   room,
   questionText,
-  currentBuzzer,
   userId,
   participants,
   allRoomAnswers,
@@ -69,24 +44,17 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
   error,
   isCorrect,
   showResult,
-  onBuzzIn,
   onSubmitAnswer,
   onRefreshState,
-  // stamps,
-  // onSendStamp,
 }) => {
   const [answer, setAnswer] = useState('');
-  const [stampModalVisible, setStampModalVisible] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
   const inputRef = useRef<TextInput>(null);
 
-  const quizMode = room?.quiz_mode || 'all-at-once';
-  const isFirstComeMode = quizMode === 'first-come';
+  const quizMode = room?.quiz_mode || 'all-at-once-host';
   const hasQuestion = !!questionText && isQuizActive(room?.status || '');
-  const canBuzzIn = canParticipantBuzzIn(quizMode, currentBuzzer);
-  const hasBuzzedIn = isFirstComeMode && currentBuzzer === userId;
-  const otherHasBuzzed = isFirstComeMode && currentBuzzer && currentBuzzer !== userId;
-  const canAnswer = canParticipantAnswer(quizMode, currentBuzzer, userId); // 参加者自身の回答を取得して判定タイプを確認
+  const canAnswer = canParticipantAnswer(quizMode, null, userId);
+  // 参加者自身の回答を取得して判定タイプを確認
   const userAnswer = allRoomAnswers.find((answer) => answer.user_id === userId);
   const allowPartialPoints = room?.allow_partial_points || false;
   const userJudgmentResult = userAnswer?.judge_result;
@@ -110,26 +78,6 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
       });
     }, 300); // キーボードアニメーション後に実行
   };
-
-  // スタンプを画面上にランダムな位置で表示
-  // const renderStamps = () =>
-  //   stamps.map((stamp, idx) => {
-  //     const emoji = AVAILABLE_STAMPS.find((s) => s.type === stamp.type)?.emoji || '❓';
-  //     return (
-  //       <View
-  //         key={idx}
-  //         style={{
-  //           position: 'absolute',
-  //           left: stamp.x,
-  //           top: stamp.y,
-  //           zIndex: 100,
-  //           pointerEvents: 'none',
-  //         }}
-  //       >
-  //         <Text style={{ fontSize: 36 }}>{emoji}</Text>
-  //       </View>
-  //     );
-  //   });
 
   // Handle quiz ending
   if (isQuizEnded(room?.status || '')) {
@@ -174,88 +122,35 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        {/* クイズコンテンツ - 優先表示 */}
-        {isFirstComeMode ? (
-          // First-come mode
-          <>
-            {canBuzzIn ? (
-              // Can buzz in
-              <Button
-                title="押す!"
-                onPress={onBuzzIn}
-                disabled={loading}
-                variant="primary"
-                size="large"
-                fullWidth
-                className="mb-4"
-              />
-            ) : hasBuzzedIn ? (
-              // User has buzzed in
-              <>
-                <View className="bg-green-100 p-3 rounded-lg mb-4 w-full">
-                  <Text className="text-green-800 text-center">あなたが回答権を獲得しました！</Text>
-                </View>
+        <Text className="text-lg font-bold text-green-500 mb-4 text-center">
+          聞こえたフレーズを入力してください
+        </Text>
 
-                <View className="w-full mb-4">
-                  <TextInput
-                    ref={inputRef}
-                    className="border border-gray-300 p-4 rounded-lg mb-3 w-full text-lg"
-                    placeholder="聞こえたフレーズを入力"
-                    value={answer}
-                    onChangeText={setAnswer}
-                    editable={!showResult}
-                    returnKeyType="done"
-                    onSubmitEditing={() => Keyboard.dismiss()}
-                    onFocus={handleInputFocus}
-                    blurOnSubmit={false}
-                  />
-
-                  <Button
-                    title="解答する"
-                    onPress={handleSubmitAnswer}
-                    disabled={!answer.trim() || showResult || loading}
-                    variant="primary"
-                    size="large"
-                    fullWidth
-                  />
-                </View>
-              </>
-            ) : (
-              // Someone else has buzzed in
-              <View className="bg-red-100 p-3 rounded-lg w-full mb-4">
-                <Text className="text-red-800 text-center">他の参加者が回答中です</Text>
-              </View>
-            )}
-          </>
-        ) : !showResult ? (
+        {/* クイズコンテンツ */}
+        {!showResult ? (
           // All-at-once mode - hasn't answered yet
-          <>
-            <Text className="text-lg font-bold text-green-500 mb-4 text-center">
-              聞こえたフレーズを入力してください
-            </Text>
-            <View className="w-full mb-4">
-              <TextInput
-                ref={inputRef}
-                className="border border-gray-300 p-4 rounded-lg mb-3 w-full text-xl"
-                placeholder="聞こえたフレーズを入力"
-                value={answer}
-                onChangeText={setAnswer}
-                editable={!showResult}
-                returnKeyType="done"
-                onSubmitEditing={() => Keyboard.dismiss()}
-                onFocus={handleInputFocus}
-              />
+          <View className="w-full mb-4">
+            <TextInput
+              ref={inputRef}
+              className="border border-gray-300 p-4 rounded-lg mb-3 w-full text-xl"
+              placeholder="聞こえたフレーズを入力"
+              value={answer}
+              onChangeText={setAnswer}
+              editable={!showResult}
+              returnKeyType="done"
+              onSubmitEditing={() => Keyboard.dismiss()}
+              onFocus={handleInputFocus}
+            />
 
-              <Button
-                title="回答する"
-                onPress={handleSubmitAnswer}
-                disabled={!answer.trim() || showResult || loading}
-                variant="primary"
-                size="large"
-                fullWidth
-              />
-            </View>
-          </>
+            <Button
+              title="回答する"
+              onPress={handleSubmitAnswer}
+              disabled={!answer.trim() || showResult || loading}
+              variant="primary"
+              size="large"
+              fullWidth
+            />
+          </View>
         ) : (
           // All-at-once mode - has answered
           <View className="bg-blue-100 p-4 rounded-lg mb-4 w-full">
@@ -300,32 +195,6 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
                 <Text className="text-center text-black mt-2">正解: {questionText}</Text>
               </>
             )}
-          </View>
-        )}
-
-        {/* Result display for first-come mode */}
-        {showResult && isFirstComeMode && (
-          <View className="mb-4 items-center">
-            <Text
-              className={
-                isAnswerCorrect
-                  ? 'text-green-600 font-bold text-lg'
-                  : isPartialAnswer
-                  ? 'text-orange-600 font-bold text-lg'
-                  : 'text-red-600 font-bold text-lg'
-              }
-            >
-              {isAnswerCorrect ? '✓ 正解！' : isPartialAnswer ? '△ 惜しい！' : '✗ 不正解'}
-            </Text>
-            {(isAnswerCorrect || isPartialAnswer) && (
-              <Text className="text-yellow-600 font-bold text-lg mt-1">
-                {isAnswerCorrect ? '🎉 10ポイントGET！ 🎉' : '✨ 5ポイントGET！ ✨'}
-              </Text>
-            )}
-            {userAnswer && (
-              <Text className="text-blue-600 mt-2">あなたの回答: 「{userAnswer.answer_text}」</Text>
-            )}
-            <Text className="mt-2">正解: {questionText}</Text>
           </View>
         )}
 

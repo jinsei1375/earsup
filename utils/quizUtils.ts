@@ -66,21 +66,22 @@ export const canParticipantAnswer = (
   currentBuzzer: string | null,
   userId: string | null
 ): boolean => {
-  if (quizMode === 'all-at-once') return true;
-  if (quizMode === 'first-come') {
-    return currentBuzzer === userId;
-  }
+  if (quizMode === 'all-at-once-host' || quizMode === 'all-at-once-auto') return true;
   return false;
 };
 
 export const canParticipantBuzzIn = (quizMode: string, currentBuzzer: string | null): boolean => {
-  return quizMode === 'first-come' && !currentBuzzer;
+  // 新しいモードでは早押し機能は使用しない
+  return false;
 };
 
 export const getQuizModeDisplayName = (mode: string): string => {
   switch (mode) {
-    case 'first-come':
-      return '早押しモード';
+    case 'all-at-once-host':
+      return '一斉回答（ホストあり）';
+    case 'all-at-once-auto':
+      return '一斉回答（ホストなし）';
+    // 後方互換性のため
     case 'all-at-once':
       return '一斉回答モード';
     default:

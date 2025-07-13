@@ -3,8 +3,8 @@ import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 
 interface QuizModeSelectorProps {
-  selectedMode: 'first-come' | 'all-at-once';
-  onModeChange: (mode: 'first-come' | 'all-at-once') => void;
+  selectedMode: 'all-at-once-host' | 'all-at-once-auto';
+  onModeChange: (mode: 'all-at-once-host' | 'all-at-once-auto') => void;
   allowPartialPoints: boolean;
   onPartialPointsChange: (allow: boolean) => void;
   disabled?: boolean;
@@ -23,35 +23,51 @@ export const QuizModeSelector: React.FC<QuizModeSelectorProps> = ({
       <Text className="mb-2 font-bold">クイズモード</Text>
       <View className="flex-row justify-between mb-4">
         <TouchableOpacity
-          onPress={() => {}} // Disabled for MVP
-          disabled={true} // Always disabled for MVP
-          className="flex-1 mr-2 p-4 rounded-lg border-2 border-gray-300 bg-gray-100 opacity-50 items-center justify-center"
-        >
-          <Text className="text-center text-gray-400 font-bold">早押しモード</Text>
-          <Text className="text-xs text-center text-gray-400 mt-1">近日リリース予定</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => onModeChange('all-at-once')}
+          onPress={() => onModeChange('all-at-once-host')}
           disabled={disabled}
-          className={`flex-1 ml-2 p-4 rounded-lg border-2 items-center justify-center ${
-            selectedMode === 'all-at-once'
+          className={`flex-1 mr-2 p-4 rounded-lg border-2 items-center justify-center ${
+            selectedMode === 'all-at-once-host'
               ? 'bg-blue-500 border-blue-500 active:bg-blue-600'
               : 'bg-transparent border-gray-300 active:bg-gray-50'
           } ${disabled ? 'opacity-50' : ''}`}
         >
           <Text
             className={`text-center font-bold ${
-              selectedMode === 'all-at-once' ? 'text-white' : 'text-gray-700'
+              selectedMode === 'all-at-once-host' ? 'text-white' : 'text-gray-700'
             }`}
           >
-            一斉回答モード
+            一斉回答（ホストあり）
           </Text>
           <Text
             className={`text-xs text-center mt-1 ${
-              selectedMode === 'all-at-once' ? 'text-blue-100' : 'text-gray-500'
+              selectedMode === 'all-at-once-host' ? 'text-blue-100' : 'text-gray-500'
             }`}
           >
-            全員が同時に回答
+            ホストが問題を作成
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => onModeChange('all-at-once-auto')}
+          disabled={disabled}
+          className={`flex-1 ml-2 p-4 rounded-lg border-2 items-center justify-center ${
+            selectedMode === 'all-at-once-auto'
+              ? 'bg-blue-500 border-blue-500 active:bg-blue-600'
+              : 'bg-transparent border-gray-300 active:bg-gray-50'
+          } ${disabled ? 'opacity-50' : ''}`}
+        >
+          <Text
+            className={`text-center font-bold ${
+              selectedMode === 'all-at-once-auto' ? 'text-white' : 'text-gray-700'
+            }`}
+          >
+            一斉回答（ホストなし）
+          </Text>
+          <Text
+            className={`text-xs text-center mt-1 ${
+              selectedMode === 'all-at-once-auto' ? 'text-blue-100' : 'text-gray-500'
+            }`}
+          >
+            ランダムに問題が出題
           </Text>
         </TouchableOpacity>
       </View>

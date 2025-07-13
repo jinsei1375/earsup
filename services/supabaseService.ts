@@ -16,7 +16,7 @@ export class SupabaseService {
   static async createRoom(
     code: string,
     hostUserId: string,
-    quizMode: 'first-come' | 'all-at-once',
+    quizMode: 'all-at-once-host' | 'all-at-once-auto',
     allowPartialPoints: boolean = true
   ): Promise<Room> {
     const { data, error } = await supabase

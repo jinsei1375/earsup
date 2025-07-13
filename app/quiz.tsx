@@ -39,9 +39,7 @@ export default function QuizScreen() {
     currentQuestion,
     answers,
     allRoomAnswers,
-    currentBuzzer,
     participants,
-    stamps,
     loading,
     error,
     connectionState,
@@ -50,9 +48,6 @@ export default function QuizScreen() {
     createQuestion,
     submitAnswer,
     judgeAnswer,
-    buzzIn,
-    resetBuzz,
-    sendStamp,
     endQuiz,
     nextQuestion,
     removeParticipant,
@@ -132,19 +127,13 @@ export default function QuizScreen() {
 
   const handleSubmitAnswer = async (answerText: string) => {
     try {
-      const isFirstComeMode = room?.quiz_mode === 'first-come';
-      const autoJudge = isFirstComeMode;
+      // 新しいモードでは常にホストが判定
+      const autoJudge = false;
 
-      const answerData = await submitAnswer(answerText, isFirstComeMode, autoJudge);
+      const answerData = await submitAnswer(answerText, false, autoJudge);
 
       setShowResult(true);
-
-      if (autoJudge && currentQuestion) {
-        const correct = validateAnswer(answerText, currentQuestion.text);
-        setIsCorrect(correct);
-      } else {
-        setIsCorrect(null); // Wait for host judgment
-      }
+      setIsCorrect(null); // Wait for host judgment
     } catch (err) {
       console.error('Answer submission failed:', err);
     }
@@ -166,30 +155,6 @@ export default function QuizScreen() {
       await judgeAnswer(answerId, judgmentResult);
     } catch (err) {
       console.error('Answer judgment failed:', err);
-    }
-  };
-
-  const handleBuzzIn = async () => {
-    try {
-      await buzzIn();
-    } catch (err) {
-      console.error('Buzz in failed:', err);
-    }
-  };
-
-  const handleSendStamp = async (stampType: string) => {
-    try {
-      await sendStamp(stampType);
-    } catch (err) {
-      console.error('Send stamp failed:', err);
-    }
-  };
-
-  const handleResetBuzz = async () => {
-    try {
-      await resetBuzz();
-    } catch (err) {
-      console.error('Buzz reset failed:', err);
     }
   };
 
@@ -303,16 +268,14 @@ export default function QuizScreen() {
             questionText={currentQuestion.text}
             answers={answers}
             allRoomAnswers={allRoomAnswers}
-            currentBuzzer={currentBuzzer}
             participants={participants}
             hostUserId={room?.host_user_id || ''}
-            isFirstComeMode={room?.quiz_mode === 'first-come'}
+            quizMode={room?.quiz_mode || 'all-at-once-host'}
             allowPartialPoints={room?.allow_partial_points || false}
             judgmentTypes={judgmentTypes}
             loading={loading}
             error={error}
             onJudgeAnswer={handleJudgeAnswer}
-            onResetBuzz={handleResetBuzz}
             onRefreshAnswers={() => fetchAnswers(true)}
             onEndQuiz={handleEndQuiz}
             onNextQuestion={handleNextQuestion}
@@ -367,7 +330,6 @@ export default function QuizScreen() {
           <ParticipantQuizScreen
             room={room}
             questionText={currentQuestion?.text || ''}
-            currentBuzzer={currentBuzzer}
             userId={userId}
             participants={participants}
             allRoomAnswers={allRoomAnswers}
@@ -377,11 +339,8 @@ export default function QuizScreen() {
             error={error}
             isCorrect={isCorrect}
             showResult={showResult}
-            onBuzzIn={handleBuzzIn}
             onSubmitAnswer={handleSubmitAnswer}
             onRefreshState={handleRefreshState}
-            // stamps={stamps}
-            // onSendStamp={handleSendStamp}
           />
         </ScrollView>
 
