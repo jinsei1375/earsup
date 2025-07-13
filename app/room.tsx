@@ -170,6 +170,10 @@ export default function RoomScreen() {
     }
   };
 
+  const handleCancel = () => {
+    router.replace('/');
+  };
+
   const loading = localLoading || roomLoading;
   const error = localError || roomError;
 
@@ -314,6 +318,16 @@ export default function RoomScreen() {
                   variant="primary"
                   size="large"
                   fullWidth
+                  className="mb-3"
+                />
+
+                <Button
+                  title="中止してトップに戻る"
+                  onPress={handleCancel}
+                  disabled={loading}
+                  variant="danger"
+                  size="large"
+                  fullWidth
                 />
               </>
             ) : (
@@ -334,6 +348,16 @@ export default function RoomScreen() {
                   onPress={handleJoinRoom}
                   disabled={!code.trim() || loading}
                   variant="primary"
+                  size="large"
+                  fullWidth
+                  className="mb-3"
+                />
+
+                <Button
+                  title="中止してトップに戻る"
+                  onPress={handleCancel}
+                  disabled={loading}
+                  variant="danger"
                   size="large"
                   fullWidth
                 />
