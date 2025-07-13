@@ -235,7 +235,6 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
               returnKeyType="done"
               onSubmitEditing={() => Keyboard.dismiss()}
               onFocus={handleInputFocus}
-              blurOnSubmit={false}
             />
 
             <Button
