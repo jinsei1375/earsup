@@ -8,6 +8,7 @@ import { useQuizData } from '@/hooks/useQuizData';
 import { QuestionCreator } from '@/components/quiz/QuestionCreator';
 import { HostQuizScreen } from '@/components/quiz/HostQuizScreen';
 import { ParticipantQuizScreen } from '@/components/quiz/ParticipantQuizScreen';
+import { QuizResultScreen } from '@/components/quiz/QuizResultScreen';
 import { ExitRoomModal } from '@/components/common/ExitRoomModal';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { ErrorMessage } from '@/components/common/ErrorMessage';
@@ -25,6 +26,7 @@ export default function QuizScreen() {
   const [showResult, setShowResult] = useState(false);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [isExitModalVisible, setIsExitModalVisible] = useState(false);
+  const [showQuizResult, setShowQuizResult] = useState(false);
 
   const isHost = role === 'host';
 
@@ -62,17 +64,15 @@ export default function QuizScreen() {
   // Handle room status changes
   useEffect(() => {
     if (room?.status === 'ended') {
-      console.log('Quiz ended, navigating to home');
+      console.log('Quiz ended, showing result screen');
       // Reset local state
       setShowResult(false);
       setIsCorrect(null);
 
-      // Navigate home
-      setTimeout(() => {
-        router.replace('/');
-      }, 1000);
+      // Show result screen instead of navigating immediately
+      setShowQuizResult(true);
     }
-  }, [room?.status, router]);
+  }, [room?.status]);
 
   // ヘッダーの設定ボタンを制御
   useEffect(() => {
@@ -169,14 +169,11 @@ export default function QuizScreen() {
   const handleEndQuiz = async () => {
     try {
       await endQuiz();
-
-      // Navigate after successful end
-      setTimeout(() => {
-        router.replace('/');
-      }, 800);
+      // 結果画面を表示するために自動遷移を削除
+      // room.status が 'ended' になることで結果画面が表示される
     } catch (err) {
       console.error('End quiz failed:', err);
-      // Navigate anyway on error
+      // エラー時のみ自動遷移
       setTimeout(() => router.replace('/'), 1000);
     }
   };
@@ -210,6 +207,33 @@ export default function QuizScreen() {
       console.error('Next question failed:', err);
     }
   };
+
+  const handleGoHome = () => {
+    router.replace('/');
+  };
+
+  // Show quiz result screen when quiz is ended
+  if (showQuizResult) {
+    return (
+      <SafeAreaView className="flex-1 bg-white">
+        <QuizResultScreen
+          participants={participants}
+          allRoomAnswers={allRoomAnswers}
+          hostUserId={room?.host_user_id}
+          isHost={isHost}
+          loading={loading}
+          onGoHome={handleGoHome}
+        />
+
+        <ExitRoomModal
+          isVisible={isExitModalVisible}
+          onClose={() => setIsExitModalVisible(false)}
+          onConfirmExit={handleExitRoom}
+          isHost={isHost}
+        />
+      </SafeAreaView>
+    );
+  }
 
   // Host screens
   if (isHost) {
