@@ -26,7 +26,7 @@ export const AnswersList: React.FC<AnswersListProps> = ({
     <View className="w-full my-4 max-h-[400px]">
       <View className="flex-row justify-between items-center mb-2">
         <Text className="text-base font-bold">回答一覧 ({answers.length}件)</Text>
-        <Button title="更新" onPress={onRefresh} variant="ghost" size="small" />
+        <Button title="更新" onPress={onRefresh} variant="outline" size="small" />
       </View>
 
       {answers.length === 0 ? (
