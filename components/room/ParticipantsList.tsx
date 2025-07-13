@@ -114,7 +114,7 @@ export const ParticipantsList: React.FC<ParticipantsListProps> = ({
               return (
                 <View
                   key={participant.id}
-                  className={`mb-3 p-4 rounded-xl shadow-sm ${
+                  className={`mb-3 p-3 rounded-xl shadow-sm ${
                     isHost
                       ? 'bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200'
                       : 'bg-white border border-gray-200'
@@ -122,23 +122,23 @@ export const ParticipantsList: React.FC<ParticipantsListProps> = ({
                 >
                   <View className="flex-row justify-between items-start">
                     <View className="flex-1">
-                      <View className="flex-row items-center mb-2">
+                      <View className="flex-row items-center">
                         {isHost && <View className="bg-blue-500 rounded-full w-3 h-3 mr-2" />}
                         <Text
-                          className={`text-lg ${
+                          className={`text-base ${
                             isHost ? 'font-bold text-blue-800' : 'font-semibold text-gray-800'
                           }`}
                         >
                           {participant.nickname}
                         </Text>
                         {isHost && (
-                          <View className="ml-2 bg-blue-500 px-3 py-1 rounded-full">
+                          <View className="ml-2 bg-blue-500 px-2 py-0.5 rounded-full">
                             <Text className="text-xs text-white font-bold">ホスト</Text>
                           </View>
                         )}
                         {rank && (
                           <View
-                            className={`ml-2 px-2 py-1 rounded-full ${
+                            className={`ml-2 px-1.5 py-0.5 rounded-full ${
                               rank === 1
                                 ? 'bg-yellow-100'
                                 : rank === 2
