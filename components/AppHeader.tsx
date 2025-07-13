@@ -18,10 +18,7 @@ export default function AppHeader({ title, rightComponent, settingsConfig }: App
 
   return (
     <View className="h-[60px] flex-row items-center justify-between px-4 border-b border-gray-200 bg-white w-full">
-      <View className="w-[60px] items-start">{/* バックボタンは削除 */}</View>
-
       <Text className="text-lg font-bold flex-1 text-center">{title}</Text>
-
       <View className="w-[60px] items-end">
         {rightComponent ||
           (showSettings && onSettingsPress ? (

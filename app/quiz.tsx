@@ -1,7 +1,6 @@
 // app/quiz.tsx
 import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useUserStore } from '@/stores/userStore';
 import { useQuizData } from '@/hooks/useQuizData';
@@ -215,7 +214,7 @@ export default function QuizScreen() {
   // Show quiz result screen when quiz is ended
   if (showQuizResult) {
     return (
-      <SafeAreaView className="flex-1 bg-white">
+      <View className="flex-1 bg-white">
         <QuizResultScreen
           participants={participants}
           allRoomAnswers={allRoomAnswers}
@@ -231,7 +230,7 @@ export default function QuizScreen() {
           onConfirmExit={handleExitRoom}
           isHost={isHost}
         />
-      </SafeAreaView>
+      </View>
     );
   }
 
@@ -240,7 +239,7 @@ export default function QuizScreen() {
     // Question creation screen
     if (!currentQuestion || room?.status === 'ready' || room?.status === 'waiting') {
       return (
-        <SafeAreaView className="flex-1 bg-white">
+        <>
           <ScrollView
             className="flex-1"
             contentContainerStyle={{ flexGrow: 1 }}
@@ -259,13 +258,13 @@ export default function QuizScreen() {
             onConfirmExit={handleExitRoom}
             isHost={isHost}
           />
-        </SafeAreaView>
+        </>
       );
     }
 
     // Host quiz management screen
     return (
-      <SafeAreaView className="flex-1 bg-white">
+      <>
         <ScrollView
           className="flex-1"
           contentContainerStyle={{ flexGrow: 1 }}
@@ -295,7 +294,7 @@ export default function QuizScreen() {
           onConfirmExit={handleExitRoom}
           isHost={isHost}
         />
-      </SafeAreaView>
+      </>
     );
   }
 
@@ -304,7 +303,7 @@ export default function QuizScreen() {
     // Show waiting screen when no question or room is waiting/ready
     if (!currentQuestion || room?.status === 'waiting' || room?.status === 'ready') {
       return (
-        <SafeAreaView className="flex-1 bg-white">
+        <>
           <View className="flex-1 p-6 items-center justify-center">
             <Text className="text-xl font-bold mb-4">待機中</Text>
             <Text className="text-base text-gray-600 text-center mb-4">
@@ -322,13 +321,13 @@ export default function QuizScreen() {
               isHost={isHost}
             />
           </View>
-        </SafeAreaView>
+        </>
       );
     }
 
     // Show quiz screen when there's an active question
     return (
-      <SafeAreaView className="flex-1 bg-white">
+      <>
         <ScrollView
           className="flex-1"
           contentContainerStyle={{ flexGrow: 1 }}
@@ -360,7 +359,7 @@ export default function QuizScreen() {
           onConfirmExit={handleExitRoom}
           isHost={isHost}
         />
-      </SafeAreaView>
+      </>
     );
   }
 }

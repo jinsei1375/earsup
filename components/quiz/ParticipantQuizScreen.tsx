@@ -254,6 +254,7 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
               <>
                 <Text className="text-center font-bold text-blue-800 mb-1">回答を提出しました</Text>
                 <Text className="text-center text-blue-600">ホストの判定をお待ちください</Text>
+                <LoadingSpinner size="small" variant="dots" className="mt-2" />
               </>
             ) : isCorrect ? (
               // Correct

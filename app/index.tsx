@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { useUserStore } from '@/stores/userStore';
 import { supabase } from '@/lib/supabase';
 import { router } from 'expo-router';
@@ -111,7 +111,10 @@ export default function HomeScreen() {
         {/* ヘッダーセクション */}
         <View className="items-center mb-8 mt-4">
           <View className="bg-white rounded-full p-2 shadow-lg mb-4">
-            <Text className="text-6xl p-2">🎧</Text>
+            <Image
+              source={require('@/assets/images/adaptive-icon.png')}
+              className="w-24 h-24 rounded-full"
+            />
           </View>
           <Text className="text-4xl font-bold text-gray-800 mb-2">EarsUp</Text>
           <Text className="text-lg text-gray-600 text-center mb-4">リスニングクイズアプリ</Text>
