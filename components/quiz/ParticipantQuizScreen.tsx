@@ -1,6 +1,14 @@
 // components/quiz/ParticipantQuizScreen.tsx
-import React, { useState } from 'react';
-import { View, Text, TextInput, Keyboard } from 'react-native';
+import React, { useState, useRef } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  Keyboard,
+  KeyboardAvoidingView,
+  ScrollView,
+  Platform,
+} from 'react-native';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { ErrorMessage } from '@/components/common/ErrorMessage';
 import { Button } from '@/components/common/Button';
@@ -67,6 +75,8 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
 }) => {
   const [answer, setAnswer] = useState('');
   const [stampModalVisible, setStampModalVisible] = useState(false);
+  const scrollViewRef = useRef<ScrollView>(null);
+  const inputRef = useRef<TextInput>(null);
 
   const quizMode = room?.quiz_mode || 'all-at-once';
   const isFirstComeMode = quizMode === 'first-come';
@@ -81,6 +91,15 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
       await onSubmitAnswer(answer.trim());
       setAnswer('');
     }
+  };
+
+  const handleInputFocus = () => {
+    setTimeout(() => {
+      inputRef.current?.measureInWindow((x, y, width, height) => {
+        const scrollToY = y - 150; // 画面中央より少し上に調整
+        scrollViewRef.current?.scrollTo({ y: Math.max(0, scrollToY), animated: true });
+      });
+    }, 300); // キーボードアニメーション後に実行
   };
 
   // スタンプを画面上にランダムな位置で表示
@@ -134,135 +153,157 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
 
   // Quiz is active
   return (
-    <View className="flex-1 p-6">
-      <Text className="text-xl font-bold mb-4 text-center">リスニングクイズ</Text>
+    <KeyboardAvoidingView
+      className="flex-1"
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
+    >
+      <ScrollView
+        ref={scrollViewRef}
+        className="flex-1 p-6"
+        contentContainerStyle={{ flexGrow: 1 }}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        <Text className="text-xl font-bold mb-4 text-center">リスニングクイズ</Text>
 
-      {/* 参加者リスト */}
-      <ParticipantsList
-        participants={participants}
-        hostUserId={room?.host_user_id}
-        loading={false}
-        onRefresh={onRefreshState}
-        answers={allRoomAnswers}
-      />
+        {/* 参加者リスト */}
+        <ParticipantsList
+          participants={participants}
+          hostUserId={room?.host_user_id}
+          loading={false}
+          onRefresh={onRefreshState}
+          answers={allRoomAnswers}
+        />
 
-      <Text className="text-lg font-bold text-green-500 my-4 text-center">
-        問題が出題されました!
-      </Text>
+        <Text className="text-lg font-bold text-green-500 my-4 text-center">
+          問題が出題されました!
+        </Text>
 
-      {isFirstComeMode ? (
-        // First-come mode
-        <>
-          {canBuzzIn ? (
-            // Can buzz in
+        {isFirstComeMode ? (
+          // First-come mode
+          <>
+            {canBuzzIn ? (
+              // Can buzz in
+              <Button
+                title="押す!"
+                onPress={onBuzzIn}
+                disabled={loading}
+                variant="primary"
+                size="large"
+                fullWidth
+                className="my-4"
+              />
+            ) : hasBuzzedIn ? (
+              // User has buzzed in
+              <>
+                <View className="bg-green-100 p-3 rounded-lg mb-4 w-full">
+                  <Text className="text-green-800 text-center">あなたが回答権を獲得しました！</Text>
+                </View>
+
+                <View className="w-full mt-4 mb-6">
+                  <TextInput
+                    ref={inputRef}
+                    className="border border-gray-300 p-4 rounded-lg my-3 w-full text-lg"
+                    placeholder="聞こえたフレーズを入力"
+                    value={answer}
+                    onChangeText={setAnswer}
+                    editable={!showResult}
+                    returnKeyType="done"
+                    onSubmitEditing={() => Keyboard.dismiss()}
+                    onFocus={handleInputFocus}
+                    blurOnSubmit={false}
+                  />
+
+                  <Button
+                    title="解答する"
+                    onPress={handleSubmitAnswer}
+                    disabled={!answer.trim() || showResult || loading}
+                    variant="primary"
+                    size="large"
+                    fullWidth
+                  />
+                </View>
+              </>
+            ) : (
+              // Someone else has buzzed in
+              <View className="bg-red-100 p-3 rounded-lg w-full">
+                <Text className="text-red-800 text-center">他の参加者が回答中です</Text>
+              </View>
+            )}
+          </>
+        ) : !showResult ? (
+          // All-at-once mode - hasn't answered yet
+          <View className="w-full mt-4 mb-6">
+            <TextInput
+              ref={inputRef}
+              className="border border-gray-300 p-4 rounded-lg my-3 w-full text-lg"
+              placeholder="聞こえたフレーズを入力"
+              value={answer}
+              onChangeText={setAnswer}
+              editable={!showResult}
+              returnKeyType="done"
+              onSubmitEditing={() => Keyboard.dismiss()}
+              onFocus={handleInputFocus}
+              blurOnSubmit={false}
+            />
+
             <Button
-              title="押す!"
-              onPress={onBuzzIn}
-              disabled={loading}
+              title="解答する"
+              onPress={handleSubmitAnswer}
+              disabled={!answer.trim() || showResult || loading}
               variant="primary"
               size="large"
               fullWidth
-              className="my-4"
             />
-          ) : hasBuzzedIn ? (
-            // User has buzzed in
-            <>
-              <View className="bg-green-100 p-3 rounded-lg mb-4 w-full">
-                <Text className="text-green-800 text-center">あなたが回答権を獲得しました！</Text>
-              </View>
+          </View>
+        ) : (
+          // All-at-once mode - has answered
+          <View className="bg-blue-100 p-4 rounded-lg my-4 w-full">
+            {isCorrect === null ? (
+              // Waiting for judgment
+              <>
+                <Text className="text-center font-bold text-blue-800 mb-1">回答を提出しました</Text>
+                <Text className="text-center text-blue-600">ホストの判定をお待ちください</Text>
+              </>
+            ) : isCorrect ? (
+              // Correct
+              <>
+                <Text className="text-center font-bold text-green-800 mb-1">正解！</Text>
+                <Text className="text-center text-green-600">
+                  あなたの回答が正解と判定されました
+                </Text>
+              </>
+            ) : (
+              // Incorrect
+              <>
+                <Text className="text-center font-bold text-red-800 mb-1">不正解</Text>
+                <Text className="text-center text-red-600">
+                  あなたの回答が不正解と判定されました
+                </Text>
+                <Text className="text-center text-black mt-2">正解: {questionText}</Text>
+              </>
+            )}
+          </View>
+        )}
 
-              <View className="w-full mt-4 mb-6">
-                <TextInput
-                  className="border border-gray-300 p-4 rounded-lg my-3 w-full text-lg"
-                  placeholder="聞こえたフレーズを入力"
-                  value={answer}
-                  onChangeText={setAnswer}
-                  editable={!showResult}
-                  returnKeyType="done"
-                  onSubmitEditing={() => Keyboard.dismiss()}
-                />
+        {/* Result display for first-come mode */}
+        {showResult && isFirstComeMode && (
+          <View className="mt-6 items-center">
+            <Text
+              className={
+                isCorrect ? 'text-green-600 font-bold text-lg' : 'text-red-600 font-bold text-lg'
+              }
+            >
+              {isCorrect ? '✓ 正解！' : '✗ 不正解'}
+            </Text>
+            <Text className="mt-2">正解: {questionText}</Text>
+          </View>
+        )}
 
-                <Button
-                  title="解答する"
-                  onPress={handleSubmitAnswer}
-                  disabled={!answer.trim() || showResult || loading}
-                  variant="primary"
-                  size="large"
-                  fullWidth
-                />
-              </View>
-            </>
-          ) : (
-            // Someone else has buzzed in
-            <View className="bg-red-100 p-3 rounded-lg w-full">
-              <Text className="text-red-800 text-center">他の参加者が回答中です</Text>
-            </View>
-          )}
-        </>
-      ) : !showResult ? (
-        // All-at-once mode - hasn't answered yet
-        <View className="w-full mt-4 mb-6">
-          <TextInput
-            className="border border-gray-300 p-4 rounded-lg my-3 w-full text-lg"
-            placeholder="聞こえたフレーズを入力"
-            value={answer}
-            onChangeText={setAnswer}
-            editable={!showResult}
-            returnKeyType="done"
-            onSubmitEditing={() => Keyboard.dismiss()}
-          />
-
-          <Button
-            title="解答する"
-            onPress={handleSubmitAnswer}
-            disabled={!answer.trim() || showResult || loading}
-            variant="primary"
-            size="large"
-            fullWidth
-          />
-        </View>
-      ) : (
-        // All-at-once mode - has answered
-        <View className="bg-blue-100 p-4 rounded-lg my-4 w-full">
-          {isCorrect === null ? (
-            // Waiting for judgment
-            <>
-              <Text className="text-center font-bold text-blue-800 mb-1">回答を提出しました</Text>
-              <Text className="text-center text-blue-600">ホストの判定をお待ちください</Text>
-            </>
-          ) : isCorrect ? (
-            // Correct
-            <>
-              <Text className="text-center font-bold text-green-800 mb-1">正解！</Text>
-              <Text className="text-center text-green-600">あなたの回答が正解と判定されました</Text>
-            </>
-          ) : (
-            // Incorrect
-            <>
-              <Text className="text-center font-bold text-red-800 mb-1">不正解</Text>
-              <Text className="text-center text-red-600">あなたの回答が不正解と判定されました</Text>
-              <Text className="text-center text-black mt-2">正解: {questionText}</Text>
-            </>
-          )}
-        </View>
-      )}
-
-      {/* Result display for first-come mode */}
-      {showResult && isFirstComeMode && (
-        <View className="mt-6 items-center">
-          <Text
-            className={
-              isCorrect ? 'text-green-600 font-bold text-lg' : 'text-red-600 font-bold text-lg'
-            }
-          >
-            {isCorrect ? '✓ 正解！' : '✗ 不正解'}
-          </Text>
-          <Text className="mt-2">正解: {questionText}</Text>
-        </View>
-      )}
-
-      {loading && <LoadingSpinner variant="dots" color="#6366F1" />}
-      <ErrorMessage message={error} />
-    </View>
+        {loading && <LoadingSpinner variant="dots" color="#6366F1" />}
+        <ErrorMessage message={error} />
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
