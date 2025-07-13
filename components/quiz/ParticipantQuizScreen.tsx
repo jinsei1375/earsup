@@ -174,10 +174,6 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <Text className="text-lg font-bold text-green-500 mb-4 text-center">
-          聞こえたフレーズを入力してください
-        </Text>
-
         {/* クイズコンテンツ - 優先表示 */}
         {isFirstComeMode ? (
           // First-come mode
@@ -233,28 +229,33 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
           </>
         ) : !showResult ? (
           // All-at-once mode - hasn't answered yet
-          <View className="w-full mb-4">
-            <TextInput
-              ref={inputRef}
-              className="border border-gray-300 p-4 rounded-lg mb-3 w-full text-lg"
-              placeholder="聞こえたフレーズを入力"
-              value={answer}
-              onChangeText={setAnswer}
-              editable={!showResult}
-              returnKeyType="done"
-              onSubmitEditing={() => Keyboard.dismiss()}
-              onFocus={handleInputFocus}
-            />
+          <>
+            <Text className="text-lg font-bold text-green-500 mb-4 text-center">
+              聞こえたフレーズを入力してください
+            </Text>
+            <View className="w-full mb-4">
+              <TextInput
+                ref={inputRef}
+                className="border border-gray-300 p-4 rounded-lg mb-3 w-full text-xl"
+                placeholder="聞こえたフレーズを入力"
+                value={answer}
+                onChangeText={setAnswer}
+                editable={!showResult}
+                returnKeyType="done"
+                onSubmitEditing={() => Keyboard.dismiss()}
+                onFocus={handleInputFocus}
+              />
 
-            <Button
-              title="回答する"
-              onPress={handleSubmitAnswer}
-              disabled={!answer.trim() || showResult || loading}
-              variant="primary"
-              size="large"
-              fullWidth
-            />
-          </View>
+              <Button
+                title="回答する"
+                onPress={handleSubmitAnswer}
+                disabled={!answer.trim() || showResult || loading}
+                variant="primary"
+                size="large"
+                fullWidth
+              />
+            </View>
+          </>
         ) : (
           // All-at-once mode - has answered
           <View className="bg-blue-100 p-4 rounded-lg mb-4 w-full">
@@ -268,7 +269,7 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
             ) : isAnswerCorrect ? (
               // Correct
               <>
-                <Text className="text-center font-bold text-green-500 mb-1">◯正解</Text>
+                <Text className="text-center font-bold text-green-500 text-lg mb-1">◯正解</Text>
                 <Text className="text-center font-bold text-yellow-600 text-lg mb-2">
                   10ポイントGET！
                 </Text>
@@ -280,7 +281,7 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
             ) : isPartialAnswer ? (
               // Partial (惜しい)
               <>
-                <Text className="text-center font-bold text-orange-500 mb-1">△惜しい</Text>
+                <Text className="text-center font-bold text-orange-500 text-lg mb-1">△惜しい</Text>
                 <Text className="text-center font-bold text-yellow-600 text-lg mb-2">
                   5ポイントGET！
                 </Text>
@@ -292,7 +293,7 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
             ) : (
               // Incorrect
               <>
-                <Text className="text-center font-bold text-red-500 mb-1">×不正解</Text>
+                <Text className="text-center font-bold text-red-500 text-lg mb-1">×不正解</Text>
                 <Text className="text-center text-blue-600 mt-2">
                   あなたの回答: 「{userAnswer?.answer_text}」
                 </Text>

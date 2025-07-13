@@ -53,7 +53,7 @@ export const QuizResultScreen: React.FC<QuizResultScreenProps> = ({
       <View className="p-6">
         {/* ヘッダー */}
         <View className="items-center mb-6">
-          <Text className="text-3xl font-bold text-green-600 mb-2">🏆 最終結果</Text>
+          <Text className="text-3xl font-bold text-green-600 mb-2">最終結果</Text>
           {totalQuestions > 0 && (
             <Text className="text-sm text-gray-500 mt-1">全{totalQuestions}問</Text>
           )}

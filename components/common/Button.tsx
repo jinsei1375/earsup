@@ -5,7 +5,7 @@ import { TouchableOpacity, Text, View } from 'react-native';
 interface ButtonProps {
   title?: string;
   onPress: () => void;
-  variant?: 'primary' | 'secondary' | 'danger' | 'outline' | 'ghost';
+  variant?: 'primary' | 'secondary' | 'danger' | 'outline' | 'ghost' | 'correct' | 'partial';
   size?: 'small' | 'medium' | 'large';
   disabled?: boolean;
   fullWidth?: boolean;
@@ -52,6 +52,12 @@ export const CustomButton: React.FC<ButtonProps> = ({
     ghost: disabled
       ? 'bg-transparent border-transparent'
       : 'bg-transparent border-transparent active:bg-gray-100',
+    correct: disabled
+      ? 'bg-green-300 border-green-300'
+      : 'bg-green-500 border-green-500 active:bg-green-600',
+    partial: disabled
+      ? 'bg-orange-300 border-orange-300'
+      : 'bg-orange-500 border-orange-500 active:bg-orange-600',
   };
 
   // テキストスタイル
@@ -67,6 +73,8 @@ export const CustomButton: React.FC<ButtonProps> = ({
     danger: disabled ? 'text-gray-500' : 'text-white',
     outline: disabled ? 'text-gray-400' : 'text-blue-500',
     ghost: disabled ? 'text-gray-400' : 'text-gray-700',
+    correct: disabled ? 'text-gray-500' : 'text-white',
+    partial: disabled ? 'text-gray-500' : 'text-white',
   };
 
   const buttonClassName = [

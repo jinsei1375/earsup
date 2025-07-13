@@ -83,7 +83,7 @@ export const AnswersList: React.FC<AnswersListProps> = ({
                       title="正解"
                       onPress={() => onJudgeAnswer(answer.id, true, 'correct')}
                       disabled={loading}
-                      variant="primary"
+                      variant="correct"
                       size="small"
                     />
                     {allowPartialPoints && (
@@ -91,7 +91,7 @@ export const AnswersList: React.FC<AnswersListProps> = ({
                         title="惜しい"
                         onPress={() => onJudgeAnswer(answer.id, false, 'partial')}
                         disabled={loading}
-                        variant="secondary"
+                        variant="partial"
                         size="small"
                       />
                     )}
