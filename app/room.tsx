@@ -178,7 +178,26 @@ export default function RoomScreen() {
     return (
       <View className="flex-1 p-6 items-center justify-center">
         <Text className="text-xl font-bold mb-6">ルーム待機中</Text>
-        <Text className="text-[32px] font-bold tracking-[4px] my-5">{room?.code || ''}</Text>
+
+        <Text className="mb-2 text-gray-600">合言葉をタップしてコピー</Text>
+        <TouchableOpacity
+          onPress={async () => {
+            try {
+              await Clipboard.setStringAsync(room?.code || '');
+              showNotification('コピー完了', '合言葉がクリップボードにコピーされました');
+            } catch (error) {
+              console.error('Copy failed:', error);
+              showNotification('エラー', 'コピーに失敗しました');
+            }
+          }}
+          className="p-6 rounded-xl border-2 border-dashed border-blue-400 bg-blue-50 my-5 active:bg-blue-100"
+          activeOpacity={0.8}
+        >
+          <Text className="text-[32px] font-bold tracking-[4px] text-blue-700 text-center">
+            {room?.code || ''}
+          </Text>
+          <Text className="text-sm text-blue-600 text-center mt-2">📋 タップしてコピー</Text>
+        </TouchableOpacity>
 
         <RealtimeStatus connectionState={connectionState} />
 
@@ -225,10 +244,13 @@ export default function RoomScreen() {
             })()}
           </View>
         ) : (
-          <Text className="mt-5 italic">ホストがクイズを開始するのを待っています...</Text>
+          <View className="mt-5 items-center">
+            <Text className="italic mb-4">ホストがクイズを開始するのを待っています...</Text>
+            <LoadingSpinner variant="pulse" color="#8B5CF6" size="large" />
+          </View>
         )}
 
-        {loading && <LoadingSpinner />}
+        {loading && <LoadingSpinner variant="dots" color="#3B82F6" />}
         <ErrorMessage message={error} />
       </View>
     );
@@ -318,7 +340,7 @@ export default function RoomScreen() {
               </>
             )}
 
-            {loading && <LoadingSpinner />}
+            {loading && <LoadingSpinner variant="default" color="#3B82F6" />}
             <ErrorMessage message={error} />
           </View>
         </ScrollView>

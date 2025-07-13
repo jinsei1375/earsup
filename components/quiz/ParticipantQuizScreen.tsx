@@ -110,7 +110,7 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
       <View className="flex-1 p-6 items-center justify-center">
         <Text className="text-green-600 font-bold text-lg mb-3">クイズが終了しました</Text>
         <Text className="mb-3">ホーム画面に移動しています...</Text>
-        <LoadingSpinner size="large" />
+        <LoadingSpinner size="large" variant="pulse" color="#10B981" />
       </View>
     );
   }
@@ -121,7 +121,8 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
       <View className="flex-1 p-6 items-center justify-center">
         <Text className="text-xl font-bold mb-4">リスニングクイズ</Text>
         <RealtimeStatus connectionState={connectionState} showLastUpdate={false} />
-        <Text>ホストが問題を作成中です...</Text>
+        <Text className="mb-6">ホストが問題を作成中です...</Text>
+        <LoadingSpinner size="large" variant="sound-wave" color="#3B82F6" className="mb-4" />
         <Button
           title="状態を更新"
           onPress={onRefreshState}
@@ -263,7 +264,7 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
         </View>
       )}
 
-      {loading && <LoadingSpinner />}
+      {loading && <LoadingSpinner variant="dots" color="#6366F1" />}
       <ErrorMessage message={error} />
     </View>
   );

@@ -179,7 +179,7 @@ export const HostQuizScreen: React.FC<HostQuizScreenProps> = ({
         fullWidth
         disabled={loading}
       />
-      {loading && <LoadingSpinner />}
+      {loading && <LoadingSpinner variant="default" color="#3B82F6" />}
       <ErrorMessage message={error} />
     </View>
   );
