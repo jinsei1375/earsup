@@ -170,8 +170,7 @@ export const calculateParticipantStats = (
   hostUserId?: string,
   judgmentTypes?: Record<string, 'correct' | 'partial' | 'incorrect'>
 ): ParticipantStats[] => {
-  return participants
-    .filter((participant) => participant.id !== hostUserId) // Exclude host from stats
+  return participants // ホストも含めて統計を計算
     .map((participant) => {
       const userAnswers = answers.filter(
         (answer) => answer.user_id === participant.id && answer.judged

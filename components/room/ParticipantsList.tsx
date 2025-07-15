@@ -29,11 +29,8 @@ export const ParticipantsList: React.FC<ParticipantsListProps> = ({
       ? calculateParticipantStats(participants, answers, hostUserId, judgmentTypes)
       : null;
 
-  // Sort participants: host first, then by points (for non-hosts)
+  // Sort participants by points (including host)
   const sortedParticipants = [...participants].sort((a, b) => {
-    if (a.id === hostUserId) return -1;
-    if (b.id === hostUserId) return 1;
-
     // Sort by points if stats are available
     if (participantStats) {
       const statsA = participantStats.find((s) => s.userId === a.id);
@@ -56,31 +53,33 @@ export const ParticipantsList: React.FC<ParticipantsListProps> = ({
       if (!statsA && statsB) return 1;
     }
 
+    // If no stats, put host first as fallback
+    if (a.id === hostUserId) return -1;
+    if (b.id === hostUserId) return 1;
+
     return 0;
   });
 
-  // Get participant rank (excluding host)
+  // Get participant rank (including host)
   const getRank = (userId: string): number | null => {
-    if (!participantStats || userId === hostUserId) return null;
+    if (!participantStats) return null;
 
-    const nonHostStats = participantStats
-      .filter((s) => s.userId !== hostUserId)
-      .sort((a, b) => {
-        // Sort by points first
-        if (a.points !== b.points) {
-          return b.points - a.points;
-        }
-        // Then by accuracy as tiebreaker
-        if (a.totalAnswers > 0 && b.totalAnswers > 0) {
-          const accuracyA = a.correctAnswers / a.totalAnswers;
-          const accuracyB = b.correctAnswers / b.totalAnswers;
-          return accuracyB - accuracyA;
-        }
-        return 0;
-      });
+    const allStats = participantStats.sort((a, b) => {
+      // Sort by points first
+      if (a.points !== b.points) {
+        return b.points - a.points;
+      }
+      // Then by accuracy as tiebreaker
+      if (a.totalAnswers > 0 && b.totalAnswers > 0) {
+        const accuracyA = a.correctAnswers / a.totalAnswers;
+        const accuracyB = b.correctAnswers / b.totalAnswers;
+        return accuracyB - accuracyA;
+      }
+      return 0;
+    });
 
-    const rank = nonHostStats.findIndex((s) => s.userId === userId) + 1;
-    return rank <= nonHostStats.length ? rank : null;
+    const rank = allStats.findIndex((s) => s.userId === userId) + 1;
+    return rank <= allStats.length ? rank : null;
   };
 
   // Get progress bar width percentage
@@ -93,7 +92,7 @@ export const ParticipantsList: React.FC<ParticipantsListProps> = ({
     <>
       <View className="flex-row justify-between items-center w-full mt-2.5 mb-2.5">
         <Text className="text-lg font-semibold text-gray-800">
-          参加者 ({participants.length}名)
+          参加者 ({String(participants.length)}名)
         </Text>
         <Button
           title="更新"
@@ -172,17 +171,17 @@ export const ParticipantsList: React.FC<ParticipantsListProps> = ({
                       </View>
                     </View>
 
-                    {stats && !isHost && (
+                    {stats && (
                       <View className="items-end min-w-[100px]">
                         <View className="flex-row items-center mb-1">
                           <Text className="text-2xl font-bold text-blue-600 mr-1">
-                            {stats.points}
+                            {String(stats.points)}
                           </Text>
                           <Text className="text-xs text-gray-500">ポイント</Text>
-                          <Text className="text-sm text-gray-500">
-                            ({stats.correctAnswers}/{stats.totalAnswers}問)
-                          </Text>
                         </View>
+                        <Text className="text-sm text-gray-500 text-right">
+                          ({String(stats.correctAnswers)}/{String(stats.totalAnswers)}問)
+                        </Text>
 
                         {stats.totalAnswers > 0 && (
                           <>
@@ -198,7 +197,10 @@ export const ParticipantsList: React.FC<ParticipantsListProps> = ({
                               />
                             </View>
                             <Text className="text-xs text-green-600 font-medium mb-1">
-                              正解率 {Math.round((stats.correctAnswers / stats.totalAnswers) * 100)}
+                              正解率{' '}
+                              {String(
+                                Math.round((stats.correctAnswers / stats.totalAnswers) * 100)
+                              )}
                               %
                             </Text>
 
@@ -207,14 +209,14 @@ export const ParticipantsList: React.FC<ParticipantsListProps> = ({
                               {stats.currentStreak > 0 && (
                                 <View className="bg-orange-100 px-2 py-1 rounded-full mr-1">
                                   <Text className="text-xs text-orange-700 font-bold">
-                                    🔥{stats.currentStreak}連続
+                                    🔥{String(stats.currentStreak)}連続
                                   </Text>
                                 </View>
                               )}
                               {stats.maxStreak > 1 && (
                                 <View className="bg-purple-100 px-2 py-1 rounded-full">
                                   <Text className="text-xs text-purple-700 font-medium">
-                                    最高{stats.maxStreak}連続
+                                    最高{String(stats.maxStreak)}連続
                                   </Text>
                                 </View>
                               )}

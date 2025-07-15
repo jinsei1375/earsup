@@ -62,8 +62,50 @@ export const HostQuizScreen: React.FC<HostQuizScreenProps> = ({
     onEndQuiz();
   };
 
-  // 全ての回答が判定されているかチェック
-  const allAnswersJudged = answers.length > 0 && answers.every((answer) => answer.judged);
+  // 全ての参加者の回答が判定されているかチェック
+  const allAnswersJudged = (() => {
+    // 参加者がいない場合は判定完了とみなさない
+    if (participants.length === 0) {
+      return false;
+    }
+
+    // 回答がない場合も判定完了とみなさない
+    if (answers.length === 0) {
+      return false;
+    }
+
+    // ホストありモードの場合：ホスト以外の参加者のみチェック
+    if (quizMode === 'all-at-once-host') {
+      const nonHostParticipants = participants.filter((p) => p.id !== hostUserId);
+
+      // 非ホスト参加者がいない場合は判定完了とみなさない
+      if (nonHostParticipants.length === 0) {
+        return false;
+      }
+
+      // 非ホスト参加者の回答を取得
+      const nonHostAnswers = answers.filter((answer) =>
+        nonHostParticipants.some((p) => p.id === answer.user_id)
+      );
+
+      // 全ての非ホスト参加者が回答し、かつ全て判定済み
+      const hasAllAnswers = nonHostAnswers.length === nonHostParticipants.length;
+      const allJudged = nonHostAnswers.every((answer) => answer.judged === true);
+
+      return hasAllAnswers && allJudged;
+    }
+
+    // ホストなしモードの場合：全参加者（ホスト含む）をチェック
+    const allParticipantAnswers = answers.filter((answer) =>
+      participants.some((p) => p.id === answer.user_id)
+    );
+
+    // 全ての参加者が回答し、かつ全て判定済み
+    const hasAllAnswers = allParticipantAnswers.length === participants.length;
+    const allJudged = allParticipantAnswers.every((answer) => answer.judged === true);
+
+    return hasAllAnswers && allJudged;
+  })();
 
   return (
     <ScrollView className="flex-1 p-6 pb-10" showsVerticalScrollIndicator={false}>
@@ -153,14 +195,18 @@ export const HostQuizScreen: React.FC<HostQuizScreenProps> = ({
 
       {/* 次の問題へボタン（全ての回答が判定されている場合のみ表示） */}
       {allAnswersJudged && (
-        <Button
-          title="次の問題へ"
-          onPress={onNextQuestion}
-          variant="primary"
-          fullWidth
-          disabled={loading}
-          className="mb-4"
-        />
+        <View className="mb-4">
+          <Text className="text-center text-green-600 text-sm mb-2">
+            ✅ 全ての参加者の判定が完了しました
+          </Text>
+          <Button
+            title="次の問題へ"
+            onPress={onNextQuestion}
+            variant="primary"
+            fullWidth
+            disabled={loading}
+          />
+        </View>
       )}
 
       <Button

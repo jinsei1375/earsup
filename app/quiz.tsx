@@ -88,23 +88,54 @@ export default function QuizScreen() {
 
   // Monitor answer judgment for participants
   useEffect(() => {
-    if (!isHost && userId && currentQuestion?.id) {
-      const myAnswer = answers.find((a) => a.user_id === userId);
-      if (myAnswer?.judged && myAnswer.judge_result) {
-        // judge_resultに基づいて判定結果を設定
-        setIsCorrect(myAnswer.judge_result === 'correct');
-        setShowResult(true);
+    if (userId && currentQuestion?.id) {
+      const isAutoMode = room?.quiz_mode === 'all-at-once-auto';
+      
+      // 参加者または ホストなしモードのホストの回答判定を監視
+      if (!isHost || (isHost && isAutoMode)) {
+        const myAnswer = answers.find((a) => a.user_id === userId);
+        if (myAnswer?.judged && myAnswer.judge_result) {
+          // judge_resultに基づいて判定結果を設定
+          setIsCorrect(myAnswer.judge_result === 'correct');
+          setShowResult(true);
+        }
       }
     }
-  }, [answers, isHost, userId, currentQuestion?.id]);
+  }, [answers, isHost, userId, currentQuestion?.id, room?.quiz_mode]);
 
   // Reset participant result state when question changes or room goes to waiting
   useEffect(() => {
-    if (!isHost && (!currentQuestion || room?.status === 'waiting' || room?.status === 'ready')) {
-      setShowResult(false);
-      setIsCorrect(null);
+    const isAutoMode = room?.quiz_mode === 'all-at-once-auto';
+    
+    // 参加者の状態リセット
+    if (!isHost) {
+      if (!currentQuestion || room?.status === 'waiting' || room?.status === 'ready') {
+        setShowResult(false);
+        setIsCorrect(null);
+      }
+      
+      // ホストなしモードでは問題が変わった時もリセット
+      if (isAutoMode && currentQuestion) {
+        // 新しい問題が来た場合はリセット
+        setShowResult(false);
+        setIsCorrect(null);
+      }
     }
-  }, [isHost, currentQuestion, room?.status]);
+    
+    // ホストなしモードの場合、ホストも参加者として扱うので状態をリセット
+    if (isHost && isAutoMode) {
+      if (!currentQuestion || room?.status === 'waiting' || room?.status === 'ready') {
+        setShowResult(false);
+        setIsCorrect(null);
+      }
+      
+      // 問題が変わった時もリセット
+      if (currentQuestion) {
+        setShowResult(false);
+        setIsCorrect(null);
+      }
+    }
+  }, [isHost, currentQuestion?.id, room?.status, room?.quiz_mode]);
 
   // allRoomAnswersからjudgmentTypesを更新
   useEffect(() => {
@@ -117,6 +148,34 @@ export default function QuizScreen() {
     setJudgmentTypes(newJudgmentTypes);
   }, [allRoomAnswers]);
 
+  // ホストなしモードで自動的に問題を作成
+  useEffect(() => {
+    const isAutoMode = room?.quiz_mode === 'all-at-once-auto';
+    if (isHost && isAutoMode && (room?.status === 'ready' || room?.status === 'waiting') && !currentQuestion) {
+      // サンプル問題を自動作成
+      const sampleQuestions = [
+        'Hello, how are you today?',
+        'What time is it now?',
+        'Where are you from?',
+        'Nice to meet you.',
+        'Have a nice day!',
+        'Good morning!',
+        'See you later.',
+        'Thank you very much.',
+        'You are welcome.',
+        'How old are you?',
+      ];
+      const randomQuestion = sampleQuestions[Math.floor(Math.random() * sampleQuestions.length)];
+      
+      // 少し遅延を入れて状態が安定してから問題を作成
+      const timer = setTimeout(() => {
+        handleCreateQuestion(randomQuestion);
+      }, 200);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [room?.status, room?.quiz_mode, currentQuestion, isHost]);
+
   const handleCreateQuestion = async (text: string) => {
     try {
       await createQuestion(text);
@@ -127,13 +186,20 @@ export default function QuizScreen() {
 
   const handleSubmitAnswer = async (answerText: string) => {
     try {
-      // 新しいモードでは常にホストが判定
-      const autoJudge = false;
+      const isAutoMode = room?.quiz_mode === 'all-at-once-auto';
+      const autoJudge = isAutoMode; // ホストなしモードは自動判定
 
       const answerData = await submitAnswer(answerText, false, autoJudge);
 
       setShowResult(true);
-      setIsCorrect(null); // Wait for host judgment
+
+      if (autoJudge && currentQuestion) {
+        // ホストなしモードでは自動判定
+        const correct = validateAnswer(answerText, currentQuestion.text);
+        setIsCorrect(correct);
+      } else {
+        setIsCorrect(null); // Wait for host judgment
+      }
     } catch (err) {
       console.error('Answer submission failed:', err);
     }
@@ -177,12 +243,16 @@ export default function QuizScreen() {
       // データベースから参加者を削除し、必要に応じてルームを終了
       await removeParticipant(userId);
 
-      // ホーム画面に戻る
-      router.replace('/');
+      // ホーム画面に戻る - 遅延を追加してクリーンアップを確実に
+      setTimeout(() => {
+        router.replace('/');
+      }, 100);
     } catch (err: any) {
       console.error('Exit room failed:', err);
       // エラーが発生してもホーム画面に戻る
-      router.replace('/');
+      setTimeout(() => {
+        router.replace('/');
+      }, 100);
     }
   };
 
@@ -194,7 +264,43 @@ export default function QuizScreen() {
 
   const handleNextQuestion = async () => {
     try {
-      await nextQuestion();
+      const isAutoMode = room?.quiz_mode === 'all-at-once-auto';
+      
+      if (isAutoMode) {
+        // ホストなしモードでは、まず状態をリセット
+        setShowResult(false);
+        setIsCorrect(null);
+        
+        // 次の問題を自動作成して即座に出題
+        await nextQuestion();
+        
+        // サンプル問題を自動作成
+        const sampleQuestions = [
+          'Hello, how are you today?',
+          'What time is it now?',
+          'Where are you from?',
+          'Nice to meet you.',
+          'Have a nice day!',
+          'Good morning!',
+          'See you later.',
+          'Thank you very much.',
+          'You are welcome.',
+          'How old are you?',
+        ];
+        const randomQuestion = sampleQuestions[Math.floor(Math.random() * sampleQuestions.length)];
+        
+        // 少し遅延を入れて確実に状態をリセットしてから新しい問題を作成
+        setTimeout(async () => {
+          try {
+            await handleCreateQuestion(randomQuestion);
+          } catch (err) {
+            console.error('Auto question creation failed:', err);
+          }
+        }, 100);
+      } else {
+        // ホストありモードでは従来通り
+        await nextQuestion();
+      }
     } catch (err) {
       console.error('Next question failed:', err);
     }
@@ -230,8 +336,73 @@ export default function QuizScreen() {
 
   // Host screens
   if (isHost) {
+    const isAutoMode = room?.quiz_mode === 'all-at-once-auto';
+
+    // ホストなしモードの場合は、ホストも参加者として扱う
+    if (isAutoMode && currentQuestion) {
+      return (
+        <>
+          <ScrollView
+            className="flex-1"
+            contentContainerStyle={{ flexGrow: 1 }}
+            showsVerticalScrollIndicator={false}
+          >
+            <ParticipantQuizScreen
+              room={room}
+              questionText={currentQuestion?.text || ''}
+              userId={userId}
+              participants={participants}
+              allRoomAnswers={allRoomAnswers}
+              judgmentTypes={judgmentTypes}
+              connectionState={connectionState}
+              loading={loading}
+              error={error}
+              isCorrect={isCorrect}
+              showResult={showResult}
+              onSubmitAnswer={handleSubmitAnswer}
+              onRefreshState={handleRefreshState}
+              onNextQuestion={handleNextQuestion}
+            />
+          </ScrollView>
+
+          <ExitRoomModal
+            isVisible={isExitModalVisible}
+            onClose={() => setIsExitModalVisible(false)}
+            onConfirmExit={handleExitRoom}
+            isHost={isHost}
+          />
+        </>
+      );
+    }
+
     // Question creation screen
     if (!currentQuestion || room?.status === 'ready' || room?.status === 'waiting') {
+      // ホストなしモードの場合は問題作成画面を表示せず、ローディング画面を表示
+      if (isAutoMode) {
+        return (
+          <>
+            <View className="flex-1 p-6 items-center justify-center">
+              <Text className="text-xl font-bold mb-4">リスニングクイズ</Text>
+              <Text className="text-base text-gray-600 text-center mb-4">
+                次の問題を準備中です...
+              </Text>
+              <LoadingSpinner variant="sound-wave" color="#8B5CF6" size="large" className="mb-4" />
+              
+              {loading && <LoadingSpinner variant="default" color="#3B82F6" />}
+              <ErrorMessage message={error} />
+            </View>
+
+            <ExitRoomModal
+              isVisible={isExitModalVisible}
+              onClose={() => setIsExitModalVisible(false)}
+              onConfirmExit={handleExitRoom}
+              isHost={isHost}
+            />
+          </>
+        );
+      }
+      
+      // ホストありモードの場合は従来の問題作成画面
       return (
         <>
           <ScrollView
@@ -341,6 +512,7 @@ export default function QuizScreen() {
             showResult={showResult}
             onSubmitAnswer={handleSubmitAnswer}
             onRefreshState={handleRefreshState}
+            onNextQuestion={handleNextQuestion}
           />
         </ScrollView>
 

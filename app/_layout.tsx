@@ -75,7 +75,7 @@ function RootLayoutContent() {
     <SafeAreaView className="flex-1 bg-white">
       <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
       <AppHeader title={title} settingsConfig={settingsConfig} />
-      <View className="flex-1">
+      <View className="flex-1" pointerEvents="auto">
         <Slot />
       </View>
     </SafeAreaView>

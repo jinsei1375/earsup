@@ -56,7 +56,7 @@ export default function RoomScreen() {
   } = useRoomData({
     roomId,
     userId,
-    pollingInterval: 5000,
+    pollingInterval: 2000, // 2秒に短縮
     enableRealtime: true,
   });
 
@@ -88,8 +88,7 @@ export default function RoomScreen() {
 
   // Handle room status changes for participants
   useEffect(() => {
-    if (room?.status === 'ready' && !isHost) {
-      console.log('クイズ開始を検知: 参加者画面へ遷移します');
+    if ((room?.status === 'ready' || room?.status === 'active') && !isHost) {
       router.push({
         pathname: '/quiz',
         params: { roomId, role: 'participant' },
@@ -138,18 +137,27 @@ export default function RoomScreen() {
   const handleStartQuiz = async () => {
     if (!room || !isHost) return;
 
-    // Check if there are any participants (excluding host)
-    const participantCount = participants.filter((p) => p.id !== room.host_user_id).length;
-    if (participantCount === 0) {
-      setLocalError('参加者が1人以上いないとクイズを開始できません。');
+    // Check if there are any participants (excluding host for host mode, all participants for auto mode)
+    const isAutoMode = room.quiz_mode === 'all-at-once-auto';
+    const relevantParticipants = isAutoMode
+      ? participants // ホストなしモードでは全参加者
+      : participants.filter((p) => p.id !== room.host_user_id); // ホストありモードではホスト以外
+
+    if (relevantParticipants.length === 0) {
+      const message = isAutoMode
+        ? '参加者が1人以上いないとクイズを開始できません。'
+        : '参加者が1人以上いないとクイズを開始できません。';
+      setLocalError(message);
       return;
     }
 
     try {
       setLocalLoading(true);
+
+      // ルームステータスを'ready'に更新（参加者遷移のトリガー）
       await updateRoomStatus('ready');
 
-      // Navigate to quiz screen as host
+      // ホストの画面遷移
       router.push({
         pathname: '/quiz',
         params: { roomId, role: 'host' },
@@ -216,15 +224,18 @@ export default function RoomScreen() {
           <View className="mt-5">
             {/* 参加者数チェックとメッセージ */}
             {(() => {
-              const participantCount = participants.filter(
-                (p) => p.id !== room?.host_user_id
-              ).length;
-              const canStartQuiz = participantCount > 0;
+              const isAutoMode = room?.quiz_mode === 'all-at-once-auto';
+              const relevantParticipants = isAutoMode
+                ? participants // ホストなしモードでは全参加者
+                : participants.filter((p) => p.id !== room?.host_user_id); // ホストありモードではホスト以外
+              const canStartQuiz = relevantParticipants.length > 0;
 
               return (
                 <>
                   {!canStartQuiz && (
-                    <Text className="text-center text-gray-600 mb-3">参加者が1人以上必要です</Text>
+                    <Text className="text-center text-gray-600 mb-3">
+                      {isAutoMode ? '参加者が1人以上必要です' : '参加者が1人以上必要です'}
+                    </Text>
                   )}
 
                   <View className="flex-row gap-4">
@@ -256,6 +267,16 @@ export default function RoomScreen() {
 
         {loading && <LoadingSpinner variant="default" color="#3B82F6" />}
         <ErrorMessage message={error} />
+
+        {/* デバッグ情報 */}
+        {process.env.NODE_ENV === 'development' && (
+          <View className="mt-4 p-2 bg-gray-100 rounded">
+            <Text className="text-xs text-gray-600">
+              Debug - Room Status: {room?.status} | Connected:{' '}
+              {connectionState.connected ? 'Yes' : 'No'}
+            </Text>
+          </View>
+        )}
       </View>
     );
   }
@@ -304,6 +325,10 @@ export default function RoomScreen() {
                   selectedMode={quizMode}
                   onModeChange={(mode) => {
                     setQuizMode(mode);
+                    // ホストなしモードの場合は惜しい判定を自動的に無効にする
+                    if (mode === 'all-at-once-auto') {
+                      setAllowPartialPoints(false);
+                    }
                   }}
                   allowPartialPoints={allowPartialPoints}
                   onPartialPointsChange={setAllowPartialPoints}

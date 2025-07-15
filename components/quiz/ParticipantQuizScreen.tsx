@@ -12,7 +12,7 @@ import {
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { ErrorMessage } from '@/components/common/ErrorMessage';
 import { Button } from '@/components/common/Button';
-import { canParticipantAnswer, isQuizActive, isQuizEnded } from '@/utils/quizUtils';
+import { canParticipantAnswer, isQuizActive, isQuizEnded, speakText } from '@/utils/quizUtils';
 import { ParticipantsList } from '@/components/room/ParticipantsList';
 import type { Room, RealtimeConnectionState, ParticipantWithNickname, Answer } from '@/types';
 
@@ -30,6 +30,7 @@ interface ParticipantQuizScreenProps {
   showResult: boolean;
   onSubmitAnswer: (answer: string) => Promise<void>;
   onRefreshState: () => void;
+  onNextQuestion?: () => Promise<void>; // ホストなしモード用の次の問題へボタン
 }
 
 export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
@@ -46,12 +47,16 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
   showResult,
   onSubmitAnswer,
   onRefreshState,
+  onNextQuestion,
 }) => {
   const [answer, setAnswer] = useState('');
+  const [playCount, setPlayCount] = useState(0); // 音声再生回数
   const scrollViewRef = useRef<ScrollView>(null);
   const inputRef = useRef<TextInput>(null);
 
   const quizMode = room?.quiz_mode || 'all-at-once-host';
+  const isAutoMode = quizMode === 'all-at-once-auto';
+  const maxPlayCount = isAutoMode ? 3 : Infinity; // ホストなしモードは3回まで
   const hasQuestion = !!questionText && isQuizActive(room?.status || '');
   const canAnswer = canParticipantAnswer(quizMode, null, userId);
   // 参加者自身の回答を取得して判定タイプを確認
@@ -63,11 +68,40 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
   const isAnswerCorrect = userJudgmentResult === 'correct';
   const isPartialAnswer = allowPartialPoints && userJudgmentResult === 'partial';
 
+  // 結果表示の準備が完了しているかチェック
+  const isResultDataReady = showResult && isCorrect !== null && userAnswer?.answer_text;
+
+  // Check if all answers are judged (for room creator's next question button in host-less mode)
+  const isRoomCreator = room?.host_user_id === userId;
+  const isHostlessMode = room?.quiz_mode === 'all-at-once-auto';
+
+  // In host-less mode, consider all participants except host for judgment tracking
+  const participantsToJudge = isHostlessMode
+    ? participants.filter((p) => p.id !== room?.host_user_id)
+    : participants;
+
+  const totalParticipantsToJudge = participantsToJudge.length;
+  const currentAnswers = allRoomAnswers.filter((answer) => answer.room_id === room?.id);
+  const judgedCount = currentAnswers
+    ? currentAnswers.filter(
+        (answer) =>
+          answer.judge_result !== null && (!isHostlessMode || answer.user_id !== room?.host_user_id)
+      ).length
+    : 0;
+
+  const allAnswersJudged = totalParticipantsToJudge > 0 && judgedCount >= totalParticipantsToJudge;
+
   const handleSubmitAnswer = async () => {
     if (answer.trim()) {
       await onSubmitAnswer(answer.trim());
       setAnswer('');
     }
+  };
+
+  const handlePlayAudio = () => {
+    if (!questionText || playCount >= maxPlayCount) return;
+    speakText(questionText, { rate: 1.0 });
+    setPlayCount((prev) => prev + 1);
   };
 
   const handleInputFocus = () => {
@@ -126,6 +160,25 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
           聞こえたフレーズを入力してください
         </Text>
 
+        {/* 音声再生ボタン - ホストなしモードのみ */}
+        {isAutoMode && (
+          <View className="mb-4">
+            <Button
+              title={`音声を再生する (${playCount}/${maxPlayCount})`}
+              onPress={handlePlayAudio}
+              disabled={!questionText || playCount >= maxPlayCount || showResult}
+              variant={playCount >= maxPlayCount ? 'secondary' : 'primary'}
+              size="large"
+              fullWidth
+            />
+            {playCount >= maxPlayCount && (
+              <Text className="text-center text-red-600 text-sm mt-2">
+                再生回数の上限に達しました
+              </Text>
+            )}
+          </View>
+        )}
+
         {/* クイズコンテンツ */}
         {!showResult ? (
           // All-at-once mode - hasn't answered yet
@@ -154,11 +207,13 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
         ) : (
           // All-at-once mode - has answered
           <View className="bg-blue-100 p-4 rounded-lg mb-4 w-full">
-            {isCorrect === null ? (
-              // Waiting for judgment
+            {!isResultDataReady ? (
+              // Waiting for judgment or complete result data
               <>
                 <Text className="text-center font-bold text-blue-800 mb-1">回答を提出しました</Text>
-                <Text className="text-center text-blue-600">ホストの判定をお待ちください</Text>
+                <Text className="text-center text-blue-600">
+                  {isCorrect === null ? 'ホストの判定をお待ちください' : '結果を準備中...'}
+                </Text>
                 <LoadingSpinner size="small" variant="dots" className="mt-2" />
               </>
             ) : isAnswerCorrect ? (
@@ -170,7 +225,7 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
                 </Text>
 
                 <Text className="text-center text-blue-600 mt-2">
-                  あなたの回答: 「{userAnswer?.answer_text}」
+                  あなたの回答: 「{userAnswer.answer_text}」
                 </Text>
               </>
             ) : isPartialAnswer ? (
@@ -181,7 +236,7 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
                   5ポイントGET！
                 </Text>
                 <Text className="text-center text-blue-600 mt-2">
-                  あなたの回答: 「{userAnswer?.answer_text}」
+                  あなたの回答: 「{userAnswer.answer_text}」
                 </Text>
                 <Text className="text-center text-black mt-2">正解: {questionText}</Text>
               </>
@@ -190,11 +245,24 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
               <>
                 <Text className="text-center font-bold text-red-500 text-lg mb-1">×不正解</Text>
                 <Text className="text-center text-blue-600 mt-2">
-                  あなたの回答: 「{userAnswer?.answer_text}」
+                  あなたの回答: 「{userAnswer.answer_text}」
                 </Text>
                 <Text className="text-center text-black mt-2">正解: {questionText}</Text>
               </>
             )}
+          </View>
+        )}
+
+        {/* ホストなしモード: ルーム作成者用の次の問題ボタン */}
+        {isHostlessMode && isRoomCreator && showResult && allAnswersJudged && onNextQuestion && (
+          <View className="mt-4 mb-4">
+            <Button
+              title="次の問題へ"
+              onPress={onNextQuestion}
+              variant="primary"
+              size="large"
+              fullWidth
+            />
           </View>
         )}
 

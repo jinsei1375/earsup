@@ -61,7 +61,6 @@ export const useRoomData = (options: UseRoomDataOptions) => {
         setParticipants(participantsData);
       } catch (err: any) {
         setError(err.message || 'ルーム情報の取得中にエラーが発生しました。');
-        console.error('Room data fetch error:', err);
       } finally {
         if (force) {
           setLoading(false);
