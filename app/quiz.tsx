@@ -90,7 +90,7 @@ export default function QuizScreen() {
   useEffect(() => {
     if (userId && currentQuestion?.id) {
       const isAutoMode = room?.quiz_mode === 'all-at-once-auto';
-      
+
       // 参加者または ホストなしモードのホストの回答判定を監視
       if (!isHost || (isHost && isAutoMode)) {
         const myAnswer = answers.find((a) => a.user_id === userId);
@@ -106,14 +106,14 @@ export default function QuizScreen() {
   // Reset participant result state when question changes or room goes to waiting
   useEffect(() => {
     const isAutoMode = room?.quiz_mode === 'all-at-once-auto';
-    
+
     // 参加者の状態リセット
     if (!isHost) {
       if (!currentQuestion || room?.status === 'waiting' || room?.status === 'ready') {
         setShowResult(false);
         setIsCorrect(null);
       }
-      
+
       // ホストなしモードでは問題が変わった時もリセット
       if (isAutoMode && currentQuestion) {
         // 新しい問題が来た場合はリセット
@@ -121,14 +121,14 @@ export default function QuizScreen() {
         setIsCorrect(null);
       }
     }
-    
+
     // ホストなしモードの場合、ホストも参加者として扱うので状態をリセット
     if (isHost && isAutoMode) {
       if (!currentQuestion || room?.status === 'waiting' || room?.status === 'ready') {
         setShowResult(false);
         setIsCorrect(null);
       }
-      
+
       // 問題が変わった時もリセット
       if (currentQuestion) {
         setShowResult(false);
@@ -151,7 +151,12 @@ export default function QuizScreen() {
   // ホストなしモードで自動的に問題を作成
   useEffect(() => {
     const isAutoMode = room?.quiz_mode === 'all-at-once-auto';
-    if (isHost && isAutoMode && (room?.status === 'ready' || room?.status === 'waiting') && !currentQuestion) {
+    if (
+      isHost &&
+      isAutoMode &&
+      (room?.status === 'ready' || room?.status === 'waiting') &&
+      !currentQuestion
+    ) {
       // サンプル問題を自動作成
       const sampleQuestions = [
         'Hello, how are you today?',
@@ -166,12 +171,12 @@ export default function QuizScreen() {
         'How old are you?',
       ];
       const randomQuestion = sampleQuestions[Math.floor(Math.random() * sampleQuestions.length)];
-      
+
       // 少し遅延を入れて状態が安定してから問題を作成
       const timer = setTimeout(() => {
         handleCreateQuestion(randomQuestion);
       }, 200);
-      
+
       return () => clearTimeout(timer);
     }
   }, [room?.status, room?.quiz_mode, currentQuestion, isHost]);
@@ -265,15 +270,15 @@ export default function QuizScreen() {
   const handleNextQuestion = async () => {
     try {
       const isAutoMode = room?.quiz_mode === 'all-at-once-auto';
-      
+
       if (isAutoMode) {
         // ホストなしモードでは、まず状態をリセット
         setShowResult(false);
         setIsCorrect(null);
-        
+
         // 次の問題を自動作成して即座に出題
         await nextQuestion();
-        
+
         // サンプル問題を自動作成
         const sampleQuestions = [
           'Hello, how are you today?',
@@ -288,7 +293,7 @@ export default function QuizScreen() {
           'How old are you?',
         ];
         const randomQuestion = sampleQuestions[Math.floor(Math.random() * sampleQuestions.length)];
-        
+
         // 少し遅延を入れて確実に状態をリセットしてから新しい問題を作成
         setTimeout(async () => {
           try {
@@ -387,7 +392,7 @@ export default function QuizScreen() {
                 次の問題を準備中です...
               </Text>
               <LoadingSpinner variant="sound-wave" color="#8B5CF6" size="large" className="mb-4" />
-              
+
               {loading && <LoadingSpinner variant="default" color="#3B82F6" />}
               <ErrorMessage message={error} />
             </View>
@@ -401,7 +406,7 @@ export default function QuizScreen() {
           </>
         );
       }
-      
+
       // ホストありモードの場合は従来の問題作成画面
       return (
         <>

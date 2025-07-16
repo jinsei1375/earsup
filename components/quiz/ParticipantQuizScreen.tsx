@@ -1,5 +1,5 @@
 // components/quiz/ParticipantQuizScreen.tsx
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -59,8 +59,34 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
   const maxPlayCount = isAutoMode ? 3 : Infinity; // ホストなしモードは3回まで
   const hasQuestion = !!questionText && isQuizActive(room?.status || '');
   const canAnswer = canParticipantAnswer(quizMode, null, userId);
-  // 参加者自身の回答を取得して判定タイプを確認
-  const userAnswer = allRoomAnswers.find((answer) => answer.user_id === userId);
+
+  // 現在のルームの回答をフィルタリング
+  const roomAnswers = allRoomAnswers.filter((answer) => answer.room_id === room?.id);
+
+  // 現在の問題IDを取得
+  const currentQuestionId = useMemo(() => {
+    if (roomAnswers.length === 0) {
+      return null;
+    }
+
+    // 最新の問題IDを取得（回答の作成日時順）
+    const sortedAnswers = [...roomAnswers].sort(
+      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    );
+
+    return sortedAnswers[0]?.question_id || null;
+  }, [roomAnswers, questionText]);
+
+  // デバッグ用の一意問題数計算
+  const uniqueQuestionIds = [...new Set(roomAnswers.map((answer) => answer.question_id))];
+
+  // 現在の問題に対するユーザーの回答のみを取得
+  const userAnswer =
+    currentQuestionId && showResult
+      ? roomAnswers.find(
+          (answer) => answer.user_id === userId && answer.question_id === currentQuestionId
+        )
+      : undefined;
   const allowPartialPoints = room?.allow_partial_points || false;
   const userJudgmentResult = userAnswer?.judge_result;
 
@@ -81,15 +107,34 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
     : participants;
 
   const totalParticipantsToJudge = participantsToJudge.length;
-  const currentAnswers = allRoomAnswers.filter((answer) => answer.room_id === room?.id);
-  const judgedCount = currentAnswers
-    ? currentAnswers.filter(
-        (answer) =>
-          answer.judge_result !== null && (!isHostlessMode || answer.user_id !== room?.host_user_id)
-      ).length
-    : 0;
 
-  const allAnswersJudged = totalParticipantsToJudge > 0 && judgedCount >= totalParticipantsToJudge;
+  // 現在の問題に対する回答のみをフィルタリング
+  const currentQuestionAnswers = currentQuestionId
+    ? roomAnswers.filter((answer) => answer.question_id === currentQuestionId)
+    : [];
+
+  // ホストなしモードでは非ホスト参加者の回答のみカウント
+  const relevantAnswers = isHostlessMode
+    ? currentQuestionAnswers.filter((answer) => answer.user_id !== room?.host_user_id)
+    : currentQuestionAnswers;
+
+  const judgedCount = relevantAnswers.filter((answer) => answer.judge_result !== null).length;
+
+  // 全ての非ホスト参加者が回答を提出し、かつ全て判定済みかチェック
+  const allAnswersSubmitted = relevantAnswers.length >= totalParticipantsToJudge;
+  const allAnswersJudged =
+    currentQuestionId && // 現在の問題が存在する
+    allAnswersSubmitted &&
+    judgedCount >= totalParticipantsToJudge &&
+    totalParticipantsToJudge > 0;
+
+  // 問題が変わったときに音声再生回数と入力をリセット
+  useEffect(() => {
+    setPlayCount(0);
+    setAnswer('');
+    // 新しい問題になったら、前の結果表示状態もクリア
+    // これはquiz.tsxで管理されているが、念のためローカルでもクリア
+  }, [questionText, currentQuestionId]);
 
   const handleSubmitAnswer = async () => {
     if (answer.trim()) {
@@ -225,7 +270,7 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
                 </Text>
 
                 <Text className="text-center text-blue-600 mt-2">
-                  あなたの回答: 「{userAnswer.answer_text}」
+                  あなたの回答: 「{userAnswer?.answer_text || '取得中...'}」
                 </Text>
               </>
             ) : isPartialAnswer ? (
@@ -236,7 +281,7 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
                   5ポイントGET！
                 </Text>
                 <Text className="text-center text-blue-600 mt-2">
-                  あなたの回答: 「{userAnswer.answer_text}」
+                  あなたの回答: 「{userAnswer?.answer_text || '取得中...'}」
                 </Text>
                 <Text className="text-center text-black mt-2">正解: {questionText}</Text>
               </>
@@ -245,7 +290,7 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
               <>
                 <Text className="text-center font-bold text-red-500 text-lg mb-1">×不正解</Text>
                 <Text className="text-center text-blue-600 mt-2">
-                  あなたの回答: 「{userAnswer.answer_text}」
+                  あなたの回答: 「{userAnswer?.answer_text || '取得中...'}」
                 </Text>
                 <Text className="text-center text-black mt-2">正解: {questionText}</Text>
               </>
@@ -254,17 +299,36 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
         )}
 
         {/* ホストなしモード: ルーム作成者用の次の問題ボタン */}
-        {isHostlessMode && isRoomCreator && showResult && allAnswersJudged && onNextQuestion && (
-          <View className="mt-4 mb-4">
-            <Button
-              title="次の問題へ"
-              onPress={onNextQuestion}
-              variant="primary"
-              size="large"
-              fullWidth
-            />
-          </View>
-        )}
+        {isHostlessMode &&
+          isRoomCreator &&
+          allAnswersJudged &&
+          onNextQuestion &&
+          currentQuestionId && (
+            <View className="mt-4 mb-4">
+              <Button
+                title="次の問題へ"
+                onPress={onNextQuestion}
+                variant="primary"
+                size="large"
+                fullWidth
+              />
+              {/* デバッグ情報を表示（開発時のみ） */}
+              {__DEV__ && (
+                <View className="mt-2">
+                  <Text className="text-xs text-gray-500 text-center">
+                    問題ID: {currentQuestionId?.slice(-8)} | 参加者: {totalParticipantsToJudge} |
+                    回答: {relevantAnswers.length} | 判定済: {judgedCount}
+                  </Text>
+                  <Text className="text-xs text-gray-400 text-center">
+                    全回答数: {roomAnswers.length} | 一意問題数: {uniqueQuestionIds.length}
+                  </Text>
+                  <Text className="text-xs text-gray-400 text-center">
+                    問題文: {questionText.slice(0, 20)}...
+                  </Text>
+                </View>
+              )}
+            </View>
+          )}
 
         {/* 参加者リスト - コンパクト表示 */}
         <View className="mt-4">
