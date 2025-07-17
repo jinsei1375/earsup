@@ -94,12 +94,13 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
   const isAnswerCorrect = userJudgmentResult === 'correct';
   const isPartialAnswer = allowPartialPoints && userJudgmentResult === 'partial';
 
-  // 結果表示の準備が完了しているかチェック
-  const isResultDataReady = showResult && isCorrect !== null && userAnswer?.answer_text;
-
   // Check if all answers are judged (for room creator's next question button in host-less mode)
   const isRoomCreator = room?.host_user_id === userId;
   const isHostlessMode = room?.quiz_mode === 'all-at-once-auto';
+
+  // 結果表示の準備が完了しているかチェック
+  // ルーム作成者の場合も、判定結果が存在するまで待機表示
+  const isResultDataReady = showResult && userAnswer?.answer_text && userJudgmentResult !== null;
 
   // In host-less mode, consider all participants except host for judgment tracking
   const participantsToJudge = isHostlessMode
@@ -135,6 +136,36 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
     // 新しい問題になったら、前の結果表示状態もクリア
     // これはquiz.tsxで管理されているが、念のためローカルでもクリア
   }, [questionText, currentQuestionId]);
+
+  // 現在の問題に対してのみ判定状態をチェック
+  const isCurrentQuestionFullyJudged = useMemo(() => {
+    if (!currentQuestionId || !showResult) {
+      return false;
+    }
+
+    // 現在の問題に対する回答のみを対象とする
+    const currentQuestionRelevantAnswers = isHostlessMode
+      ? currentQuestionAnswers.filter((answer) => answer.user_id !== room?.host_user_id)
+      : currentQuestionAnswers;
+
+    const currentJudgedCount = currentQuestionRelevantAnswers.filter(
+      (answer) => answer.judge_result !== null
+    ).length;
+    const currentSubmittedCount = currentQuestionRelevantAnswers.length;
+
+    return (
+      currentSubmittedCount >= totalParticipantsToJudge &&
+      currentJudgedCount >= totalParticipantsToJudge &&
+      totalParticipantsToJudge > 0
+    );
+  }, [
+    currentQuestionId,
+    currentQuestionAnswers,
+    totalParticipantsToJudge,
+    showResult,
+    isHostlessMode,
+    room?.host_user_id,
+  ]);
 
   const handleSubmitAnswer = async () => {
     if (answer.trim()) {
@@ -257,7 +288,11 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
               <>
                 <Text className="text-center font-bold text-blue-800 mb-1">回答を提出しました</Text>
                 <Text className="text-center text-blue-600">
-                  {isCorrect === null ? 'ホストの判定をお待ちください' : '結果を準備中...'}
+                  {isRoomCreator
+                    ? '結果を準備中...'
+                    : isCorrect === null
+                    ? 'ホストの判定をお待ちください'
+                    : '結果を準備中...'}
                 </Text>
                 <LoadingSpinner size="small" variant="dots" className="mt-2" />
               </>
@@ -301,7 +336,7 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
         {/* ホストなしモード: ルーム作成者用の次の問題ボタン */}
         {isHostlessMode &&
           isRoomCreator &&
-          allAnswersJudged &&
+          isCurrentQuestionFullyJudged &&
           onNextQuestion &&
           currentQuestionId && (
             <View className="mt-4 mb-4">
