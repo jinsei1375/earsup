@@ -32,6 +32,9 @@ export default function QuizScreen() {
     Record<string, 'correct' | 'partial' | 'incorrect'>
   >({});
 
+  // 現在の問題IDを追跡するための状態
+  const [currentQuestionId, setCurrentQuestionId] = useState<string | null>(null);
+
   const isHost = role === 'host';
 
   const {
@@ -103,6 +106,14 @@ export default function QuizScreen() {
     }
   }, [answers, isHost, userId, currentQuestion?.id, room?.quiz_mode]);
 
+  // 問題IDの変更を追跡
+  useEffect(() => {
+    const newQuestionId = currentQuestion?.id || null;
+    if (newQuestionId !== currentQuestionId) {
+      setCurrentQuestionId(newQuestionId);
+    }
+  }, [currentQuestion?.id, currentQuestionId]);
+
   // Reset participant result state when question changes or room goes to waiting
   useEffect(() => {
     const isAutoMode = room?.quiz_mode === 'all-at-once-auto';
@@ -116,9 +127,11 @@ export default function QuizScreen() {
 
       // ホストなしモードでは問題が変わった時もリセット
       if (isAutoMode && currentQuestion) {
-        // 新しい問題が来た場合はリセット
-        setShowResult(false);
-        setIsCorrect(null);
+        // 問題IDが変わった場合のみリセット
+        if (currentQuestion.id !== currentQuestionId) {
+          setShowResult(false);
+          setIsCorrect(null);
+        }
       }
     }
 
@@ -129,13 +142,13 @@ export default function QuizScreen() {
         setIsCorrect(null);
       }
 
-      // 問題が変わった時もリセット
-      if (currentQuestion) {
+      // 問題IDが変わった時のみリセット（同じ問題IDの場合はリセットしない）
+      if (currentQuestion && currentQuestion.id !== currentQuestionId) {
         setShowResult(false);
         setIsCorrect(null);
       }
     }
-  }, [isHost, currentQuestion?.id, room?.status, room?.quiz_mode]);
+  }, [isHost, currentQuestion?.id, currentQuestionId, room?.status, room?.quiz_mode]);
 
   // allRoomAnswersからjudgmentTypesを更新
   useEffect(() => {
