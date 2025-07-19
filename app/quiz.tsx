@@ -89,69 +89,50 @@ export default function QuizScreen() {
     };
   }, [setSettingsConfig]);
 
-  // Monitor answer judgment for participants
-  useEffect(() => {
-    if (userId && currentQuestion?.id) {
-      const isAutoMode = room?.quiz_mode === 'all-at-once-auto';
-
-      // 参加者または ホストなしモードのホストの回答判定を監視
-      if (!isHost || (isHost && isAutoMode)) {
-        // 現在の問題に対する回答のみをフィルタリング
-        const myAnswer = answers.find(
-          (a) => a.user_id === userId && a.question_id === currentQuestion.id
-        );
-        if (myAnswer?.judged && myAnswer.judge_result) {
-          // judge_resultに基づいて判定結果を設定
-          setIsCorrect(myAnswer.judge_result === 'correct');
-          setShowResult(true);
-        }
-      }
-    }
-  }, [answers, isHost, userId, currentQuestion?.id, room?.quiz_mode]);
-
-  // 問題IDの変更を追跡
+  // 問題IDの変更を追跡し、即座に状態をリセット
   useEffect(() => {
     const newQuestionId = currentQuestion?.id || null;
     if (newQuestionId !== currentQuestionId) {
+      // 問題が変わったら即座に結果表示状態をリセット
+      setShowResult(false);
+      setIsCorrect(null);
       setCurrentQuestionId(newQuestionId);
     }
   }, [currentQuestion?.id, currentQuestionId]);
 
-  // Reset participant result state when question changes or room goes to waiting
+  // Reset participant result state when room status changes
   useEffect(() => {
     const isAutoMode = room?.quiz_mode === 'all-at-once-auto';
 
-    // 参加者の状態リセット
-    if (!isHost) {
-      if (!currentQuestion || room?.status === 'waiting' || room?.status === 'ready') {
-        setShowResult(false);
-        setIsCorrect(null);
-      }
+    // ルーム状態が待機中や準備中の場合は結果をリセット
+    if (!currentQuestion || room?.status === 'waiting' || room?.status === 'ready') {
+      setShowResult(false);
+      setIsCorrect(null);
+    }
+  }, [currentQuestion, room?.status]);
 
-      // ホストなしモードでは問題が変わった時もリセット
-      if (isAutoMode && currentQuestion) {
-        // 問題IDが変わった場合のみリセット
-        if (currentQuestion.id !== currentQuestionId) {
-          setShowResult(false);
-          setIsCorrect(null);
+  // Monitor answer judgment for participants (runs after state reset)
+  useEffect(() => {
+    if (userId && currentQuestion?.id && currentQuestion.id === currentQuestionId) {
+      const isAutoMode = room?.quiz_mode === 'all-at-once-auto';
+
+      // 参加者または ホストなしモードのホストの回答判定を監視
+      if (!isHost || (isHost && isAutoMode)) {
+        // 既に結果を表示中の場合は重複チェックを避ける
+        if (!showResult) {
+          // 現在の問題に対する回答のみをフィルタリング
+          const myAnswer = answers.find(
+            (a) => a.user_id === userId && a.question_id === currentQuestion.id
+          );
+          if (myAnswer?.judged && myAnswer.judge_result) {
+            // judge_resultに基づいて判定結果を設定
+            setIsCorrect(myAnswer.judge_result === 'correct');
+            setShowResult(true);
+          }
         }
       }
     }
-
-    // ホストなしモードの場合、ホストも参加者として扱うので状態をリセット
-    if (isHost && isAutoMode) {
-      if (!currentQuestion || room?.status === 'waiting' || room?.status === 'ready') {
-        setShowResult(false);
-        setIsCorrect(null);
-      }
-
-      // 問題IDが変わった時のみリセット（同じ問題IDの場合はリセットしない）
-      if (currentQuestion && currentQuestion.id !== currentQuestionId) {
-        setShowResult(false);
-        setIsCorrect(null);
-      }
-    }
-  }, [isHost, currentQuestion?.id, currentQuestionId, room?.status, room?.quiz_mode]);
+  }, [answers, isHost, userId, currentQuestion?.id, currentQuestionId, room?.quiz_mode, showResult]);
 
   // allRoomAnswersからjudgmentTypesを更新
   useEffect(() => {
