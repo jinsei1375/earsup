@@ -96,7 +96,10 @@ export default function QuizScreen() {
 
       // 参加者または ホストなしモードのホストの回答判定を監視
       if (!isHost || (isHost && isAutoMode)) {
-        const myAnswer = answers.find((a) => a.user_id === userId);
+        // 現在の問題に対する回答のみをフィルタリング
+        const myAnswer = answers.find(
+          (a) => a.user_id === userId && a.question_id === currentQuestion.id
+        );
         if (myAnswer?.judged && myAnswer.judge_result) {
           // judge_resultに基づいて判定結果を設定
           setIsCorrect(myAnswer.judge_result === 'correct');
