@@ -311,15 +311,6 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
               size="large"
               fullWidth
             />
-
-            <Button
-              title="回答する"
-              onPress={handleSubmitAnswer}
-              disabled={!answer.trim() || showResult || loading}
-              variant="primary"
-              size="large"
-              fullWidth
-            />
           </View>
         ) : (
           // All-at-once mode - has answered
