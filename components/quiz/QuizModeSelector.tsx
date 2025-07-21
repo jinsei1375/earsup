@@ -133,7 +133,7 @@ export const QuizModeSelector: React.FC<QuizModeSelectorProps> = ({
       {selectedMode === 'all-at-once-auto' && (
         <View className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
           <Text className="text-yellow-800 font-bold mb-2">ホストなしモードの特徴</Text>
-          <Text className="text-yellow-700 text-sm mb-1">• 自動でクイズが開始されます</Text>
+          <Text className="text-yellow-700 text-sm mb-1">• 参加者全員が回答できます</Text>
           <Text className="text-yellow-700 text-sm mb-1">• 1人3回まで音声を再生できます</Text>
           <Text className="text-yellow-700 text-sm mb-1">• 回答は自動で正誤判定されます</Text>
           <Text className="text-yellow-700 text-sm">• 惜しい判定は利用できません</Text>
