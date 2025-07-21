@@ -24,6 +24,7 @@ export const ExitRoomModal: React.FC<ExitRoomModalProps> = ({
             <View className="bg-white rounded-lg p-6 w-full max-w-sm">
               {/* Header */}
               <View className="flex-row items-center justify-between mb-4">
+                <View className="w-6" />
                 <Text className="text-xl font-bold">ルーム退出</Text>
                 <TouchableOpacity onPress={onClose}>
                   <Ionicons name="close" size={24} color="#666" />
