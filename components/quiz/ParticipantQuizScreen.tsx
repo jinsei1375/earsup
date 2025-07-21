@@ -71,12 +71,16 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
   const uniqueQuestionIds = [...new Set(allRoomAnswers.map((answer) => answer.question_id))];
 
   // 現在の問題に対するユーザーの回答を取得 (unjudgedも含む)
+  // 追加の安全チェック: showResultがtrueでも、実際に現在の問題の回答データがある場合のみ表示
   const userAnswer =
     currentQuestionId && showResult
       ? answers.find(
           (answer) => answer.user_id === userId && answer.question_id === currentQuestionId
         )
       : undefined;
+  
+  // 結果表示の安全性チェック: userAnswerが存在し、かつ現在の問題のものである場合のみ
+  const isValidResultDisplay = showResult && userAnswer && userAnswer.question_id === currentQuestionId;
   const allowPartialPoints = room?.allow_partial_points || false;
   const userJudgmentResult = userAnswer?.judge_result;
 
@@ -90,7 +94,8 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
 
   // 結果表示の準備が完了しているかチェック
   // ルーム作成者の場合も、判定結果が存在するまで待機表示
-  const isResultDataReady = showResult && userAnswer?.answer_text && userJudgmentResult !== null && userJudgmentResult !== undefined;
+  // 追加の安全チェック: 有効な結果表示状態でのみデータ準備完了とする
+  const isResultDataReady = isValidResultDisplay && userAnswer?.answer_text && userJudgmentResult !== null && userJudgmentResult !== undefined;
 
   // In host-less mode, consider all participants except host for judgment tracking
   const participantsToJudge = isHostlessMode
