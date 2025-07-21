@@ -274,16 +274,42 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
         {!showResult ? (
           // All-at-once mode - hasn't answered yet
           <View className="w-full mb-4">
-            <TextInput
-              ref={inputRef}
-              className="border border-gray-300 p-4 rounded-lg mb-3 w-full text-xl"
-              placeholder="聞こえたフレーズを入力"
-              value={answer}
-              onChangeText={setAnswer}
-              editable={!showResult}
-              returnKeyType="done"
-              onSubmitEditing={() => Keyboard.dismiss()}
-              onFocus={handleInputFocus}
+            {/* ホストなしモードでは句読点を表示 */}
+            {isAutoMode && (
+              <View className="flex-row items-center justify-center mb-2">
+                <Text className="text-gray-600 text-sm">
+                  句読点（. ! ?）は自動で判定されるため入力不要です
+                </Text>
+              </View>
+            )}
+            
+            <View className="flex-row items-center">
+              <TextInput
+                ref={inputRef}
+                className="border border-gray-300 p-4 rounded-lg w-full text-xl flex-1"
+                placeholder="聞こえたフレーズを入力"
+                value={answer}
+                onChangeText={setAnswer}
+                editable={!showResult}
+                returnKeyType="done"
+                onSubmitEditing={() => Keyboard.dismiss()}
+                onFocus={handleInputFocus}
+              />
+              {/* ホストなしモードでは句読点を表示 */}
+              {isAutoMode && (
+                <View className="ml-2 flex-row">
+                  <Text className="text-gray-400 text-xl">.!?</Text>
+                </View>
+              )}
+            </View>
+
+            <Button
+              title="回答する"
+              onPress={handleSubmitAnswer}
+              disabled={!answer.trim() || showResult || loading}
+              variant="primary"
+              size="large"
+              fullWidth
             />
 
             <Button

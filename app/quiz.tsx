@@ -270,8 +270,8 @@ export default function QuizScreen() {
       setShowResult(true);
 
       if (autoJudge && currentQuestion) {
-        // ホストなしモードでは自動判定
-        const correct = validateAnswer(answerText, currentQuestion.text);
+        // ホストなしモードでは自動判定（句読点を除外）
+        const correct = validateAnswer(answerText, currentQuestion.text, true);
         setIsCorrect(correct);
       } else {
         setIsCorrect(null); // Wait for host judgment
