@@ -216,6 +216,7 @@ export default function RoomScreen() {
         <ParticipantsList
           participants={participants}
           hostUserId={room?.host_user_id}
+          currentUserId={userId}
           loading={loading}
           onRefresh={() => fetchRoomData(true)}
           quizMode={room?.quiz_mode}
