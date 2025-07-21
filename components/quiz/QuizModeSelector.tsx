@@ -67,7 +67,7 @@ export const QuizModeSelector: React.FC<QuizModeSelectorProps> = ({
               selectedMode === 'all-at-once-auto' ? 'text-blue-100' : 'text-gray-500'
             }`}
           >
-            自動クイズ・3回再生・自動判定
+            自動クイズ・自動判定
           </Text>
         </TouchableOpacity>
       </View>
