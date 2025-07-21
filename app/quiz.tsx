@@ -364,6 +364,7 @@ export default function QuizScreen() {
               questionText={currentQuestion?.text || ''}
               userId={userId}
               participants={participants}
+              answers={answers}
               allRoomAnswers={allRoomAnswers}
               judgmentTypes={judgmentTypes}
               connectionState={connectionState}
@@ -516,6 +517,7 @@ export default function QuizScreen() {
             questionText={currentQuestion?.text || ''}
             userId={userId}
             participants={participants}
+            answers={answers}
             allRoomAnswers={allRoomAnswers}
             judgmentTypes={judgmentTypes}
             connectionState={connectionState}

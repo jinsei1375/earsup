@@ -22,7 +22,8 @@ interface ParticipantQuizScreenProps {
   questionText: string;
   userId: string | null;
   participants: ParticipantWithNickname[];
-  allRoomAnswers: Answer[]; // Changed to allRoomAnswers for cumulative stats
+  answers: Answer[]; // Current question's answers (including unjudged)
+  allRoomAnswers: Answer[]; // All room answers (judged only, for cumulative stats)
   judgmentTypes?: Record<string, 'correct' | 'partial' | 'incorrect'>; // 判定タイプ
   connectionState: RealtimeConnectionState;
   loading: boolean;
@@ -40,6 +41,7 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
   questionText,
   userId,
   participants,
+  answers,
   allRoomAnswers,
   judgmentTypes = {}, // デフォルトは空のオブジェクト
   connectionState,
@@ -62,19 +64,16 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
   const hasQuestion = !!questionText && isQuizActive(room?.status || '');
   const canAnswer = canParticipantAnswer(quizMode, null, userId);
 
-  // 現在のルームの回答をフィルタリング
-  const roomAnswers = allRoomAnswers.filter((answer) => answer.room_id === room?.id);
-
   // 現在の問題IDを取得 - authoritativeなcurrentQuestion.idを使用
   const currentQuestionId = currentQuestion?.id || null;
 
   // デバッグ用の一意問題数計算
-  const uniqueQuestionIds = [...new Set(roomAnswers.map((answer) => answer.question_id))];
+  const uniqueQuestionIds = [...new Set(allRoomAnswers.map((answer) => answer.question_id))];
 
-  // 現在の問題に対するユーザーの回答のみを取得
+  // 現在の問題に対するユーザーの回答を取得 (unjudgedも含む)
   const userAnswer =
     currentQuestionId && showResult
-      ? roomAnswers.find(
+      ? answers.find(
           (answer) => answer.user_id === userId && answer.question_id === currentQuestionId
         )
       : undefined;
@@ -100,9 +99,9 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
 
   const totalParticipantsToJudge = participantsToJudge.length;
 
-  // 現在の問題に対する回答のみをフィルタリング
+  // 現在の問題に対する回答のみをフィルタリング (including unjudged)
   const currentQuestionAnswers = currentQuestionId
-    ? roomAnswers.filter((answer) => answer.question_id === currentQuestionId)
+    ? answers.filter((answer) => answer.question_id === currentQuestionId)
     : [];
 
   // ホストなしモードでは非ホスト参加者の回答のみカウント
@@ -346,7 +345,7 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
                     回答: {relevantAnswers.length} | 判定済: {judgedCount}
                   </Text>
                   <Text className="text-xs text-gray-400 text-center">
-                    全回答数: {roomAnswers.length} | 一意問題数: {uniqueQuestionIds.length}
+                    全回答数: {allRoomAnswers.length} | 一意問題数: {uniqueQuestionIds.length}
                   </Text>
                   <Text className="text-xs text-gray-400 text-center">
                     問題文: {questionText.slice(0, 20)}...
