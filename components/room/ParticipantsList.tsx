@@ -9,28 +9,34 @@ import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 interface ParticipantsListProps {
   participants: ParticipantWithNickname[];
   hostUserId?: string;
+  currentUserId: string | null; // 現在のユーザーID
   loading: boolean;
   onRefresh: () => void;
   answers?: Answer[]; // Added to calculate stats
   judgmentTypes?: Record<string, 'correct' | 'partial' | 'incorrect'>; // 判定タイプ
+  quizMode?: 'all-at-once-host' | 'all-at-once-auto'; // クイズモード
 }
 
 export const ParticipantsList: React.FC<ParticipantsListProps> = ({
   participants,
   hostUserId,
+  currentUserId,
   loading,
   onRefresh,
   answers = [], // Default to empty array
   judgmentTypes = {}, // デフォルトは空のオブジェクト
+  quizMode = 'all-at-once-host', // デフォルトはホストモード
 }) => {
   // Calculate stats only if answers are provided (during quiz)
-  const participantStats =
-    answers.length > 0
-      ? calculateParticipantStats(participants, answers, hostUserId, judgmentTypes)
-      : null;
 
-  // Sort participants by points (including host)
-  const sortedParticipants = [...participants].sort((a, b) => {
+  const isAutoMode = quizMode === 'all-at-once-auto';
+
+  // 参加者並び替え ホストありモード時はホストを除外
+  const filteredParticipants = !isAutoMode
+    ? participants.filter((p) => p.id !== hostUserId)
+    : participants;
+
+  const sortedParticipants = [...filteredParticipants].sort((a, b) => {
     // Sort by points if stats are available
     if (participantStats) {
       const statsA = participantStats.find((s) => s.userId === a.id);
@@ -59,6 +65,11 @@ export const ParticipantsList: React.FC<ParticipantsListProps> = ({
 
     return 0;
   });
+
+  const participantStats =
+    answers.length > 0
+      ? calculateParticipantStats(sortedParticipants, answers, hostUserId, judgmentTypes)
+      : null;
 
   // Get participant rank (including host)
   const getRank = (userId: string): number | null => {
@@ -92,7 +103,7 @@ export const ParticipantsList: React.FC<ParticipantsListProps> = ({
     <>
       <View className="flex-row justify-between items-center w-full mt-2.5 mb-2.5">
         <Text className="text-lg font-semibold text-gray-800">
-          参加者 ({String(participants.length)}名)
+          参加者 ({String(filteredParticipants.length)}名)
         </Text>
         <Button
           title="更新"
@@ -114,13 +125,14 @@ export const ParticipantsList: React.FC<ParticipantsListProps> = ({
             sortedParticipants.map((participant, index) => {
               const stats = participantStats?.find((s) => s.userId === participant.id);
               const isHost = participant.id === hostUserId;
+              const isCurrentUser = participant.id === currentUserId; // 自分かどうか
               const rank = getRank(participant.id);
 
               return (
                 <View
                   key={participant.id}
                   className={`mb-3 p-3 rounded-xl shadow-sm ${
-                    isHost
+                    isCurrentUser
                       ? 'bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200'
                       : 'bg-white border border-gray-200'
                   }`}
@@ -128,15 +140,19 @@ export const ParticipantsList: React.FC<ParticipantsListProps> = ({
                   <View className="flex-row justify-between items-start">
                     <View className="flex-1">
                       <View className="flex-row items-center">
-                        {isHost && <View className="bg-blue-500 rounded-full w-3 h-3 mr-2" />}
+                        {isCurrentUser && (
+                          <View className="bg-blue-500 rounded-full w-3 h-3 mr-2" />
+                        )}
                         <Text
                           className={`text-base ${
-                            isHost ? 'font-bold text-blue-800' : 'font-semibold text-gray-800'
+                            isCurrentUser
+                              ? 'font-bold text-blue-800'
+                              : 'font-semibold text-gray-800'
                           }`}
                         >
                           {participant.nickname}
                         </Text>
-                        {isHost && (
+                        {isHost && !isAutoMode && (
                           <View className="ml-2 bg-blue-500 px-2 py-0.5 rounded-full">
                             <Text className="text-xs text-white font-bold">ホスト</Text>
                           </View>

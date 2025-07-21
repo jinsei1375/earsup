@@ -379,10 +379,12 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
             <ParticipantsList
               participants={participants}
               hostUserId={room?.host_user_id}
+              currentUserId={userId}
               loading={false}
               onRefresh={onRefreshState}
               answers={allRoomAnswers}
               judgmentTypes={judgmentTypes}
+              quizMode={quizMode} // ホストなしモードのためのクイズモード
             />
           </View>
         </View>

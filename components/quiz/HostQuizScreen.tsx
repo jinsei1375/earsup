@@ -224,10 +224,12 @@ export const HostQuizScreen: React.FC<HostQuizScreenProps> = ({
           <ParticipantsList
             participants={participants}
             hostUserId={hostUserId}
+            currentUserId={hostUserId} // ホストが現在のユーザー
             loading={false}
             onRefresh={() => {}} // No refresh needed in host view
             answers={allRoomAnswers}
             judgmentTypes={judgmentTypes}
+            quizMode={quizMode}
           />
         </View>
       </View>

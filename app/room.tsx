@@ -218,6 +218,7 @@ export default function RoomScreen() {
           hostUserId={room?.host_user_id}
           loading={loading}
           onRefresh={() => fetchRoomData(true)}
+          quizMode={room?.quiz_mode}
         />
 
         {isHost ? (
