@@ -360,6 +360,7 @@ export default function QuizScreen() {
           >
             <ParticipantQuizScreen
               room={room}
+              currentQuestion={currentQuestion}
               questionText={currentQuestion?.text || ''}
               userId={userId}
               participants={participants}
@@ -511,6 +512,7 @@ export default function QuizScreen() {
         >
           <ParticipantQuizScreen
             room={room}
+            currentQuestion={currentQuestion}
             questionText={currentQuestion?.text || ''}
             userId={userId}
             participants={participants}

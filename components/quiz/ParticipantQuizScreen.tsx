@@ -14,10 +14,11 @@ import { ErrorMessage } from '@/components/common/ErrorMessage';
 import { Button } from '@/components/common/Button';
 import { canParticipantAnswer, isQuizActive, isQuizEnded, speakText } from '@/utils/quizUtils';
 import { ParticipantsList } from '@/components/room/ParticipantsList';
-import type { Room, RealtimeConnectionState, ParticipantWithNickname, Answer } from '@/types';
+import type { Room, RealtimeConnectionState, ParticipantWithNickname, Answer, Question } from '@/types';
 
 interface ParticipantQuizScreenProps {
   room: Room | null;
+  currentQuestion: Question | null; // Add current question for authoritative question ID
   questionText: string;
   userId: string | null;
   participants: ParticipantWithNickname[];
@@ -35,6 +36,7 @@ interface ParticipantQuizScreenProps {
 
 export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
   room,
+  currentQuestion,
   questionText,
   userId,
   participants,
@@ -63,19 +65,8 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
   // 現在のルームの回答をフィルタリング
   const roomAnswers = allRoomAnswers.filter((answer) => answer.room_id === room?.id);
 
-  // 現在の問題IDを取得
-  const currentQuestionId = useMemo(() => {
-    if (roomAnswers.length === 0) {
-      return null;
-    }
-
-    // 最新の問題IDを取得（回答の作成日時順）
-    const sortedAnswers = [...roomAnswers].sort(
-      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-    );
-
-    return sortedAnswers[0]?.question_id || null;
-  }, [roomAnswers, questionText]);
+  // 現在の問題IDを取得 - authoritativeなcurrentQuestion.idを使用
+  const currentQuestionId = currentQuestion?.id || null;
 
   // デバッグ用の一意問題数計算
   const uniqueQuestionIds = [...new Set(roomAnswers.map((answer) => answer.question_id))];
@@ -135,7 +126,7 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
     setAnswer('');
     // 新しい問題になったら、前の結果表示状態もクリア
     // これはquiz.tsxで管理されているが、念のためローカルでもクリア
-  }, [questionText, currentQuestionId]);
+  }, [currentQuestionId]);
 
   // 現在の問題に対してのみ判定状態をチェック
   const isCurrentQuestionFullyJudged = useMemo(() => {
