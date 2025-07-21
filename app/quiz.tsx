@@ -113,6 +113,7 @@ export default function QuizScreen() {
 
   // Monitor answer judgment for participants (runs after state reset)
   useEffect(() => {
+    // 現在の問題IDが設定されており、かつ同期が取れている場合のみ実行
     if (userId && currentQuestion?.id && currentQuestion.id === currentQuestionId) {
       const isAutoMode = room?.quiz_mode === 'all-at-once-auto';
 
@@ -120,9 +121,11 @@ export default function QuizScreen() {
       if (!isHost || (isHost && isAutoMode)) {
         // 既に結果を表示中の場合は重複チェックを避ける
         if (!showResult) {
-          // 現在の問題に対する回答のみをフィルタリング
+          // 現在の問題に対する回答のみを厳密にフィルタリング
           const myAnswer = answers.find(
-            (a) => a.user_id === userId && a.question_id === currentQuestion.id
+            (a) => a.user_id === userId && 
+                   a.question_id === currentQuestion.id && 
+                   a.question_id === currentQuestionId // 追加の同期チェック
           );
           if (myAnswer?.judged && myAnswer.judge_result) {
             // judge_resultに基づいて判定結果を設定
@@ -191,8 +194,13 @@ export default function QuizScreen() {
       const isAutoMode = room?.quiz_mode === 'all-at-once-auto';
       const autoJudge = isAutoMode; // ホストなしモードは自動判定
 
+      // 回答提出前に結果状態をリセット（新しい質問の場合）
+      setShowResult(false);
+      setIsCorrect(null);
+
       const answerData = await submitAnswer(answerText, false, autoJudge);
 
+      // 回答提出後は「準備中」状態を表示
       setShowResult(true);
 
       if (autoJudge && currentQuestion) {
@@ -272,6 +280,7 @@ export default function QuizScreen() {
         // ホストなしモードでは、まず状態をリセット
         setShowResult(false);
         setIsCorrect(null);
+        setCurrentQuestionId(null); // 問題IDもリセット
 
         // 次の問題を自動作成して即座に出題
         await nextQuestion();

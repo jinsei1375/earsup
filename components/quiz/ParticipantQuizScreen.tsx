@@ -100,7 +100,7 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
 
   // 結果表示の準備が完了しているかチェック
   // ルーム作成者の場合も、判定結果が存在するまで待機表示
-  const isResultDataReady = showResult && userAnswer?.answer_text && userJudgmentResult !== null;
+  const isResultDataReady = showResult && userAnswer?.answer_text && userJudgmentResult !== null && userJudgmentResult !== undefined;
 
   // In host-less mode, consider all participants except host for judgment tracking
   const participantsToJudge = isHostlessMode
@@ -288,7 +288,7 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
               <>
                 <Text className="text-center font-bold text-blue-800 mb-1">回答を提出しました</Text>
                 <Text className="text-center text-blue-600">
-                  {isRoomCreator
+                  {isAutoMode && isRoomCreator
                     ? '結果を準備中...'
                     : isCorrect === null
                     ? 'ホストの判定をお待ちください'
