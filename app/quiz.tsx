@@ -2,8 +2,9 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useUserStore } from '@/stores/userStore';
 import { useQuizData } from '@/hooks/useQuizData';
+import { useUserStore } from '@/stores/userStore';
+import { SampleSentenceService } from '@/services/sampleSentenceService';
 import { QuestionCreator } from '@/components/quiz/QuestionCreator';
 import { HostQuizScreen } from '@/components/quiz/HostQuizScreen';
 import { ParticipantQuizScreen } from '@/components/quiz/ParticipantQuizScreen';
@@ -14,6 +15,17 @@ import { ErrorMessage } from '@/components/common/ErrorMessage';
 import { useHeaderSettings } from '@/contexts/HeaderSettingsContext';
 import { validateAnswer } from '@/utils/quizUtils';
 import type { QuizScreenParams } from '@/types';
+
+const fallbackQuestions = [
+  'Hello, how are you today?',
+  'What time is it now?',
+  'Where are you from?',
+  'Nice to meet you.',
+  'Have a nice day!',
+  'Good morning!',
+  'See you later.',
+  'Thank you very much.',
+];
 
 export default function QuizScreen() {
   const params = useLocalSearchParams() as QuizScreenParams;
@@ -35,7 +47,42 @@ export default function QuizScreen() {
   // 現在の問題IDを追跡するための状態
   const [currentQuestionId, setCurrentQuestionId] = useState<string | null>(null);
 
+  // 使用済み問題IDを追跡するための状態（auto mode用）
+  const [usedQuestionIds, setUsedQuestionIds] = useState<Set<string>>(new Set());
+
   const isHost = role === 'host';
+
+  // サンプル文からランダムに未使用の問題を選択する関数
+  const getRandomSampleSentence = async (): Promise<string | null> => {
+    try {
+      const allSentences = await SampleSentenceService.getAllSentences();
+      if (!allSentences || allSentences.length === 0) {
+        console.warn('No sample sentences available');
+        return null;
+      }
+
+      // 未使用の文章を絞り込み
+      const unusedSentences = allSentences.filter((sentence) => !usedQuestionIds.has(sentence.id));
+
+      // すべて使用済みの場合は使用履歴をリセット
+      if (unusedSentences.length === 0) {
+        console.log('All sample sentences used, resetting usage history');
+        setUsedQuestionIds(new Set());
+        return allSentences[Math.floor(Math.random() * allSentences.length)].text;
+      }
+
+      // ランダムに選択
+      const randomSentence = unusedSentences[Math.floor(Math.random() * unusedSentences.length)];
+
+      // 使用済みIDに追加
+      setUsedQuestionIds((prev) => new Set(prev).add(randomSentence.id));
+
+      return randomSentence.text;
+    } catch (error) {
+      console.error('Failed to get random sample sentence:', error);
+      return null;
+    }
+  };
 
   const {
     room,
@@ -174,26 +221,29 @@ export default function QuizScreen() {
       !currentQuestion
     ) {
       // サンプル問題を自動作成
-      const sampleQuestions = [
-        'Hello, how are you today?',
-        'What time is it now?',
-        'Where are you from?',
-        'Nice to meet you.',
-        'Have a nice day!',
-        'Good morning!',
-        'See you later.',
-        'Thank you very much.',
-        'You are welcome.',
-        'How old are you?',
-      ];
-      const randomQuestion = sampleQuestions[Math.floor(Math.random() * sampleQuestions.length)];
+      const createAutoQuestion = async () => {
+        const randomQuestionText = await getRandomSampleSentence();
+        if (randomQuestionText) {
+          await new Promise((resolve) => {
+            requestAnimationFrame(() => {
+              requestAnimationFrame(resolve);
+            });
+          });
+          await handleCreateQuestion(randomQuestionText);
+        } else {
+          const fallbackQuestion =
+            fallbackQuestions[Math.floor(Math.random() * fallbackQuestions.length)];
 
-      // 少し遅延を入れて状態が安定してから問題を作成
-      const timer = setTimeout(() => {
-        handleCreateQuestion(randomQuestion);
-      }, 200);
+          await new Promise((resolve) => {
+            requestAnimationFrame(() => {
+              requestAnimationFrame(resolve);
+            });
+          });
+          await handleCreateQuestion(fallbackQuestion);
+        }
+      };
 
-      return () => clearTimeout(timer);
+      createAutoQuestion();
     }
   }, [room?.status, room?.quiz_mode, currentQuestion, isHost]);
 
@@ -302,28 +352,25 @@ export default function QuizScreen() {
         await nextQuestion();
 
         // サンプル問題を自動作成
-        const sampleQuestions = [
-          'Hello, how are you today?',
-          'What time is it now?',
-          'Where are you from?',
-          'Nice to meet you.',
-          'Have a nice day!',
-          'Good morning!',
-          'See you later.',
-          'Thank you very much.',
-          'You are welcome.',
-          'How old are you?',
-        ];
-        const randomQuestion = sampleQuestions[Math.floor(Math.random() * sampleQuestions.length)];
+        const randomQuestionText = await getRandomSampleSentence();
+        const questionToUse =
+          randomQuestionText ||
+          (() => {
+            // フォールバック: デフォルトの質問
+            return fallbackQuestions[Math.floor(Math.random() * fallbackQuestions.length)];
+          })();
 
-        // 少し遅延を入れて確実に状態をリセットしてから新しい問題を作成
-        setTimeout(async () => {
-          try {
-            await handleCreateQuestion(randomQuestion);
-          } catch (err) {
-            console.error('Auto question creation failed:', err);
-          }
-        }, 100);
+        await new Promise((resolve) => {
+          requestAnimationFrame(() => {
+            requestAnimationFrame(resolve);
+          });
+        });
+
+        try {
+          await handleCreateQuestion(questionToUse);
+        } catch (err) {
+          console.error('Auto question creation failed:', err);
+        }
       } else {
         // ホストありモードでは従来通り
         await nextQuestion();
