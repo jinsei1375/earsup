@@ -130,9 +130,10 @@ export default function QuizScreen() {
         if (!safeShowResult) {
           // 現在の問題に対する回答のみを厳密にフィルタリング
           const myAnswer = answers.find(
-            (a) => a.user_id === userId && 
-                   a.question_id === currentQuestion.id && 
-                   a.question_id === currentQuestionId // 追加の同期チェック
+            (a) =>
+              a.user_id === userId &&
+              a.question_id === currentQuestion.id &&
+              a.question_id === currentQuestionId // 追加の同期チェック
           );
           if (myAnswer?.judged && myAnswer.judge_result) {
             // judge_resultに基づいて判定結果を設定
@@ -142,7 +143,15 @@ export default function QuizScreen() {
         }
       }
     }
-  }, [answers, isHost, userId, currentQuestion?.id, currentQuestionId, room?.quiz_mode, safeShowResult]);
+  }, [
+    answers,
+    isHost,
+    userId,
+    currentQuestion?.id,
+    currentQuestionId,
+    room?.quiz_mode,
+    safeShowResult,
+  ]);
 
   // allRoomAnswersからjudgmentTypesを更新
   useEffect(() => {
@@ -382,6 +391,7 @@ export default function QuizScreen() {
               onSubmitAnswer={handleSubmitAnswer}
               onRefreshState={handleRefreshState}
               onNextQuestion={handleNextQuestion}
+              onEndQuiz={handleEndQuiz}
             />
           </ScrollView>
 
@@ -535,6 +545,7 @@ export default function QuizScreen() {
             onSubmitAnswer={handleSubmitAnswer}
             onRefreshState={handleRefreshState}
             onNextQuestion={handleNextQuestion}
+            onEndQuiz={handleEndQuiz}
           />
         </ScrollView>
 

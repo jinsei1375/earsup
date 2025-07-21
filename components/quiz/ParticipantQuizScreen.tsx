@@ -14,7 +14,14 @@ import { ErrorMessage } from '@/components/common/ErrorMessage';
 import { Button } from '@/components/common/Button';
 import { canParticipantAnswer, isQuizActive, isQuizEnded, speakText } from '@/utils/quizUtils';
 import { ParticipantsList } from '@/components/room/ParticipantsList';
-import type { Room, RealtimeConnectionState, ParticipantWithNickname, Answer, Question } from '@/types';
+import type {
+  Room,
+  RealtimeConnectionState,
+  ParticipantWithNickname,
+  Answer,
+  Question,
+} from '@/types';
+import { ExitRoomModal } from '../common/ExitRoomModal';
 
 interface ParticipantQuizScreenProps {
   room: Room | null;
@@ -33,6 +40,7 @@ interface ParticipantQuizScreenProps {
   onSubmitAnswer: (answer: string) => Promise<void>;
   onRefreshState: () => void;
   onNextQuestion?: () => Promise<void>; // ホストなしモード用の次の問題へボタン
+  onEndQuiz: () => Promise<void>;
 }
 
 export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
@@ -52,9 +60,11 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
   onSubmitAnswer,
   onRefreshState,
   onNextQuestion,
+  onEndQuiz,
 }) => {
   const [answer, setAnswer] = useState('');
   const [playCount, setPlayCount] = useState(0); // 音声再生回数
+  const [showExitModal, setShowExitModal] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
   const inputRef = useRef<TextInput>(null);
 
@@ -78,9 +88,10 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
           (answer) => answer.user_id === userId && answer.question_id === currentQuestionId
         )
       : undefined;
-  
+
   // 結果表示の安全性チェック: userAnswerが存在し、かつ現在の問題のものである場合のみ
-  const isValidResultDisplay = showResult && userAnswer && userAnswer.question_id === currentQuestionId;
+  const isValidResultDisplay =
+    showResult && userAnswer && userAnswer.question_id === currentQuestionId;
   const allowPartialPoints = room?.allow_partial_points || false;
   const userJudgmentResult = userAnswer?.judge_result;
 
@@ -95,7 +106,11 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
   // 結果表示の準備が完了しているかチェック
   // ルーム作成者の場合も、判定結果が存在するまで待機表示
   // 追加の安全チェック: 有効な結果表示状態でのみデータ準備完了とする
-  const isResultDataReady = isValidResultDisplay && userAnswer?.answer_text && userJudgmentResult !== null && userJudgmentResult !== undefined;
+  const isResultDataReady =
+    isValidResultDisplay &&
+    userAnswer?.answer_text &&
+    userJudgmentResult !== null &&
+    userJudgmentResult !== undefined;
 
   // In host-less mode, consider all participants except host for judgment tracking
   const participantsToJudge = isHostlessMode
@@ -182,6 +197,11 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
         scrollViewRef.current?.scrollTo({ y: Math.max(0, scrollToY), animated: true });
       });
     }, 300); // キーボードアニメーション後に実行
+  };
+
+  const handleEndQuiz = () => {
+    setShowExitModal(false);
+    onEndQuiz();
   };
 
   // Handle quiz ending
@@ -342,21 +362,14 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
                 size="large"
                 fullWidth
               />
-              {/* デバッグ情報を表示（開発時のみ） */}
-              {__DEV__ && (
-                <View className="mt-2">
-                  <Text className="text-xs text-gray-500 text-center">
-                    問題ID: {currentQuestionId?.slice(-8)} | 参加者: {totalParticipantsToJudge} |
-                    回答: {relevantAnswers.length} | 判定済: {judgedCount}
-                  </Text>
-                  <Text className="text-xs text-gray-400 text-center">
-                    全回答数: {allRoomAnswers.length} | 一意問題数: {uniqueQuestionIds.length}
-                  </Text>
-                  <Text className="text-xs text-gray-400 text-center">
-                    問題文: {questionText.slice(0, 20)}...
-                  </Text>
-                </View>
-              )}
+              <Button
+                title="クイズを終了する"
+                onPress={() => setShowExitModal(true)}
+                variant="danger"
+                fullWidth
+                disabled={loading}
+                className="mt-4"
+              />
             </View>
           )}
 
@@ -376,6 +389,13 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
 
         {loading && <LoadingSpinner variant="dots" color="#6366F1" />}
         <ErrorMessage message={error} />
+        {/* クイズ終了確認モーダル */}
+        <ExitRoomModal
+          isVisible={showExitModal}
+          onClose={() => setShowExitModal(false)}
+          onConfirmExit={handleEndQuiz}
+          isHost={true}
+        />
       </ScrollView>
     </KeyboardAvoidingView>
   );
