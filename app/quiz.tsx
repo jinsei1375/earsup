@@ -100,6 +100,13 @@ export default function QuizScreen() {
     }
   }, [currentQuestion?.id, currentQuestionId]);
 
+  // 問題が変わった瞬間に即座に状態をリセットするための追加チェック
+  // useEffectよりも早く実行されるため、レンダリング時の古い状態表示を防ぐ
+  const actualCurrentQuestionId = currentQuestion?.id || null;
+  const shouldResetState = actualCurrentQuestionId !== currentQuestionId;
+  const safeShowResult = shouldResetState ? false : showResult;
+  const safeIsCorrect = shouldResetState ? null : isCorrect;
+
   // Reset participant result state when room status changes
   useEffect(() => {
     const isAutoMode = room?.quiz_mode === 'all-at-once-auto';
@@ -113,16 +120,19 @@ export default function QuizScreen() {
 
   // Monitor answer judgment for participants (runs after state reset)
   useEffect(() => {
+    // 現在の問題IDが設定されており、かつ同期が取れている場合のみ実行
     if (userId && currentQuestion?.id && currentQuestion.id === currentQuestionId) {
       const isAutoMode = room?.quiz_mode === 'all-at-once-auto';
 
       // 参加者または ホストなしモードのホストの回答判定を監視
       if (!isHost || (isHost && isAutoMode)) {
         // 既に結果を表示中の場合は重複チェックを避ける
-        if (!showResult) {
-          // 現在の問題に対する回答のみをフィルタリング
+        if (!safeShowResult) {
+          // 現在の問題に対する回答のみを厳密にフィルタリング
           const myAnswer = answers.find(
-            (a) => a.user_id === userId && a.question_id === currentQuestion.id
+            (a) => a.user_id === userId && 
+                   a.question_id === currentQuestion.id && 
+                   a.question_id === currentQuestionId // 追加の同期チェック
           );
           if (myAnswer?.judged && myAnswer.judge_result) {
             // judge_resultに基づいて判定結果を設定
@@ -132,7 +142,7 @@ export default function QuizScreen() {
         }
       }
     }
-  }, [answers, isHost, userId, currentQuestion?.id, currentQuestionId, room?.quiz_mode, showResult]);
+  }, [answers, isHost, userId, currentQuestion?.id, currentQuestionId, room?.quiz_mode, safeShowResult]);
 
   // allRoomAnswersからjudgmentTypesを更新
   useEffect(() => {
@@ -191,8 +201,13 @@ export default function QuizScreen() {
       const isAutoMode = room?.quiz_mode === 'all-at-once-auto';
       const autoJudge = isAutoMode; // ホストなしモードは自動判定
 
+      // 回答提出前に結果状態をリセット（新しい質問の場合）
+      setShowResult(false);
+      setIsCorrect(null);
+
       const answerData = await submitAnswer(answerText, false, autoJudge);
 
+      // 回答提出後は「準備中」状態を表示
       setShowResult(true);
 
       if (autoJudge && currentQuestion) {
@@ -272,6 +287,7 @@ export default function QuizScreen() {
         // ホストなしモードでは、まず状態をリセット
         setShowResult(false);
         setIsCorrect(null);
+        setCurrentQuestionId(null); // 問題IDもリセット
 
         // 次の問題を自動作成して即座に出題
         await nextQuestion();
@@ -351,16 +367,18 @@ export default function QuizScreen() {
           >
             <ParticipantQuizScreen
               room={room}
+              currentQuestion={currentQuestion}
               questionText={currentQuestion?.text || ''}
               userId={userId}
               participants={participants}
+              answers={answers}
               allRoomAnswers={allRoomAnswers}
               judgmentTypes={judgmentTypes}
               connectionState={connectionState}
               loading={loading}
               error={error}
-              isCorrect={isCorrect}
-              showResult={showResult}
+              isCorrect={safeIsCorrect}
+              showResult={safeShowResult}
               onSubmitAnswer={handleSubmitAnswer}
               onRefreshState={handleRefreshState}
               onNextQuestion={handleNextQuestion}
@@ -502,16 +520,18 @@ export default function QuizScreen() {
         >
           <ParticipantQuizScreen
             room={room}
+            currentQuestion={currentQuestion}
             questionText={currentQuestion?.text || ''}
             userId={userId}
             participants={participants}
+            answers={answers}
             allRoomAnswers={allRoomAnswers}
             judgmentTypes={judgmentTypes}
             connectionState={connectionState}
             loading={loading}
             error={error}
-            isCorrect={isCorrect}
-            showResult={showResult}
+            isCorrect={safeIsCorrect}
+            showResult={safeShowResult}
             onSubmitAnswer={handleSubmitAnswer}
             onRefreshState={handleRefreshState}
             onNextQuestion={handleNextQuestion}

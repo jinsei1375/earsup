@@ -14,14 +14,16 @@ import { ErrorMessage } from '@/components/common/ErrorMessage';
 import { Button } from '@/components/common/Button';
 import { canParticipantAnswer, isQuizActive, isQuizEnded, speakText } from '@/utils/quizUtils';
 import { ParticipantsList } from '@/components/room/ParticipantsList';
-import type { Room, RealtimeConnectionState, ParticipantWithNickname, Answer } from '@/types';
+import type { Room, RealtimeConnectionState, ParticipantWithNickname, Answer, Question } from '@/types';
 
 interface ParticipantQuizScreenProps {
   room: Room | null;
+  currentQuestion: Question | null; // Add current question for authoritative question ID
   questionText: string;
   userId: string | null;
   participants: ParticipantWithNickname[];
-  allRoomAnswers: Answer[]; // Changed to allRoomAnswers for cumulative stats
+  answers: Answer[]; // Current question's answers (including unjudged)
+  allRoomAnswers: Answer[]; // All room answers (judged only, for cumulative stats)
   judgmentTypes?: Record<string, 'correct' | 'partial' | 'incorrect'>; // 判定タイプ
   connectionState: RealtimeConnectionState;
   loading: boolean;
@@ -35,9 +37,11 @@ interface ParticipantQuizScreenProps {
 
 export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
   room,
+  currentQuestion,
   questionText,
   userId,
   participants,
+  answers,
   allRoomAnswers,
   judgmentTypes = {}, // デフォルトは空のオブジェクト
   connectionState,
@@ -60,33 +64,23 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
   const hasQuestion = !!questionText && isQuizActive(room?.status || '');
   const canAnswer = canParticipantAnswer(quizMode, null, userId);
 
-  // 現在のルームの回答をフィルタリング
-  const roomAnswers = allRoomAnswers.filter((answer) => answer.room_id === room?.id);
-
-  // 現在の問題IDを取得
-  const currentQuestionId = useMemo(() => {
-    if (roomAnswers.length === 0) {
-      return null;
-    }
-
-    // 最新の問題IDを取得（回答の作成日時順）
-    const sortedAnswers = [...roomAnswers].sort(
-      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-    );
-
-    return sortedAnswers[0]?.question_id || null;
-  }, [roomAnswers, questionText]);
+  // 現在の問題IDを取得 - authoritativeなcurrentQuestion.idを使用
+  const currentQuestionId = currentQuestion?.id || null;
 
   // デバッグ用の一意問題数計算
-  const uniqueQuestionIds = [...new Set(roomAnswers.map((answer) => answer.question_id))];
+  const uniqueQuestionIds = [...new Set(allRoomAnswers.map((answer) => answer.question_id))];
 
-  // 現在の問題に対するユーザーの回答のみを取得
+  // 現在の問題に対するユーザーの回答を取得 (unjudgedも含む)
+  // 追加の安全チェック: showResultがtrueでも、実際に現在の問題の回答データがある場合のみ表示
   const userAnswer =
     currentQuestionId && showResult
-      ? roomAnswers.find(
+      ? answers.find(
           (answer) => answer.user_id === userId && answer.question_id === currentQuestionId
         )
       : undefined;
+  
+  // 結果表示の安全性チェック: userAnswerが存在し、かつ現在の問題のものである場合のみ
+  const isValidResultDisplay = showResult && userAnswer && userAnswer.question_id === currentQuestionId;
   const allowPartialPoints = room?.allow_partial_points || false;
   const userJudgmentResult = userAnswer?.judge_result;
 
@@ -100,7 +94,8 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
 
   // 結果表示の準備が完了しているかチェック
   // ルーム作成者の場合も、判定結果が存在するまで待機表示
-  const isResultDataReady = showResult && userAnswer?.answer_text && userJudgmentResult !== null;
+  // 追加の安全チェック: 有効な結果表示状態でのみデータ準備完了とする
+  const isResultDataReady = isValidResultDisplay && userAnswer?.answer_text && userJudgmentResult !== null && userJudgmentResult !== undefined;
 
   // In host-less mode, consider all participants except host for judgment tracking
   const participantsToJudge = isHostlessMode
@@ -109,9 +104,9 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
 
   const totalParticipantsToJudge = participantsToJudge.length;
 
-  // 現在の問題に対する回答のみをフィルタリング
+  // 現在の問題に対する回答のみをフィルタリング (including unjudged)
   const currentQuestionAnswers = currentQuestionId
-    ? roomAnswers.filter((answer) => answer.question_id === currentQuestionId)
+    ? answers.filter((answer) => answer.question_id === currentQuestionId)
     : [];
 
   // ホストなしモードでは非ホスト参加者の回答のみカウント
@@ -135,7 +130,7 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
     setAnswer('');
     // 新しい問題になったら、前の結果表示状態もクリア
     // これはquiz.tsxで管理されているが、念のためローカルでもクリア
-  }, [questionText, currentQuestionId]);
+  }, [currentQuestionId]);
 
   // 現在の問題に対してのみ判定状態をチェック
   const isCurrentQuestionFullyJudged = useMemo(() => {
@@ -288,7 +283,7 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
               <>
                 <Text className="text-center font-bold text-blue-800 mb-1">回答を提出しました</Text>
                 <Text className="text-center text-blue-600">
-                  {isRoomCreator
+                  {isAutoMode && isRoomCreator
                     ? '結果を準備中...'
                     : isCorrect === null
                     ? 'ホストの判定をお待ちください'
@@ -355,7 +350,7 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
                     回答: {relevantAnswers.length} | 判定済: {judgedCount}
                   </Text>
                   <Text className="text-xs text-gray-400 text-center">
-                    全回答数: {roomAnswers.length} | 一意問題数: {uniqueQuestionIds.length}
+                    全回答数: {allRoomAnswers.length} | 一意問題数: {uniqueQuestionIds.length}
                   </Text>
                   <Text className="text-xs text-gray-400 text-center">
                     問題文: {questionText.slice(0, 20)}...
