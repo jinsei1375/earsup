@@ -74,6 +74,16 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
   const hasQuestion = !!questionText && isQuizActive(room?.status || '');
   const canAnswer = canParticipantAnswer(quizMode, null, userId);
 
+  // 問題文の末尾から句読点を抽出する関数
+  const extractTrailingPunctuation = (text: string): string => {
+    if (!text) return '';
+    const match = text.match(/[.!?]+$/);
+    return match ? match[0] : '';
+  };
+
+  // 問題文から抽出した句読点
+  const trailingPunctuation = extractTrailingPunctuation(questionText);
+
   // 現在の問題IDを取得 - authoritativeなcurrentQuestion.idを使用
   const currentQuestionId = currentQuestion?.id || null;
 
@@ -296,9 +306,9 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
                 onFocus={handleInputFocus}
               />
               {/* ホストなしモードでは句読点を表示 */}
-              {isAutoMode && (
+              {isAutoMode && trailingPunctuation && (
                 <View className="ml-2 flex-row">
-                  <Text className="text-gray-400 text-xl">.!?</Text>
+                  <Text className="text-gray-400 text-xl">{trailingPunctuation}</Text>
                 </View>
               )}
             </View>
