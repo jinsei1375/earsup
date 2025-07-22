@@ -74,6 +74,16 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
   const hasQuestion = !!questionText && isQuizActive(room?.status || '');
   const canAnswer = canParticipantAnswer(quizMode, null, userId);
 
+  // 問題文の末尾から句読点を抽出する関数
+  const extractTrailingPunctuation = (text: string): string => {
+    if (!text) return '';
+    const match = text.match(/[.!?]+$/);
+    return match ? match[0] : '';
+  };
+
+  // 問題文から抽出した句読点
+  const trailingPunctuation = extractTrailingPunctuation(questionText);
+
   // 現在の問題IDを取得 - authoritativeなcurrentQuestion.idを使用
   const currentQuestionId = currentQuestion?.id || null;
 
@@ -274,17 +284,34 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
         {!showResult ? (
           // All-at-once mode - hasn't answered yet
           <View className="w-full mb-4">
-            <TextInput
-              ref={inputRef}
-              className="border border-gray-300 p-4 rounded-lg mb-3 w-full text-xl"
-              placeholder="聞こえたフレーズを入力"
-              value={answer}
-              onChangeText={setAnswer}
-              editable={!showResult}
-              returnKeyType="done"
-              onSubmitEditing={() => Keyboard.dismiss()}
-              onFocus={handleInputFocus}
-            />
+            {/* ホストなしモードでは句読点を表示 */}
+            {isAutoMode && (
+              <View className="flex-row items-center justify-center mb-2">
+                <Text className="text-gray-600 text-sm">
+                  句読点（. ! ?）は自動で判定されるため入力不要です
+                </Text>
+              </View>
+            )}
+            
+            <View className="flex-row items-center">
+              <TextInput
+                ref={inputRef}
+                className="border border-gray-300 p-4 rounded-lg w-full text-xl flex-1"
+                placeholder="聞こえたフレーズを入力"
+                value={answer}
+                onChangeText={setAnswer}
+                editable={!showResult}
+                returnKeyType="done"
+                onSubmitEditing={() => Keyboard.dismiss()}
+                onFocus={handleInputFocus}
+              />
+              {/* ホストなしモードでは句読点を表示 */}
+              {isAutoMode && trailingPunctuation && (
+                <View className="ml-2 flex-row">
+                  <Text className="text-gray-400 text-xl">{trailingPunctuation}</Text>
+                </View>
+              )}
+            </View>
 
             <Button
               title="回答する"
