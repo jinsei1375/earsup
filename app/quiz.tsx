@@ -13,7 +13,6 @@ import { ExitRoomModal } from '@/components/common/ExitRoomModal';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { ErrorMessage } from '@/components/common/ErrorMessage';
 import { useHeaderSettings } from '@/contexts/HeaderSettingsContext';
-import { validateAnswer } from '@/utils/quizUtils';
 import type { QuizScreenParams } from '@/types';
 
 const fallbackQuestions = [
@@ -269,9 +268,10 @@ export default function QuizScreen() {
       // 回答提出後は「準備中」状態を表示
       setShowResult(true);
 
-      if (autoJudge && currentQuestion) {
-        // ホストなしモードでは自動判定（句読点を除外）
-        const correct = validateAnswer(answerText, currentQuestion.text, true);
+      if (autoJudge && answerData) {
+        // ホストなしモードでは submitAnswer の判定結果を使用
+        const correct = answerData.judge_result === 'correct';
+        console.log('Auto judgment result:', correct, answerData.judge_result);
         setIsCorrect(correct);
       } else {
         setIsCorrect(null); // Wait for host judgment

@@ -6,17 +6,21 @@ export const generateRoomCode = (): string => {
   return Math.random().toString(36).slice(-6).toUpperCase();
 };
 
-export const validateAnswer = (answer: string, correctAnswer: string, excludePunctuation: boolean = false): boolean => {
+export const validateAnswer = (
+  answer: string,
+  correctAnswer: string,
+  excludePunctuation: boolean = false
+): boolean => {
   let processedAnswer = answer.trim().toLowerCase();
   let processedCorrectAnswer = correctAnswer.trim().toLowerCase();
-  
+
   if (excludePunctuation) {
     // Remove common punctuation marks for host-less mode comparison
     const punctuationRegex = /[.!?]/g;
     processedAnswer = processedAnswer.replace(punctuationRegex, '');
     processedCorrectAnswer = processedCorrectAnswer.replace(punctuationRegex, '');
   }
-  
+
   return processedAnswer === processedCorrectAnswer;
 };
 

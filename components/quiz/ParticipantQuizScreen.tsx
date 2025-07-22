@@ -292,7 +292,7 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
                 </Text>
               </View>
             )}
-            
+
             <View className="flex-row items-center">
               <TextInput
                 ref={inputRef}
@@ -308,7 +308,7 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
               {/* ホストなしモードでは句読点を表示 */}
               {isAutoMode && trailingPunctuation && (
                 <View className="ml-2 flex-row">
-                  <Text className="text-gray-400 text-xl">{trailingPunctuation}</Text>
+                  <Text className="text-gray-800 text-xl">{trailingPunctuation}</Text>
                 </View>
               )}
             </View>
@@ -320,6 +320,7 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
               variant="primary"
               size="large"
               fullWidth
+              className="mt-4"
             />
           </View>
         ) : (

@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { SupabaseService } from '@/services/supabaseService';
 import { useRealtimeSubscription } from './useRealtimeSubscription';
 import type { Room, Question, Answer, Buzz, ParticipantWithNickname, Stamp } from '@/types';
+import { validateAnswer } from '@/utils/quizUtils';
 
 interface UseQuizDataOptions {
   roomId: string | null;
@@ -205,7 +206,7 @@ export const useQuizData = (options: UseQuizDataOptions) => {
 
         if (autoJudge) {
           judged = true;
-          const isCorrect = answerText.trim().toLowerCase() === currentQuestion.text.toLowerCase();
+          const isCorrect = validateAnswer(answerText, currentQuestion.text, true); // exclude punctuation
           judgmentResult = isCorrect ? 'correct' : 'incorrect';
         }
 
