@@ -36,6 +36,24 @@ export class SampleSentenceService {
   }
 
   /**
+   * IDでサンプル文を取得
+   */
+  static async getSentenceById(sentenceId: string): Promise<SampleSentence | null> {
+    const { data, error } = await supabase
+      .from('sample_sentences')
+      .select('*')
+      .eq('id', sentenceId)
+      .single();
+
+    if (error) {
+      console.error('サンプル文取得エラー:', error);
+      return null;
+    }
+
+    return data;
+  }
+
+  /**
    * すべてのサンプル文を取得
    */
   static async getAllSentences(): Promise<SampleSentence[]> {

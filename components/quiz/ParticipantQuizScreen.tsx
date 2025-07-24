@@ -14,6 +14,7 @@ import { ErrorMessage } from '@/components/common/ErrorMessage';
 import { Button } from '@/components/common/Button';
 import { canParticipantAnswer, isQuizActive, isQuizEnded, speakText } from '@/utils/quizUtils';
 import { ParticipantsList } from '@/components/room/ParticipantsList';
+import { SampleSentenceService } from '@/services/sampleSentenceService';
 import type {
   Room,
   RealtimeConnectionState,
@@ -65,6 +66,7 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
   const [answer, setAnswer] = useState('');
   const [playCount, setPlayCount] = useState(0); // 音声再生回数
   const [showExitModal, setShowExitModal] = useState(false);
+  const [translation, setTranslation] = useState<string | null>(null); // 日本語訳
   const scrollViewRef = useRef<ScrollView>(null);
   const inputRef = useRef<TextInput>(null);
 
@@ -149,13 +151,27 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
     judgedCount >= totalParticipantsToJudge &&
     totalParticipantsToJudge > 0;
 
-  // 問題が変わったときに音声再生回数と入力をリセット
+  // 問題が変わったときに音声再生回数と入力をリセット、翻訳も取得
   useEffect(() => {
     setPlayCount(0);
     setAnswer('');
-    // 新しい問題になったら、前の結果表示状態もクリア
-    // これはquiz.tsxで管理されているが、念のためローカルでもクリア
-  }, [currentQuestionId]);
+    setTranslation(null); // 翻訳もリセット
+    
+    // ホストなしモードで、かつサンプル文のIDがある場合は翻訳を取得
+    if (isAutoMode && currentQuestion?.sample_sentence_id) {
+      const fetchTranslation = async () => {
+        try {
+          const sampleSentence = await SampleSentenceService.getSentenceById(currentQuestion.sample_sentence_id!);
+          if (sampleSentence && sampleSentence.translation) {
+            setTranslation(sampleSentence.translation);
+          }
+        } catch (error) {
+          console.error('Translation fetch error:', error);
+        }
+      };
+      fetchTranslation();
+    }
+  }, [currentQuestionId, isAutoMode, currentQuestion?.sample_sentence_id]);
 
   // 現在の問題に対してのみ判定状態をチェック
   const isCurrentQuestionFullyJudged = useMemo(() => {
@@ -348,8 +364,13 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
                 </Text>
 
                 <Text className="text-center text-blue-600 mt-2">
-                  あなたの回答: 「{userAnswer?.answer_text || '取得中...'}」
+                  あなたの回答: 「{userAnswer?.answer_text || '取得中...'}{trailingPunctuation}」
                 </Text>
+                {isAutoMode && translation && (
+                  <Text className="text-center text-gray-600 mt-2 italic">
+                    日本語: {translation}
+                  </Text>
+                )}
               </>
             ) : isPartialAnswer ? (
               // Partial (惜しい)
@@ -359,18 +380,28 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
                   5ポイントGET！
                 </Text>
                 <Text className="text-center text-blue-600 mt-2">
-                  あなたの回答: 「{userAnswer?.answer_text || '取得中...'}」
+                  あなたの回答: 「{userAnswer?.answer_text || '取得中...'}{trailingPunctuation}」
                 </Text>
                 <Text className="text-center text-black mt-2">正解: {questionText}</Text>
+                {isAutoMode && translation && (
+                  <Text className="text-center text-gray-600 mt-2 italic">
+                    日本語: {translation}
+                  </Text>
+                )}
               </>
             ) : (
               // Incorrect
               <>
                 <Text className="text-center font-bold text-red-500 text-lg mb-1">×不正解</Text>
                 <Text className="text-center text-blue-600 mt-2">
-                  あなたの回答: 「{userAnswer?.answer_text || '取得中...'}」
+                  あなたの回答: 「{userAnswer?.answer_text || '取得中...'}{trailingPunctuation}」
                 </Text>
                 <Text className="text-center text-black mt-2">正解: {questionText}</Text>
+                {isAutoMode && translation && (
+                  <Text className="text-center text-gray-600 mt-2 italic">
+                    日本語: {translation}
+                  </Text>
+                )}
               </>
             )}
           </View>
@@ -413,6 +444,9 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
               answers={allRoomAnswers}
               judgmentTypes={judgmentTypes}
               quizMode={quizMode} // ホストなしモードのためのクイズモード
+              currentQuestionAnswers={currentQuestionAnswers} // 現在の問題の回答
+              showCurrentAnswers={isCurrentQuestionFullyJudged} // 全員が回答・判定済みの場合のみ表示
+              trailingPunctuation={trailingPunctuation} // 句読点を渡す
             />
           </View>
         </View>

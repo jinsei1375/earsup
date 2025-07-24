@@ -165,13 +165,13 @@ export const useQuizData = (options: UseQuizDataOptions) => {
   unsubscribeRef.current = unsubscribe;
 
   const createQuestion = useCallback(
-    async (text: string) => {
+    async (text: string, sampleSentenceId?: string) => {
       if (!roomId || !isHost) throw new Error('Invalid operation');
 
       setLoading(true);
       try {
         // Create question
-        const questionData = await SupabaseService.createQuestion(roomId, text);
+        const questionData = await SupabaseService.createQuestion(roomId, text, 'en-US', 1.0, sampleSentenceId);
 
         // Update room status to active
         await SupabaseService.updateRoomStatus(roomId, 'active');

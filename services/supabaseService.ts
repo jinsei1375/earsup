@@ -81,7 +81,8 @@ export class SupabaseService {
     roomId: string,
     text: string,
     speaker: string = 'en-US',
-    speed: number = 1.0
+    speed: number = 1.0,
+    sampleSentenceId?: string
   ): Promise<Question> {
     const timestamp = new Date().toISOString();
 
@@ -92,6 +93,7 @@ export class SupabaseService {
         text,
         speaker,
         speed,
+        sample_sentence_id: sampleSentenceId,
         created_at: timestamp,
       })
       .select()

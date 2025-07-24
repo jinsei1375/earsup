@@ -21,6 +21,7 @@ export interface Question {
   text: string;
   speaker: string;
   speed: number;
+  sample_sentence_id?: string; // For linking back to sample sentence for translation
   created_at: string;
   updated_at?: string;
 }
