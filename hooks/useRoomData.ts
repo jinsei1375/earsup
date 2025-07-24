@@ -19,15 +19,16 @@ export const useRoomData = (options: UseRoomDataOptions) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isHost, setIsHost] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false); // 初期化完了フラグ
 
   const lastFetchRef = useRef<number>(0);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const { connectionState, subscribe, unsubscribe } = useRealtimeSubscription({
     channelName: `room-${roomId}`,
-    onConnected: () => console.log(`Room realtime connected: ${roomId}`),
-    onDisconnected: () => console.log(`Room realtime disconnected: ${roomId}`),
-    onError: (error) => console.error('Room realtime error:', error),
+    onConnected: () => {},
+    onDisconnected: () => {},
+    onError: () => {},
   });
 
   const fetchRoomData = useCallback(
@@ -50,8 +51,26 @@ export const useRoomData = (options: UseRoomDataOptions) => {
 
         // Fetch room data
         const roomData = await SupabaseService.getRoomById(roomId);
+
+        // ルームが削除された場合の処理（ただし初期フェッチ時は除外）
+        if (!roomData) {
+          // 初期化完了後のみ削除として扱う
+          if (isInitialized) {
+            setRoom(null);
+            setParticipants([]);
+            setIsHost(false);
+            setError('ルームが削除されました');
+          }
+          return;
+        }
+
         setRoom(roomData);
         setIsHost(roomData.host_user_id === userId);
+
+        // 初回フェッチ完了時に初期化フラグを設定
+        if (force && !isInitialized) {
+          setIsInitialized(true);
+        }
 
         // Fetch participants
         const participantsData = await SupabaseService.getParticipantsWithNicknames(
@@ -60,14 +79,29 @@ export const useRoomData = (options: UseRoomDataOptions) => {
         );
         setParticipants(participantsData);
       } catch (err: any) {
-        setError(err.message || 'ルーム情報の取得中にエラーが発生しました。');
+        // ルームが見つからない場合は削除されたとみなす（初期化完了後のみ）
+        const isRoomNotFoundError =
+          err.message?.includes('見つかりません') ||
+          err.message?.includes('not found') ||
+          err.message?.includes('存在しません') ||
+          err.message?.includes('JSON object requested, multiple (or no) rows returned') ||
+          err.status === 404;
+
+        if (isInitialized && isRoomNotFoundError) {
+          setRoom(null);
+          setParticipants([]);
+          setIsHost(false);
+          setError('ルームが削除されました');
+        } else {
+          setError(err.message || 'ルーム情報の取得中にエラーが発生しました。');
+        }
       } finally {
         if (force) {
           setLoading(false);
         }
       }
     },
-    [roomId, userId]
+    [roomId, userId, isInitialized]
   );
 
   const updateRoomStatus = useCallback(
@@ -96,6 +130,22 @@ export const useRoomData = (options: UseRoomDataOptions) => {
     }
   }, [roomId]);
 
+  const removeParticipant = useCallback(
+    async (participantUserId: string) => {
+      if (!roomId) return;
+
+      try {
+        await SupabaseService.removeParticipant(roomId, participantUserId);
+        // リアルタイム更新で自動的に反映されるが、即座に更新
+        await fetchRoomData(false);
+      } catch (err: any) {
+        setError(err.message || '参加者の削除中にエラーが発生しました。');
+        throw err;
+      }
+    },
+    [roomId, fetchRoomData]
+  );
+
   // 関数参照を安定させるためのRef
   const fetchRoomDataRef = useRef<((force?: boolean) => Promise<void>) | null>(null);
   fetchRoomDataRef.current = fetchRoomData;
@@ -123,7 +173,15 @@ export const useRoomData = (options: UseRoomDataOptions) => {
         table: 'rooms',
         filter: `id=eq.${roomId}`,
         callback: (payload: any) => {
-          console.log('Room changed:', payload);
+          // ルームが削除された場合（初期化完了後のみ）
+          if (payload.eventType === 'DELETE' && isInitialized) {
+            setRoom(null);
+            setParticipants([]);
+            setIsHost(false);
+            setError('ルームが削除されました');
+            return;
+          }
+
           debouncedFetch();
         },
       },
@@ -133,7 +191,6 @@ export const useRoomData = (options: UseRoomDataOptions) => {
         table: 'room_participants',
         filter: `room_id=eq.${roomId}`,
         callback: (payload: any) => {
-          console.log('Participants changed:', payload);
           debouncedFetch();
         },
       },
@@ -153,7 +210,7 @@ export const useRoomData = (options: UseRoomDataOptions) => {
       if (debounceTimer) clearTimeout(debounceTimer);
       unsubscribe();
     };
-  }, [roomId, enableRealtime]); // subscribe, unsubscribeを削除
+  }, [roomId, enableRealtime, isInitialized]); // subscribe, unsubscribeを削除
 
   // Setup polling as backup
   useEffect(() => {
@@ -166,7 +223,7 @@ export const useRoomData = (options: UseRoomDataOptions) => {
         if (fetchRoomDataRef.current) {
           fetchRoomDataRef.current(false);
         }
-      }, pollingInterval);
+      }, 2000); // 2秒に短縮
     };
 
     startPolling();
@@ -176,11 +233,13 @@ export const useRoomData = (options: UseRoomDataOptions) => {
         clearInterval(intervalRef.current);
       }
     };
-  }, [roomId, pollingInterval]);
+  }, [roomId]); // pollingIntervalを削除（固定値2秒を使用しているため）
 
   // Initial fetch
   useEffect(() => {
     if (roomId && fetchRoomDataRef.current) {
+      // roomIdが変更された時に初期化フラグをリセット
+      setIsInitialized(false);
       fetchRoomDataRef.current(true);
     }
   }, [roomId]);
@@ -191,10 +250,12 @@ export const useRoomData = (options: UseRoomDataOptions) => {
     loading,
     error,
     isHost,
+    isInitialized,
     connectionState,
     fetchRoomData,
     updateRoomStatus,
     deleteRoom,
+    removeParticipant,
     setError,
   };
 };

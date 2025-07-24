@@ -48,16 +48,16 @@ export default function RoomScreen() {
     loading: roomLoading,
     error: roomError,
     isHost,
-    connectionState,
+    isInitialized,
     fetchRoomData,
     updateRoomStatus,
     deleteRoom,
+    removeParticipant,
     setError: setRoomError,
   } = useRoomData({
     roomId,
     userId,
     pollingInterval: 2000, // 2秒に短縮
-    enableRealtime: true,
   });
 
   const isCreateMode = mode === 'create';
@@ -96,6 +96,34 @@ export default function RoomScreen() {
     }
   }, [room?.status, isHost, roomId, router]);
 
+  // Handle room deletion by host (for participants)
+  useEffect(() => {
+    // 初期化完了後、ホストではない参加者のみが対象
+    if (
+      isWaitingMode &&
+      isInitialized &&
+      !isHost &&
+      roomId &&
+      userId &&
+      room?.host_user_id !== userId
+    ) {
+      // ローディング中でない場合にroomがnullになった、またはエラーが発生した場合を検出
+      const shouldNavigateHome =
+        (!roomLoading && room === null) ||
+        (roomError &&
+          typeof roomError === 'string' &&
+          (roomError.includes('見つかりません') ||
+            roomError.includes('not found') ||
+            roomError.includes('存在しません') ||
+            roomError.includes('ルームが削除されました') ||
+            roomError.includes('JSON object requested, multiple (or no) rows returned')));
+
+      if (shouldNavigateHome) {
+        router.replace('/');
+      }
+    }
+  }, [room, roomId, isWaitingMode, isHost, isInitialized, roomLoading, roomError, router, userId]);
+
   const handleCreateRoom = async () => {
     if (!userId) return;
     setLocalLoading(true);
@@ -129,6 +157,23 @@ export default function RoomScreen() {
       setRoomId(roomData.id);
     } catch (err: any) {
       setLocalError(err.message || 'ルーム参加中にエラーが発生しました。');
+    } finally {
+      setLocalLoading(false);
+    }
+  };
+
+  const handleLeaveRoom = async () => {
+    if (!roomId || !userId || isHost) return;
+
+    setLocalLoading(true);
+    setLocalError(null);
+
+    try {
+      await removeParticipant(userId);
+      // 自動的にホーム画面に戻る
+      router.replace('/');
+    } catch (err: any) {
+      setLocalError(err.message || 'ルーム退出中にエラーが発生しました。');
     } finally {
       setLocalLoading(false);
     }
@@ -264,21 +309,22 @@ export default function RoomScreen() {
           <View className="mt-5 items-center">
             <Text className="italic mb-4">ホストがクイズを開始するのを待っています...</Text>
             <LoadingSpinner variant="sound-wave" color="#8B5CF6" size="large" />
+
+            {/* 参加者用退出ボタン */}
+            <View className="mt-6">
+              <Button
+                title="ルームから退出"
+                onPress={handleLeaveRoom}
+                disabled={localLoading || roomLoading}
+                variant="secondary"
+                size="medium"
+              />
+            </View>
           </View>
         )}
 
         {loading && <LoadingSpinner variant="default" color="#3B82F6" />}
         <ErrorMessage message={error} />
-
-        {/* デバッグ情報 */}
-        {process.env.NODE_ENV === 'development' && (
-          <View className="mt-4 p-2 bg-gray-100 rounded">
-            <Text className="text-xs text-gray-600">
-              Debug - Room Status: {room?.status} | Connected:{' '}
-              {connectionState.connected ? 'Yes' : 'No'}
-            </Text>
-          </View>
-        )}
       </View>
     );
   }

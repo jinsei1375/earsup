@@ -46,15 +46,16 @@ export class SupabaseService {
     return data;
   }
 
-  static async getRoomById(roomId: string): Promise<Room> {
-    const { data, error } = await supabase
-      .from('rooms')
-      .select('*')
-      .eq('id', roomId)
-      .single()
-      .throwOnError();
+  static async getRoomById(roomId: string): Promise<Room | null> {
+    const { data, error } = await supabase.from('rooms').select('*').eq('id', roomId).single();
 
-    if (error) throw error;
+    if (error) {
+      // ルームが見つからない場合（削除済みなど）はnullを返す
+      if (error.code === 'PGRST116') {
+        return null;
+      }
+      throw error;
+    }
     return data;
   }
 
@@ -244,6 +245,9 @@ export class SupabaseService {
     // Check room status first - don't allow joining if quiz has started
     try {
       const room = await this.getRoomById(roomId);
+      if (!room) {
+        throw new Error('ルームが見つからないか、削除されています');
+      }
       if (room.status !== 'waiting') {
         throw new Error('クイズが既に開始されているため、参加できません');
       }
@@ -346,6 +350,9 @@ export class SupabaseService {
   static async endRoomByHost(roomId: string, hostUserId: string): Promise<void> {
     // Verify the user is the host
     const room = await this.getRoomById(roomId);
+    if (!room) {
+      throw new Error('ルームが見つからないか、削除されています');
+    }
     if (room.host_user_id !== hostUserId) {
       throw new Error('Only the host can end the room');
     }
