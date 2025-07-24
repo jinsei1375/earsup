@@ -258,17 +258,8 @@ export default function RoomScreen() {
           <Text className="text-sm text-blue-600 text-center mt-2">📋 タップしてコピー</Text>
         </TouchableOpacity>
 
-        <ParticipantsList
-          participants={participants}
-          hostUserId={room?.host_user_id}
-          currentUserId={userId}
-          loading={loading}
-          onRefresh={() => fetchRoomData(true)}
-          quizMode={room?.quiz_mode}
-        />
-
         {isHost ? (
-          <View className="mt-5">
+          <View className="mb-4">
             {/* 参加者数チェックとメッセージ */}
             {(() => {
               const isAutoMode = room?.quiz_mode === 'all-at-once-auto';
@@ -306,20 +297,33 @@ export default function RoomScreen() {
             })()}
           </View>
         ) : (
-          <View className="mt-5 items-center">
-            <Text className="italic mb-4">ホストがクイズを開始するのを待っています...</Text>
-            <LoadingSpinner variant="sound-wave" color="#8B5CF6" size="large" />
-
+          <View className="mb-4 items-center">
             {/* 参加者用退出ボタン */}
             <View className="mt-6">
               <Button
                 title="ルームから退出"
                 onPress={handleLeaveRoom}
                 disabled={localLoading || roomLoading}
-                variant="secondary"
+                variant="danger"
                 size="medium"
               />
             </View>
+          </View>
+        )}
+
+        <ParticipantsList
+          participants={participants}
+          hostUserId={room?.host_user_id}
+          currentUserId={userId}
+          loading={loading}
+          onRefresh={() => fetchRoomData(true)}
+          quizMode={room?.quiz_mode}
+        />
+
+        {!isHost && (
+          <View className="mt-5 items-center">
+            <Text className="italic mb-4">ホストがクイズを開始するのを待っています...</Text>
+            <LoadingSpinner variant="sound-wave" color="#8B5CF6" size="large" />
           </View>
         )}
 
