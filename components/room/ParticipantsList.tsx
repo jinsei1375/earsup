@@ -273,7 +273,7 @@ export const ParticipantsList: React.FC<ParticipantsListProps> = ({
                       <Text className="text-xs text-gray-500 mb-1">今回の回答:</Text>
                       <View className="flex-row items-center">
                         <Text className="text-sm text-gray-800 flex-1">
-                          「{currentAnswer.answer_text}{trailingPunctuation}」
+                          「{currentAnswer.answer_text}」{trailingPunctuation}
                         </Text>
                         {currentAnswer.judge_result && (
                           <View className={`ml-2 px-2 py-1 rounded-full ${
