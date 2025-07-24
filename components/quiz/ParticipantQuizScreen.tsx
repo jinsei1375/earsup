@@ -161,7 +161,9 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
     if (isAutoMode && currentQuestion?.sample_sentence_id) {
       const fetchTranslation = async () => {
         try {
-          const sampleSentence = await SampleSentenceService.getSentenceById(currentQuestion.sample_sentence_id!);
+          const sampleSentenceId = currentQuestion.sample_sentence_id;
+          if (!sampleSentenceId) return; // Ensure sample_sentence_id is still defined
+          const sampleSentence = await SampleSentenceService.getSentenceById(sampleSentenceId);
           if (sampleSentence && sampleSentence.translation) {
             setTranslation(sampleSentence.translation);
           }
