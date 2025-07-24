@@ -156,7 +156,7 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
     setPlayCount(0);
     setAnswer('');
     setTranslation(null); // 翻訳もリセット
-    
+
     // ホストなしモードで、かつサンプル文のIDがある場合は翻訳を取得
     if (isAutoMode && currentQuestion?.sample_sentence_id) {
       const fetchTranslation = async () => {

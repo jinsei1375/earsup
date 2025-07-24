@@ -134,10 +134,10 @@ export const ParticipantsList: React.FC<ParticipantsListProps> = ({
               const isHost = participant.id === hostUserId;
               const isCurrentUser = participant.id === currentUserId; // 自分かどうか
               const rank = getRank(participant.id);
-              
+
               // 現在の問題に対するこの参加者の回答を取得
-              const currentAnswer = showCurrentAnswers 
-                ? currentQuestionAnswers.find(answer => answer.user_id === participant.id)
+              const currentAnswer = showCurrentAnswers
+                ? currentQuestionAnswers.find((answer) => answer.user_id === participant.id)
                 : null;
 
               return (
@@ -158,7 +158,7 @@ export const ParticipantsList: React.FC<ParticipantsListProps> = ({
                         <Text
                           className={`text-base ${
                             isCurrentUser
-                              ? 'font-bold text-blue-800'
+                              ? 'font-semibold text-blue-800'
                               : 'font-semibold text-gray-800'
                           }`}
                         >
@@ -266,7 +266,7 @@ export const ParticipantsList: React.FC<ParticipantsListProps> = ({
                       </View>
                     )}
                   </View>
-                  
+
                   {/* 現在の問題の回答表示（全員回答・判定済みの場合のみ） */}
                   {currentAnswer && (
                     <View className="mt-3 pt-3 border-t border-gray-200">
@@ -276,22 +276,26 @@ export const ParticipantsList: React.FC<ParticipantsListProps> = ({
                           「{currentAnswer.answer_text}」{trailingPunctuation}
                         </Text>
                         {currentAnswer.judge_result && (
-                          <View className={`ml-2 px-2 py-1 rounded-full ${
-                            currentAnswer.judge_result === 'correct' 
-                              ? 'bg-green-100' 
-                              : currentAnswer.judge_result === 'partial'
-                              ? 'bg-orange-100'
-                              : 'bg-red-100'
-                          }`}>
-                            <Text className={`text-xs font-medium ${
-                              currentAnswer.judge_result === 'correct' 
-                                ? 'text-green-700' 
+                          <View
+                            className={`ml-2 px-2 py-1 rounded-full ${
+                              currentAnswer.judge_result === 'correct'
+                                ? 'bg-green-100'
                                 : currentAnswer.judge_result === 'partial'
-                                ? 'text-orange-700'
-                                : 'text-red-700'
-                            }`}>
-                              {currentAnswer.judge_result === 'correct' 
-                                ? '正解' 
+                                ? 'bg-orange-100'
+                                : 'bg-red-100'
+                            }`}
+                          >
+                            <Text
+                              className={`text-xs font-medium ${
+                                currentAnswer.judge_result === 'correct'
+                                  ? 'text-green-700'
+                                  : currentAnswer.judge_result === 'partial'
+                                  ? 'text-orange-700'
+                                  : 'text-red-700'
+                              }`}
+                            >
+                              {currentAnswer.judge_result === 'correct'
+                                ? '正解'
                                 : currentAnswer.judge_result === 'partial'
                                 ? '惜しい'
                                 : '不正解'}
