@@ -52,7 +52,7 @@ export default function QuizScreen() {
   const isHost = role === 'host';
 
   // サンプル文からランダムに未使用の問題を選択する関数
-  const getRandomSampleSentence = async (): Promise<string | null> => {
+  const getRandomSampleSentence = async (): Promise<{ text: string; sampleSentenceId: string } | null> => {
     try {
       const allSentences = await SampleSentenceService.getAllSentences();
       if (!allSentences || allSentences.length === 0) {
@@ -67,7 +67,8 @@ export default function QuizScreen() {
       if (unusedSentences.length === 0) {
         console.log('All sample sentences used, resetting usage history');
         setUsedQuestionIds(new Set());
-        return allSentences[Math.floor(Math.random() * allSentences.length)].text;
+        const fallbackSentence = allSentences[Math.floor(Math.random() * allSentences.length)];
+        return { text: fallbackSentence.text, sampleSentenceId: fallbackSentence.id };
       }
 
       // ランダムに選択
@@ -76,7 +77,7 @@ export default function QuizScreen() {
       // 使用済みIDに追加
       setUsedQuestionIds((prev) => new Set(prev).add(randomSentence.id));
 
-      return randomSentence.text;
+      return { text: randomSentence.text, sampleSentenceId: randomSentence.id };
     } catch (error) {
       console.error('Failed to get random sample sentence:', error);
       return null;
@@ -221,14 +222,14 @@ export default function QuizScreen() {
     ) {
       // サンプル問題を自動作成
       const createAutoQuestion = async () => {
-        const randomQuestionText = await getRandomSampleSentence();
-        if (randomQuestionText) {
+        const randomQuestionData = await getRandomSampleSentence();
+        if (randomQuestionData) {
           await new Promise((resolve) => {
             requestAnimationFrame(() => {
               requestAnimationFrame(resolve);
             });
           });
-          await handleCreateQuestion(randomQuestionText);
+          await handleCreateQuestion(randomQuestionData.text, randomQuestionData.sampleSentenceId);
         } else {
           const fallbackQuestion =
             fallbackQuestions[Math.floor(Math.random() * fallbackQuestions.length)];
@@ -246,9 +247,9 @@ export default function QuizScreen() {
     }
   }, [room?.status, room?.quiz_mode, currentQuestion, isHost]);
 
-  const handleCreateQuestion = async (text: string) => {
+  const handleCreateQuestion = async (text: string, sampleSentenceId?: string) => {
     try {
-      await createQuestion(text);
+      await createQuestion(text, sampleSentenceId);
     } catch (err) {
       console.error('Question creation failed:', err);
     }
@@ -352,24 +353,34 @@ export default function QuizScreen() {
         await nextQuestion();
 
         // サンプル問題を自動作成
-        const randomQuestionText = await getRandomSampleSentence();
-        const questionToUse =
-          randomQuestionText ||
-          (() => {
-            // フォールバック: デフォルトの質問
-            return fallbackQuestions[Math.floor(Math.random() * fallbackQuestions.length)];
-          })();
-
-        await new Promise((resolve) => {
-          requestAnimationFrame(() => {
-            requestAnimationFrame(resolve);
+        const randomQuestionData = await getRandomSampleSentence();
+        if (randomQuestionData) {
+          await new Promise((resolve) => {
+            requestAnimationFrame(() => {
+              requestAnimationFrame(resolve);
+            });
           });
-        });
 
-        try {
-          await handleCreateQuestion(questionToUse);
-        } catch (err) {
-          console.error('Auto question creation failed:', err);
+          try {
+            await handleCreateQuestion(randomQuestionData.text, randomQuestionData.sampleSentenceId);
+          } catch (err) {
+            console.error('Auto question creation failed:', err);
+          }
+        } else {
+          // フォールバック: デフォルトの質問
+          const fallbackQuestion = fallbackQuestions[Math.floor(Math.random() * fallbackQuestions.length)];
+          
+          await new Promise((resolve) => {
+            requestAnimationFrame(() => {
+              requestAnimationFrame(resolve);
+            });
+          });
+
+          try {
+            await handleCreateQuestion(fallbackQuestion);
+          } catch (err) {
+            console.error('Auto question creation failed:', err);
+          }
         }
       } else {
         // ホストありモードでは従来通り

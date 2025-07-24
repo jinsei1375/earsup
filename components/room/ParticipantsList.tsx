@@ -15,6 +15,9 @@ interface ParticipantsListProps {
   answers?: Answer[]; // Added to calculate stats
   judgmentTypes?: Record<string, 'correct' | 'partial' | 'incorrect'>; // 判定タイプ
   quizMode?: 'all-at-once-host' | 'all-at-once-auto'; // クイズモード
+  currentQuestionAnswers?: Answer[]; // 現在の問題の回答（全員回答済み時に表示）
+  showCurrentAnswers?: boolean; // 現在の問題の回答を表示するか
+  trailingPunctuation?: string; // 句読点
 }
 
 export const ParticipantsList: React.FC<ParticipantsListProps> = ({
@@ -26,6 +29,9 @@ export const ParticipantsList: React.FC<ParticipantsListProps> = ({
   answers = [], // Default to empty array
   judgmentTypes = {}, // デフォルトは空のオブジェクト
   quizMode = 'all-at-once-host', // デフォルトはホストモード
+  currentQuestionAnswers = [], // 現在の問題の回答
+  showCurrentAnswers = false, // デフォルトは非表示
+  trailingPunctuation = '', // デフォルトは空文字
 }) => {
   // Calculate stats only if answers are provided (during quiz)
 
@@ -35,6 +41,12 @@ export const ParticipantsList: React.FC<ParticipantsListProps> = ({
   const filteredParticipants = !isAutoMode
     ? participants.filter((p) => p.id !== hostUserId)
     : participants;
+
+  // First calculate stats for sorting
+  const participantStats =
+    answers.length > 0
+      ? calculateParticipantStats(filteredParticipants, answers, hostUserId, judgmentTypes)
+      : null;
 
   const sortedParticipants = [...filteredParticipants].sort((a, b) => {
     // Sort by points if stats are available
@@ -65,11 +77,6 @@ export const ParticipantsList: React.FC<ParticipantsListProps> = ({
 
     return 0;
   });
-
-  const participantStats =
-    answers.length > 0
-      ? calculateParticipantStats(sortedParticipants, answers, hostUserId, judgmentTypes)
-      : null;
 
   // Get participant rank (including host)
   const getRank = (userId: string): number | null => {
@@ -127,6 +134,11 @@ export const ParticipantsList: React.FC<ParticipantsListProps> = ({
               const isHost = participant.id === hostUserId;
               const isCurrentUser = participant.id === currentUserId; // 自分かどうか
               const rank = getRank(participant.id);
+              
+              // 現在の問題に対するこの参加者の回答を取得
+              const currentAnswer = showCurrentAnswers 
+                ? currentQuestionAnswers.find(answer => answer.user_id === participant.id)
+                : null;
 
               return (
                 <View
@@ -254,6 +266,41 @@ export const ParticipantsList: React.FC<ParticipantsListProps> = ({
                       </View>
                     )}
                   </View>
+                  
+                  {/* 現在の問題の回答表示（全員回答・判定済みの場合のみ） */}
+                  {currentAnswer && (
+                    <View className="mt-3 pt-3 border-t border-gray-200">
+                      <Text className="text-xs text-gray-500 mb-1">今回の回答:</Text>
+                      <View className="flex-row items-center">
+                        <Text className="text-sm text-gray-800 flex-1">
+                          「{currentAnswer.answer_text}」{trailingPunctuation}
+                        </Text>
+                        {currentAnswer.judge_result && (
+                          <View className={`ml-2 px-2 py-1 rounded-full ${
+                            currentAnswer.judge_result === 'correct' 
+                              ? 'bg-green-100' 
+                              : currentAnswer.judge_result === 'partial'
+                              ? 'bg-orange-100'
+                              : 'bg-red-100'
+                          }`}>
+                            <Text className={`text-xs font-medium ${
+                              currentAnswer.judge_result === 'correct' 
+                                ? 'text-green-700' 
+                                : currentAnswer.judge_result === 'partial'
+                                ? 'text-orange-700'
+                                : 'text-red-700'
+                            }`}>
+                              {currentAnswer.judge_result === 'correct' 
+                                ? '正解' 
+                                : currentAnswer.judge_result === 'partial'
+                                ? '惜しい'
+                                : '不正解'}
+                            </Text>
+                          </View>
+                        )}
+                      </View>
+                    </View>
+                  )}
                 </View>
               );
             })
