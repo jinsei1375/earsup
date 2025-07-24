@@ -42,6 +42,12 @@ export const ParticipantsList: React.FC<ParticipantsListProps> = ({
     ? participants.filter((p) => p.id !== hostUserId)
     : participants;
 
+  // First calculate stats for sorting
+  const participantStats =
+    answers.length > 0
+      ? calculateParticipantStats(filteredParticipants, answers, hostUserId, judgmentTypes)
+      : null;
+
   const sortedParticipants = [...filteredParticipants].sort((a, b) => {
     // Sort by points if stats are available
     if (participantStats) {
@@ -71,11 +77,6 @@ export const ParticipantsList: React.FC<ParticipantsListProps> = ({
 
     return 0;
   });
-
-  const participantStats =
-    answers.length > 0
-      ? calculateParticipantStats(sortedParticipants, answers, hostUserId, judgmentTypes)
-      : null;
 
   // Get participant rank (including host)
   const getRank = (userId: string): number | null => {
