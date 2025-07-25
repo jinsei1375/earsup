@@ -39,6 +39,7 @@ export class SampleSentenceService {
    * IDでサンプル文を取得
    */
   static async getSentenceById(sentenceId: string): Promise<SampleSentence | null> {
+    console.log('SampleSentenceService: Getting sentence by ID', sentenceId);
     const { data, error } = await supabase
       .from('sample_sentences')
       .select('*')
@@ -46,10 +47,11 @@ export class SampleSentenceService {
       .single();
 
     if (error) {
-      console.error('サンプル文取得エラー:', error);
+      console.error('SampleSentenceService: Sample sentence fetch error', error);
       return null;
     }
 
+    console.log('SampleSentenceService: Sample sentence fetched', data);
     return data;
   }
 
@@ -59,15 +61,7 @@ export class SampleSentenceService {
   static async getAllSentences(): Promise<SampleSentence[]> {
     const { data, error } = await supabase
       .from('sample_sentences')
-      .select(
-        `
-        *,
-        sample_categories (
-          id,
-          name
-        )
-      `
-      )
+      .select('*')  // Simplified to match getSentenceById
       .order('created_at');
 
     if (error) {
@@ -75,6 +69,7 @@ export class SampleSentenceService {
       throw new Error('サンプル文の取得に失敗しました');
     }
 
+    console.log('SampleSentenceService: getAllSentences result', data?.length, 'sentences');
     return data || [];
   }
 }

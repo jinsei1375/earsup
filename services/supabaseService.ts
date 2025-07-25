@@ -86,6 +86,14 @@ export class SupabaseService {
   ): Promise<Question> {
     const timestamp = new Date().toISOString();
 
+    console.log('SupabaseService: Creating question with', {
+      roomId,
+      text,
+      speaker,
+      speed,
+      sampleSentenceId
+    });
+
     const { data, error } = await supabase
       .from('questions')
       .insert({
@@ -99,7 +107,12 @@ export class SupabaseService {
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      console.error('SupabaseService: Question creation error', error);
+      throw error;
+    }
+    
+    console.log('SupabaseService: Question created successfully', data);
     return data;
   }
 
@@ -112,8 +125,13 @@ export class SupabaseService {
       .limit(1)
       .throwOnError();
 
+    console.log('SupabaseService: getLatestQuestion result', { data, error });
+
     if (error || !data?.length) return null;
-    return data[0];
+    
+    const question = data[0];
+    console.log('SupabaseService: Latest question retrieved', question);
+    return question;
   }
 
   static async updateQuestion(questionId: string, updates: Partial<Question>): Promise<void> {

@@ -157,23 +157,60 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
     setAnswer('');
     setTranslation(null); // 翻訳もリセット
 
+    // Debug logging for translation fetching
+    console.log('ParticipantQuizScreen: Question changed', {
+      isAutoMode,
+      currentQuestionId,
+      sample_sentence_id: currentQuestion?.sample_sentence_id,
+      questionText: currentQuestion?.text
+    });
+
     // ホストなしモードで、かつサンプル文のIDがある場合は翻訳を取得
     if (isAutoMode && currentQuestion?.sample_sentence_id) {
       const fetchTranslation = async () => {
         try {
           const sampleSentenceId = currentQuestion.sample_sentence_id;
+          console.log('ParticipantQuizScreen: Fetching translation for', sampleSentenceId);
           if (!sampleSentenceId) return; // Ensure sample_sentence_id is still defined
           const sampleSentence = await SampleSentenceService.getSentenceById(sampleSentenceId);
+          console.log('ParticipantQuizScreen: Sample sentence result', sampleSentence);
           if (sampleSentence && sampleSentence.translation) {
+            console.log('ParticipantQuizScreen: Setting translation', sampleSentence.translation);
             setTranslation(sampleSentence.translation);
+          } else {
+            console.log('ParticipantQuizScreen: No translation found or sentence is null');
           }
         } catch (error) {
           console.error('Translation fetch error:', error);
         }
       };
       fetchTranslation();
+    } else {
+      console.log('ParticipantQuizScreen: Translation not fetched - conditions not met', {
+        isAutoMode,
+        hasSampleSentenceId: !!currentQuestion?.sample_sentence_id
+      });
     }
   }, [currentQuestionId, isAutoMode, currentQuestion?.sample_sentence_id]);
+
+  // Additional effect to fetch translation when showing results (backup mechanism)
+  useEffect(() => {
+    if (isAutoMode && showResult && currentQuestion?.sample_sentence_id && !translation) {
+      console.log('ParticipantQuizScreen: Backup translation fetch when showing results');
+      const fetchTranslationBackup = async () => {
+        try {
+          const sampleSentence = await SampleSentenceService.getSentenceById(currentQuestion.sample_sentence_id!);
+          if (sampleSentence && sampleSentence.translation) {
+            console.log('ParticipantQuizScreen: Backup translation set', sampleSentence.translation);
+            setTranslation(sampleSentence.translation);
+          }
+        } catch (error) {
+          console.error('Backup translation fetch error:', error);
+        }
+      };
+      fetchTranslationBackup();
+    }
+  }, [isAutoMode, showResult, currentQuestion?.sample_sentence_id, translation]);
 
   // 現在の問題に対してのみ判定状態をチェック
   const isCurrentQuestionFullyJudged = useMemo(() => {
