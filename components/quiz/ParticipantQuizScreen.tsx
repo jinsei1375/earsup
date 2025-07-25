@@ -1,5 +1,5 @@
 // components/quiz/ParticipantQuizScreen.tsx
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import {
   View,
   Text,
@@ -151,6 +151,23 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
     judgedCount >= totalParticipantsToJudge &&
     totalParticipantsToJudge > 0;
 
+  // Translation fetching function
+  const fetchTranslation = useCallback(async (sampleSentenceId: string) => {
+    try {
+      console.log('ParticipantQuizScreen: fetchTranslation called with', sampleSentenceId);
+      const sampleSentence = await SampleSentenceService.getSentenceById(sampleSentenceId);
+      console.log('ParticipantQuizScreen: fetchTranslation result', sampleSentence);
+      if (sampleSentence && sampleSentence.translation) {
+        console.log('ParticipantQuizScreen: Setting translation', sampleSentence.translation);
+        setTranslation(sampleSentence.translation);
+        return sampleSentence.translation;
+      }
+    } catch (error) {
+      console.error('Translation fetch error:', error);
+    }
+    return null;
+  }, []);
+
   // 問題が変わったときに音声再生回数と入力をリセット、翻訳も取得
   useEffect(() => {
     setPlayCount(0);
@@ -167,50 +184,54 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
 
     // ホストなしモードで、かつサンプル文のIDがある場合は翻訳を取得
     if (isAutoMode && currentQuestion?.sample_sentence_id) {
-      const fetchTranslation = async () => {
-        try {
-          const sampleSentenceId = currentQuestion.sample_sentence_id;
-          console.log('ParticipantQuizScreen: Fetching translation for', sampleSentenceId);
-          if (!sampleSentenceId) return; // Ensure sample_sentence_id is still defined
-          const sampleSentence = await SampleSentenceService.getSentenceById(sampleSentenceId);
-          console.log('ParticipantQuizScreen: Sample sentence result', sampleSentence);
-          if (sampleSentence && sampleSentence.translation) {
-            console.log('ParticipantQuizScreen: Setting translation', sampleSentence.translation);
-            setTranslation(sampleSentence.translation);
-          } else {
-            console.log('ParticipantQuizScreen: No translation found or sentence is null');
-          }
-        } catch (error) {
-          console.error('Translation fetch error:', error);
-        }
-      };
-      fetchTranslation();
+      fetchTranslation(currentQuestion.sample_sentence_id);
     } else {
       console.log('ParticipantQuizScreen: Translation not fetched - conditions not met', {
         isAutoMode,
         hasSampleSentenceId: !!currentQuestion?.sample_sentence_id
       });
     }
-  }, [currentQuestionId, isAutoMode, currentQuestion?.sample_sentence_id]);
+  }, [currentQuestionId, isAutoMode, currentQuestion?.sample_sentence_id, fetchTranslation]);
 
-  // Additional effect to fetch translation when showing results (backup mechanism)
-  useEffect(() => {
-    if (isAutoMode && showResult && currentQuestion?.sample_sentence_id && !translation) {
-      console.log('ParticipantQuizScreen: Backup translation fetch when showing results');
-      const fetchTranslationBackup = async () => {
-        try {
-          const sampleSentence = await SampleSentenceService.getSentenceById(currentQuestion.sample_sentence_id!);
-          if (sampleSentence && sampleSentence.translation) {
-            console.log('ParticipantQuizScreen: Backup translation set', sampleSentence.translation);
-            setTranslation(sampleSentence.translation);
+  // Component to display translation with fallback loading
+  const TranslationDisplay = ({ className }: { className?: string }) => {
+    const [localTranslation, setLocalTranslation] = useState<string | null>(translation);
+
+    useEffect(() => {
+      setLocalTranslation(translation);
+    }, [translation]);
+
+    useEffect(() => {
+      if (isAutoMode && currentQuestion?.sample_sentence_id && !localTranslation) {
+        console.log('TranslationDisplay: Fetching translation on-demand');
+        fetchTranslation(currentQuestion.sample_sentence_id).then((result: string | null) => {
+          if (result) {
+            setLocalTranslation(result);
           }
-        } catch (error) {
-          console.error('Backup translation fetch error:', error);
-        }
-      };
-      fetchTranslationBackup();
+        });
+      }
+    }, [isAutoMode, currentQuestion?.sample_sentence_id, localTranslation]);
+
+    if (!isAutoMode) return null;
+    
+    if (localTranslation) {
+      return (
+        <Text className={className || "text-center text-gray-600 mt-2 italic"}>
+          日本語: {localTranslation}
+        </Text>
+      );
     }
-  }, [isAutoMode, showResult, currentQuestion?.sample_sentence_id, translation]);
+    
+    if (currentQuestion?.sample_sentence_id) {
+      return (
+        <Text className={className || "text-center text-gray-600 mt-2 italic"}>
+          日本語: 翻訳を取得中...
+        </Text>
+      );
+    }
+    
+    return null;
+  };
 
   // 現在の問題に対してのみ判定状態をチェック
   const isCurrentQuestionFullyJudged = useMemo(() => {
@@ -405,11 +426,7 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
                 <Text className="text-center text-blue-600 mt-2">
                   あなたの回答: 「{userAnswer?.answer_text || '取得中...'}」{trailingPunctuation}
                 </Text>
-                {isAutoMode && translation && (
-                  <Text className="text-center text-gray-600 mt-2 italic">
-                    日本語: {translation}
-                  </Text>
-                )}
+                <TranslationDisplay />
               </>
             ) : isPartialAnswer ? (
               // Partial (惜しい)
@@ -422,11 +439,7 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
                   あなたの回答: 「{userAnswer?.answer_text || '取得中...'}」{trailingPunctuation}
                 </Text>
                 <Text className="text-center text-black mt-2">正解: {questionText}</Text>
-                {isAutoMode && translation && (
-                  <Text className="text-center text-gray-600 mt-2 italic">
-                    日本語: {translation}
-                  </Text>
-                )}
+                <TranslationDisplay />
               </>
             ) : (
               // Incorrect
@@ -436,11 +449,7 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
                   あなたの回答: 「{userAnswer?.answer_text || '取得中...'}」{trailingPunctuation}
                 </Text>
                 <Text className="text-center text-black mt-2">正解: {questionText}</Text>
-                {isAutoMode && translation && (
-                  <Text className="text-center text-gray-600 mt-2 italic">
-                    日本語: {translation}
-                  </Text>
-                )}
+                <TranslationDisplay />
               </>
             )}
           </View>
