@@ -54,9 +54,7 @@ export default function QuizScreen() {
   // サンプル文からランダムに未使用の問題を選択する関数
   const getRandomSampleSentence = async (): Promise<{ text: string; sampleSentenceId: string } | null> => {
     try {
-      console.log('quiz.tsx: Getting random sample sentence');
       const allSentences = await SampleSentenceService.getAllSentences();
-      console.log('quiz.tsx: All sentences', allSentences?.length, 'sentences found');
       if (!allSentences || allSentences.length === 0) {
         console.warn('No sample sentences available');
         return null;
@@ -64,20 +62,17 @@ export default function QuizScreen() {
 
       // 未使用の文章を絞り込み
       const unusedSentences = allSentences.filter((sentence) => !usedQuestionIds.has(sentence.id));
-      console.log('quiz.tsx: Unused sentences', unusedSentences.length);
 
       // すべて使用済みの場合は使用履歴をリセット
       if (unusedSentences.length === 0) {
         console.log('All sample sentences used, resetting usage history');
         setUsedQuestionIds(new Set());
         const fallbackSentence = allSentences[Math.floor(Math.random() * allSentences.length)];
-        console.log('quiz.tsx: Selected fallback sentence', fallbackSentence);
         return { text: fallbackSentence.text, sampleSentenceId: fallbackSentence.id };
       }
 
       // ランダムに選択
       const randomSentence = unusedSentences[Math.floor(Math.random() * unusedSentences.length)];
-      console.log('quiz.tsx: Selected random sentence', randomSentence);
 
       // 使用済みIDに追加
       setUsedQuestionIds((prev) => new Set(prev).add(randomSentence.id));

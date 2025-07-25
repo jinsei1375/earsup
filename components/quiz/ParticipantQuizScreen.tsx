@@ -154,11 +154,8 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
   // Translation fetching function
   const fetchTranslation = useCallback(async (sampleSentenceId: string) => {
     try {
-      console.log('ParticipantQuizScreen: fetchTranslation called with', sampleSentenceId);
       const sampleSentence = await SampleSentenceService.getSentenceById(sampleSentenceId);
-      console.log('ParticipantQuizScreen: fetchTranslation result', sampleSentence);
       if (sampleSentence && sampleSentence.translation) {
-        console.log('ParticipantQuizScreen: Setting translation', sampleSentence.translation);
         setTranslation(sampleSentence.translation);
         return sampleSentence.translation;
       }
@@ -174,22 +171,9 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
     setAnswer('');
     setTranslation(null); // 翻訳もリセット
 
-    // Debug logging for translation fetching
-    console.log('ParticipantQuizScreen: Question changed', {
-      isAutoMode,
-      currentQuestionId,
-      sample_sentence_id: currentQuestion?.sample_sentence_id,
-      questionText: currentQuestion?.text
-    });
-
     // ホストなしモードで、かつサンプル文のIDがある場合は翻訳を取得
     if (isAutoMode && currentQuestion?.sample_sentence_id) {
       fetchTranslation(currentQuestion.sample_sentence_id);
-    } else {
-      console.log('ParticipantQuizScreen: Translation not fetched - conditions not met', {
-        isAutoMode,
-        hasSampleSentenceId: !!currentQuestion?.sample_sentence_id
-      });
     }
   }, [currentQuestionId, isAutoMode, currentQuestion?.sample_sentence_id, fetchTranslation]);
 
@@ -203,7 +187,6 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
 
     useEffect(() => {
       if (isAutoMode && currentQuestion?.sample_sentence_id && !localTranslation) {
-        console.log('TranslationDisplay: Fetching translation on-demand');
         fetchTranslation(currentQuestion.sample_sentence_id).then((result: string | null) => {
           if (result) {
             setLocalTranslation(result);

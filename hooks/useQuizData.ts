@@ -170,13 +170,8 @@ export const useQuizData = (options: UseQuizDataOptions) => {
 
       setLoading(true);
       try {
-        // Debug logging for question creation
-        console.log('useQuizData: Creating question', { text, sampleSentenceId });
-
         // Create question
         const questionData = await SupabaseService.createQuestion(roomId, text, 'en-US', 1.0, sampleSentenceId);
-        
-        console.log('useQuizData: Question created', questionData);
 
         // Update room status to active
         await SupabaseService.updateRoomStatus(roomId, 'active');
