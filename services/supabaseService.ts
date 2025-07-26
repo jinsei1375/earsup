@@ -99,7 +99,11 @@ export class SupabaseService {
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      console.error('Question creation error:', error);
+      throw error;
+    }
+    
     return data;
   }
 
@@ -113,6 +117,7 @@ export class SupabaseService {
       .throwOnError();
 
     if (error || !data?.length) return null;
+    
     return data[0];
   }
 

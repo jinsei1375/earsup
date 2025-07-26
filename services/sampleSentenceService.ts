@@ -46,7 +46,7 @@ export class SampleSentenceService {
       .single();
 
     if (error) {
-      console.error('サンプル文取得エラー:', error);
+      console.error('Sample sentence fetch error:', error);
       return null;
     }
 
@@ -59,15 +59,7 @@ export class SampleSentenceService {
   static async getAllSentences(): Promise<SampleSentence[]> {
     const { data, error } = await supabase
       .from('sample_sentences')
-      .select(
-        `
-        *,
-        sample_categories (
-          id,
-          name
-        )
-      `
-      )
+      .select('*')  // Simplified to match getSentenceById
       .order('created_at');
 
     if (error) {
