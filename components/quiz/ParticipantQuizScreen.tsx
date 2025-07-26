@@ -407,7 +407,8 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
                 </Text>
 
                 <Text className="text-center text-blue-600 mt-2">
-                  あなたの回答: 「{userAnswer?.answer_text || '取得中...'}」{trailingPunctuation}
+                  あなたの回答: 「{userAnswer?.answer_text || '取得中...'}」
+                  {isAutoMode && trailingPunctuation}
                 </Text>
                 <TranslationDisplay />
               </>
@@ -419,7 +420,8 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
                   5ポイントGET！
                 </Text>
                 <Text className="text-center text-blue-600 mt-2">
-                  あなたの回答: 「{userAnswer?.answer_text || '取得中...'}」{trailingPunctuation}
+                  あなたの回答: 「{userAnswer?.answer_text || '取得中...'}」
+                  {isAutoMode && trailingPunctuation}
                 </Text>
                 <Text className="text-center text-black mt-2">正解: {questionText}</Text>
                 <TranslationDisplay />
@@ -429,7 +431,8 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
               <>
                 <Text className="text-center font-bold text-red-500 text-lg mb-1">×不正解</Text>
                 <Text className="text-center text-blue-600 mt-2">
-                  あなたの回答: 「{userAnswer?.answer_text || '取得中...'}」{trailingPunctuation}
+                  あなたの回答: 「{userAnswer?.answer_text || '取得中...'}」
+                  {isAutoMode && trailingPunctuation}
                 </Text>
                 <Text className="text-center text-black mt-2">正解: {questionText}</Text>
                 <TranslationDisplay />
