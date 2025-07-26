@@ -100,10 +100,8 @@ export class SupabaseService {
       .single();
 
     if (error) {
-      console.error('Question creation error:', error);
       throw error;
     }
-    
     return data;
   }
 
@@ -117,7 +115,7 @@ export class SupabaseService {
       .throwOnError();
 
     if (error || !data?.length) return null;
-    
+
     return data[0];
   }
 
@@ -349,7 +347,6 @@ export class SupabaseService {
 
       return false;
     } catch (error) {
-      console.error('Error checking room status:', error);
       return false;
     }
   }

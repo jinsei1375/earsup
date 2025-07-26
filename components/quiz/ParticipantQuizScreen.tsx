@@ -160,7 +160,7 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
         return sampleSentence.translation;
       }
     } catch (error) {
-      console.error('Translation fetch error:', error);
+      // Translation fetch failed silently
     }
     return null;
   }, []);
@@ -196,23 +196,23 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
     }, [isAutoMode, currentQuestion?.sample_sentence_id, localTranslation]);
 
     if (!isAutoMode) return null;
-    
+
     if (localTranslation) {
       return (
-        <Text className={className || "text-center text-gray-600 mt-2 italic"}>
+        <Text className={className || 'text-center text-gray-600 mt-2 italic'}>
           日本語: {localTranslation}
         </Text>
       );
     }
-    
+
     if (currentQuestion?.sample_sentence_id) {
       return (
-        <Text className={className || "text-center text-gray-600 mt-2 italic"}>
+        <Text className={className || 'text-center text-gray-600 mt-2 italic'}>
           日本語: 翻訳を取得中...
         </Text>
       );
     }
-    
+
     return null;
   };
 
@@ -464,8 +464,8 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
           )}
 
         {/* 参加者リスト - コンパクト表示 */}
-        <View className="mt-4">
-          <View style={{ maxHeight: 300 }}>
+        <View className="mt-4 flex-1">
+          <View style={{ flex: 1, minHeight: 200 }}>
             <ParticipantsList
               participants={participants}
               hostUserId={room?.host_user_id}

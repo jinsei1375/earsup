@@ -156,10 +156,8 @@ export const ParticipantsList: React.FC<ParticipantsListProps> = ({
                           <View className="bg-blue-500 rounded-full w-3 h-3 mr-2" />
                         )}
                         <Text
-                          className={`text-base ${
-                            isCurrentUser
-                              ? 'font-semibold text-blue-800'
-                              : 'font-semibold text-gray-800'
+                          className={`text-base font-semibold ${
+                            isCurrentUser ? 'text-blue-800' : 'text-gray-800'
                           }`}
                         >
                           {participant.nickname}
