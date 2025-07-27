@@ -2,7 +2,7 @@
 import React from 'react';
 import { View, Text, ScrollView } from 'react-native';
 import type { ParticipantWithNickname, Answer } from '@/types';
-import { calculateParticipantStats } from '@/utils/quizUtils';
+import { calculateParticipantStats, calculateParticipantRank } from '@/utils/quizUtils';
 import { Button } from '@/components/common/Button';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 
@@ -78,26 +78,10 @@ export const ParticipantsList: React.FC<ParticipantsListProps> = ({
     return 0;
   });
 
-  // Get participant rank (including host)
+  // Get participant rank (including host) with tie handling
   const getRank = (userId: string): number | null => {
     if (!participantStats) return null;
-
-    const allStats = participantStats.sort((a, b) => {
-      // Sort by points first
-      if (a.points !== b.points) {
-        return b.points - a.points;
-      }
-      // Then by accuracy as tiebreaker
-      if (a.totalAnswers > 0 && b.totalAnswers > 0) {
-        const accuracyA = a.correctAnswers / a.totalAnswers;
-        const accuracyB = b.correctAnswers / b.totalAnswers;
-        return accuracyB - accuracyA;
-      }
-      return 0;
-    });
-
-    const rank = allStats.findIndex((s) => s.userId === userId) + 1;
-    return rank <= allStats.length ? rank : null;
+    return calculateParticipantRank(participantStats, userId);
   };
 
   // Get progress bar width percentage

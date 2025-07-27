@@ -1,10 +1,10 @@
 // components/quiz/QuizResultScreen.tsx
 import React from 'react';
-import { View, Text, ScrollView } from 'react-native';
+import { View, Text, ScrollView, Alert } from 'react-native';
+import type { ParticipantWithNickname, Answer } from '@/types';
+import { calculateParticipantStats, addRanksToParticipantStats } from '@/utils/quizUtils';
 import { Button } from '@/components/common/Button';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
-import { calculateParticipantStats } from '@/utils/quizUtils';
-import type { ParticipantWithNickname, Answer } from '@/types';
 
 interface QuizResultScreenProps {
   participants: ParticipantWithNickname[];
@@ -25,25 +25,19 @@ export const QuizResultScreen: React.FC<QuizResultScreenProps> = ({
   judgmentTypes = {}, // デフォルトは空のオブジェクト
   onGoHome,
 }) => {
-  // 統計情報を計算（ポイント制：正解10ポイント、惜しい5ポイント、不正解0ポイント）
-  const participantStats = calculateParticipantStats(
-    participants,
-    allRoomAnswers,
-    hostUserId,
-    judgmentTypes
-  )
-    .map((stats) => ({
-      ...stats,
-      accuracy:
-        stats.totalAnswers > 0 ? Math.round((stats.correctAnswers / stats.totalAnswers) * 100) : 0,
-    }))
-    .sort((a, b) => {
-      // ポイント順でソート（同点の場合は正解率順）
-      if (a.points !== b.points) {
-        return b.points - a.points;
-      }
-      return b.accuracy - a.accuracy;
-    });
+  // 統計情報を計算して順位付きでソート
+  const participantStatsWithRanks = addRanksToParticipantStats(
+    calculateParticipantStats(participants, allRoomAnswers, hostUserId, judgmentTypes)
+  ).sort((a, b) => {
+    // 順位順でソート（同順位の場合はポイント順、さらに正解率順）
+    if (a.rank !== b.rank) {
+      return a.rank - b.rank;
+    }
+    if (a.points !== b.points) {
+      return b.points - a.points;
+    }
+    return b.accuracy - a.accuracy;
+  });
 
   // 総問題数（ユニークなquestion_idの数で計算）
   const totalQuestions = new Set(allRoomAnswers.map((answer) => answer.question_id)).size;
@@ -60,7 +54,7 @@ export const QuizResultScreen: React.FC<QuizResultScreenProps> = ({
         </View>
 
         {/* 最終結果 */}
-        {participantStats.length > 0 && (
+        {participantStatsWithRanks.length > 0 && (
           <View className="mb-6">
             {/* 全参加者のランキング */}
             <View className="bg-gradient-to-r from-yellow-50 to-orange-50 p-4 rounded-xl">
@@ -69,8 +63,8 @@ export const QuizResultScreen: React.FC<QuizResultScreenProps> = ({
                 showsVerticalScrollIndicator={true}
                 nestedScrollEnabled={true}
               >
-                {participantStats.map((stat, index) => {
-                  const rank = index + 1;
+                {participantStatsWithRanks.map((stat) => {
+                  const rank = stat.rank;
 
                   return (
                     <View

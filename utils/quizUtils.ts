@@ -225,3 +225,86 @@ export const calculateParticipantStats = (
 export const formatParticipantStats = (stats: ParticipantStats): string => {
   return `${stats.correctAnswers}/${stats.totalAnswers}`;
 };
+
+/**
+ * 参加者の順位を計算する（同率順位対応）
+ * @param participantStats ソート済みの参加者統計
+ * @param userId 順位を取得したい参加者のID
+ * @returns 順位（見つからない場合はnull）
+ */
+export const calculateParticipantRank = (
+  participantStats: ParticipantStats[],
+  userId: string
+): number | null => {
+  if (!participantStats || participantStats.length === 0) return null;
+
+  // 参加者統計をソート（ポイント降順、正答率降順）
+  const sortedStats = [...participantStats].sort((a, b) => {
+    // Sort by points first
+    if (a.points !== b.points) {
+      return b.points - a.points;
+    }
+    // Then by accuracy as tiebreaker
+    if (a.totalAnswers > 0 && b.totalAnswers > 0) {
+      const accuracyA = a.correctAnswers / a.totalAnswers;
+      const accuracyB = b.correctAnswers / b.totalAnswers;
+      return accuracyB - accuracyA;
+    }
+    return 0;
+  });
+
+  // 指定されたユーザーの統計を探す
+  const userStats = sortedStats.find((s) => s.userId === userId);
+  if (!userStats) return null;
+
+  // Helper function to check if two participants have the same performance
+  const isSamePerformance = (statsA: ParticipantStats, statsB: ParticipantStats) => {
+    if (statsA.points !== statsB.points) return false;
+
+    // If both have answers, compare accuracy
+    if (statsA.totalAnswers > 0 && statsB.totalAnswers > 0) {
+      const accuracyA = statsA.correctAnswers / statsA.totalAnswers;
+      const accuracyB = statsB.correctAnswers / statsB.totalAnswers;
+      return Math.abs(accuracyA - accuracyB) < 0.001; // Small epsilon for floating point comparison
+    }
+
+    // If both have no answers, they're tied
+    return statsA.totalAnswers === 0 && statsB.totalAnswers === 0;
+  };
+
+  // Calculate rank with tie handling
+  let rank = 1;
+  for (let i = 0; i < sortedStats.length; i++) {
+    const currentStats = sortedStats[i];
+
+    if (currentStats.userId === userId) {
+      return rank;
+    }
+
+    // Check if next participant has different performance
+    if (i + 1 < sortedStats.length) {
+      const nextStats = sortedStats[i + 1];
+
+      // If performance is different, next rank jumps by number of tied participants
+      if (!isSamePerformance(currentStats, nextStats)) {
+        rank = i + 2; // +2 because we're moving to next position (i+1) and rank is 1-indexed
+      }
+    }
+  }
+
+  return null;
+};
+
+/**
+ * 参加者統計配列に順位情報を追加する
+ * @param participantStats 参加者統計配列
+ * @returns 順位情報付きの参加者統計配列
+ */
+export const addRanksToParticipantStats = (
+  participantStats: ParticipantStats[]
+): (ParticipantStats & { rank: number })[] => {
+  return participantStats.map((stat) => ({
+    ...stat,
+    rank: calculateParticipantRank(participantStats, stat.userId) || 0,
+  }));
+};
