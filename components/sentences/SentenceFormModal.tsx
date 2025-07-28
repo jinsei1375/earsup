@@ -63,8 +63,14 @@ export const SentenceFormModal: React.FC<SentenceFormModalProps> = ({
     try {
       await onSave(text.trim(), translation.trim());
       // Success is handled by parent component
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else if (err && typeof err === 'object' && 'message' in err) {
+        setError((err as { message: string }).message);
+      } else {
+        setError('An unknown error occurred');
+      }
     } finally {
       setLoading(false);
     }
