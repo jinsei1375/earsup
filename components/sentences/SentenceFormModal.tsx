@@ -95,13 +95,14 @@ export const SentenceFormModal: React.FC<SentenceFormModalProps> = ({
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <View className="flex-1 bg-black/50 justify-end">
-            <View className="bg-white rounded-t-lg max-h-[90%]">
+          <View className="flex-1 bg-black/50 justify-center px-4 py-8">
+            <View
+              className="bg-white rounded-lg w-full"
+              style={{ minHeight: '60%', maxHeight: '90%' }}
+            >
               {/* Header */}
               <View className="flex-row items-center justify-between p-4 border-b border-gray-200">
-                <Text className="text-xl font-bold">
-                  {isEditing ? '例文を編集' : '例文を追加'}
-                </Text>
+                <Text className="text-xl font-bold">{isEditing ? '例文を編集' : '例文を追加'}</Text>
                 <Button
                   onPress={handleClose}
                   variant="ghost"
@@ -111,9 +112,11 @@ export const SentenceFormModal: React.FC<SentenceFormModalProps> = ({
               </View>
 
               <ScrollView
-                className="flex-1 p-4"
+                className="p-4"
+                style={{ flex: 1 }}
                 keyboardShouldPersistTaps="handled"
                 showsVerticalScrollIndicator={false}
+                contentContainerStyle={{ flexGrow: 1 }}
               >
                 {/* English Text Input */}
                 <View className="mb-4">
@@ -149,7 +152,7 @@ export const SentenceFormModal: React.FC<SentenceFormModalProps> = ({
                   <Button
                     title="キャンセル"
                     onPress={handleClose}
-                    variant="outline"
+                    variant="danger"
                     size="large"
                     fullWidth
                     disabled={loading}
@@ -173,16 +176,6 @@ export const SentenceFormModal: React.FC<SentenceFormModalProps> = ({
                 )}
 
                 <ErrorMessage message={error} />
-
-                {/* Usage Tip */}
-                <View className="bg-blue-50 rounded-lg p-3 mt-4">
-                  <Text className="text-blue-800 font-medium mb-1">💡 使い方のヒント</Text>
-                  <Text className="text-blue-700 text-sm leading-5">
-                    • クイズで出題したい英語フレーズを入力{'\n'}
-                    • 日本語訳も入力すると参加者にヒントとして表示{'\n'}
-                    • 登録した例文はクイズ作成時に選択可能
-                  </Text>
-                </View>
               </ScrollView>
             </View>
           </View>
