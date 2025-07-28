@@ -182,11 +182,9 @@ export default function RoomScreen() {
   const handleStartQuiz = async () => {
     if (!room || !isHost) return;
 
-    // Check if there are any participants (excluding host for host mode, all participants for auto mode)
+    // Check if there are any participants (excluding host for both modes)
     const isAutoMode = room.quiz_mode === 'all-at-once-auto';
-    const relevantParticipants = isAutoMode
-      ? participants // ホストなしモードでは全参加者
-      : participants.filter((p) => p.id !== room.host_user_id); // ホストありモードではホスト以外
+    const relevantParticipants = participants.filter((p) => p.id !== room.host_user_id); // 両モードともホスト以外の参加者が必要
 
     if (relevantParticipants.length === 0) {
       const message = isAutoMode
@@ -263,16 +261,14 @@ export default function RoomScreen() {
             {/* 参加者数チェックとメッセージ */}
             {(() => {
               const isAutoMode = room?.quiz_mode === 'all-at-once-auto';
-              const relevantParticipants = isAutoMode
-                ? participants // ホストなしモードでは全参加者
-                : participants.filter((p) => p.id !== room?.host_user_id); // ホストありモードではホスト以外
+              const relevantParticipants = participants.filter((p) => p.id !== room?.host_user_id); // 両モードともホスト以外の参加者が必要
               const canStartQuiz = relevantParticipants.length > 0;
 
               return (
                 <>
                   {!canStartQuiz && (
                     <Text className="text-center text-gray-600 mb-3">
-                      {isAutoMode ? '参加者が1人以上必要です' : '参加者が1人以上必要です'}
+                      ホスト以外の参加者が1人以上必要です
                     </Text>
                   )}
 
