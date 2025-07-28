@@ -108,8 +108,12 @@ export default function SentencesScreen() {
       }
       setIsFormModalVisible(false);
       loadSentences();
-    } catch (err: any) {
-      throw err; // Let the modal handle the error
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        throw err; // Let the modal handle the error
+      } else {
+        throw new Error('An unknown error occurred.');
+      }
     }
   };
 
