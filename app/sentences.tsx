@@ -44,8 +44,14 @@ export default function SentencesScreen() {
     try {
       const data = await UserSentenceService.getUserSentences(userId);
       setSentences(data);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else if (err && typeof err === 'object' && 'message' in err) {
+        setError((err as { message: string }).message);
+      } else {
+        setError('An unknown error occurred');
+      }
     } finally {
       setLoading(false);
       setRefreshing(false);
