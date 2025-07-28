@@ -84,8 +84,12 @@ export default function SentencesScreen() {
             try {
               await UserSentenceService.deleteUserSentence(sentence.id);
               loadSentences();
-            } catch (err: any) {
-              Alert.alert('エラー', err.message);
+            } catch (err: unknown) {
+              if (err instanceof Error) {
+                Alert.alert('エラー', err.message);
+              } else {
+                Alert.alert('エラー', '不明なエラーが発生しました');
+              }
             }
           },
         },
