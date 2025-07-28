@@ -76,8 +76,12 @@ export const SampleSentenceModal: React.FC<SampleSentenceModalProps> = ({
     try {
       const userSentencesData = await UserSentenceService.getUserSentences(userId);
       setUserSentences(userSentencesData);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('An unknown error occurred.');
+      }
     } finally {
       setLoading(false);
     }
