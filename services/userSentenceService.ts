@@ -60,7 +60,7 @@ export class UserSentenceService {
       .update({
         text: text.trim(),
         translation: translation.trim(),
-        updated_at: new Date().toISOString(),
+        // The `updated_at` field is now managed automatically by the database.
       })
       .eq('id', sentenceId)
       .select()
