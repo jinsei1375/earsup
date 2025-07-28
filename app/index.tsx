@@ -64,6 +64,9 @@ export default function HomeScreen() {
   const handleJoinRoom = () => {
     router.push({ pathname: '/room', params: { mode: 'join' } });
   };
+  const handleManageSentences = () => {
+    router.push('/sentences');
+  };
 
   const features = [
     {
@@ -153,6 +156,14 @@ export default function HomeScreen() {
             onPress={handleJoinRoom}
             variant="outline"
             size="large"
+            fullWidth
+            className="mb-4"
+          />
+          <Button
+            title="例文登録"
+            onPress={handleManageSentences}
+            variant="secondary"
+            size="medium"
             fullWidth
           />
         </View>
