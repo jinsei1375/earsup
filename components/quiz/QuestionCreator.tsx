@@ -59,7 +59,7 @@ export const QuestionCreator: React.FC<QuestionCreatorProps> = ({
               <View className="flex-row justify-between items-center mb-2">
                 <Text className="text-base font-medium">英語フレーズ</Text>
                 <Button
-                  title="サンプル文"
+                  title="例文選択"
                   onPress={() => setIsSampleModalVisible(true)}
                   variant="outline"
                   size="small"
