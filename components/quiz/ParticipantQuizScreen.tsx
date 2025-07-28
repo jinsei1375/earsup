@@ -12,7 +12,13 @@ import {
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { ErrorMessage } from '@/components/common/ErrorMessage';
 import { Button } from '@/components/common/Button';
-import { canParticipantAnswer, isQuizActive, isQuizEnded, speakText } from '@/utils/quizUtils';
+import {
+  canParticipantAnswer,
+  isQuizActive,
+  isQuizEnded,
+  speakText,
+  extractTrailingPunctuation,
+} from '@/utils/quizUtils';
 import { ParticipantsList } from '@/components/room/ParticipantsList';
 import { SampleSentenceService } from '@/services/sampleSentenceService';
 import type {
@@ -75,13 +81,6 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
   const maxPlayCount = isAutoMode ? 3 : Infinity; // ホストなしモードは3回まで
   const hasQuestion = !!questionText && isQuizActive(room?.status || '');
   const canAnswer = canParticipantAnswer(quizMode, null, userId);
-
-  // 問題文の末尾から句読点を抽出する関数
-  const extractTrailingPunctuation = (text: string): string => {
-    if (!text) return '';
-    const match = text.match(/[.!?]+$/);
-    return match ? match[0] : '';
-  };
 
   // 問題文から抽出した句読点
   const trailingPunctuation = extractTrailingPunctuation(questionText);
@@ -222,29 +221,26 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
       return false;
     }
 
-    // 現在の問題に対する回答のみを対象とする
-    const currentQuestionRelevantAnswers = isHostlessMode
-      ? currentQuestionAnswers.filter((answer) => answer.user_id !== room?.host_user_id)
-      : currentQuestionAnswers;
+    // クイズモードに関係なく、ホスト以外の参加者の回答のみを対象とする
+    const currentQuestionRelevantAnswers = currentQuestionAnswers.filter(
+      (answer) => answer.user_id !== room?.host_user_id
+    );
 
     const currentJudgedCount = currentQuestionRelevantAnswers.filter(
       (answer) => answer.judge_result !== null
     ).length;
     const currentSubmittedCount = currentQuestionRelevantAnswers.length;
 
+    // ホスト以外の参加者数を計算
+    const nonHostParticipants = participants.filter((p) => p.id !== room?.host_user_id);
+    const totalNonHostParticipants = nonHostParticipants.length;
+
     return (
-      currentSubmittedCount >= totalParticipantsToJudge &&
-      currentJudgedCount >= totalParticipantsToJudge &&
-      totalParticipantsToJudge > 0
+      currentSubmittedCount >= totalNonHostParticipants &&
+      currentJudgedCount >= totalNonHostParticipants &&
+      totalNonHostParticipants > 0
     );
-  }, [
-    currentQuestionId,
-    currentQuestionAnswers,
-    totalParticipantsToJudge,
-    showResult,
-    isHostlessMode,
-    room?.host_user_id,
-  ]);
+  }, [currentQuestionId, currentQuestionAnswers, participants, showResult, room?.host_user_id]);
 
   const handleSubmitAnswer = async () => {
     if (answer.trim()) {

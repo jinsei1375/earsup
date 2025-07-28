@@ -308,3 +308,14 @@ export const addRanksToParticipantStats = (
     rank: calculateParticipantRank(participantStats, stat.userId) || 0,
   }));
 };
+
+/**
+ * 問題文の末尾から句読点を抽出する関数
+ * @param text 問題文
+ * @returns 末尾の句読点（.!?など）
+ */
+export const extractTrailingPunctuation = (text: string): string => {
+  if (!text) return '';
+  const match = text.match(/[.!?]+$/);
+  return match ? match[0] : '';
+};

@@ -7,8 +7,7 @@ import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { ErrorMessage } from '@/components/common/ErrorMessage';
 import { Button } from '@/components/common/Button';
 import { ExitRoomModal } from '@/components/common/ExitRoomModal';
-import { getQuizModeDisplayName } from '@/utils/quizUtils';
-import { speakText } from '@/utils/quizUtils';
+import { getQuizModeDisplayName, speakText, extractTrailingPunctuation } from '@/utils/quizUtils';
 import type { Answer, ParticipantWithNickname } from '@/types';
 
 interface HostQuizScreenProps {
@@ -52,6 +51,17 @@ export const HostQuizScreen: React.FC<HostQuizScreenProps> = ({
   const [showSilentModeWarning, setShowSilentModeWarning] = useState(true);
   const [showExitModal, setShowExitModal] = useState(false);
 
+  // 問題文から抽出した句読点
+  const trailingPunctuation = extractTrailingPunctuation(questionText);
+
+  // 現在の問題IDを推定（最新の回答から取得）
+  const currentQuestionId = answers.length > 0 ? answers[0].question_id : null;
+
+  // 現在の問題の回答をフィルタリング
+  const currentQuestionAnswers = currentQuestionId
+    ? answers.filter((answer) => answer.question_id === currentQuestionId)
+    : [];
+
   const handlePlayQuestion = () => {
     if (!questionText) return;
     speakText(questionText, { rate: selectedSpeed });
@@ -62,7 +72,7 @@ export const HostQuizScreen: React.FC<HostQuizScreenProps> = ({
     onEndQuiz();
   };
 
-  // 全ての参加者の回答が判定されているかチェック
+  // 全ての参加者の回答が判定されているかチェック (参加者画面と同じロジック)
   const allAnswersJudged = (() => {
     // 参加者がいない場合は判定完了とみなさない
     if (participants.length === 0) {
@@ -70,41 +80,26 @@ export const HostQuizScreen: React.FC<HostQuizScreenProps> = ({
     }
 
     // 回答がない場合も判定完了とみなさない
-    if (answers.length === 0) {
+    if (currentQuestionAnswers.length === 0) {
       return false;
     }
 
     // ホストありモードの場合：ホスト以外の参加者のみチェック
-    if (quizMode === 'all-at-once-host') {
-      const nonHostParticipants = participants.filter((p) => p.id !== hostUserId);
+    const relevantAnswers =
+      quizMode === 'all-at-once-host'
+        ? currentQuestionAnswers.filter((answer) => answer.user_id !== hostUserId)
+        : currentQuestionAnswers;
 
-      // 非ホスト参加者がいない場合は判定完了とみなさない
-      if (nonHostParticipants.length === 0) {
-        return false;
-      }
+    const participantsToJudge =
+      quizMode === 'all-at-once-host'
+        ? participants.filter((p) => p.id !== hostUserId)
+        : participants;
 
-      // 非ホスト参加者の回答を取得
-      const nonHostAnswers = answers.filter((answer) =>
-        nonHostParticipants.some((p) => p.id === answer.user_id)
-      );
+    const judgedCount = relevantAnswers.filter((answer) => answer.judge_result !== null).length;
+    const submittedCount = relevantAnswers.length;
+    const totalToJudge = participantsToJudge.length;
 
-      // 全ての非ホスト参加者が回答し、かつ全て判定済み
-      const hasAllAnswers = nonHostAnswers.length === nonHostParticipants.length;
-      const allJudged = nonHostAnswers.every((answer) => answer.judged === true);
-
-      return hasAllAnswers && allJudged;
-    }
-
-    // ホストなしモードの場合：全参加者（ホスト含む）をチェック
-    const allParticipantAnswers = answers.filter((answer) =>
-      participants.some((p) => p.id === answer.user_id)
-    );
-
-    // 全ての参加者が回答し、かつ全て判定済み
-    const hasAllAnswers = allParticipantAnswers.length === participants.length;
-    const allJudged = allParticipantAnswers.every((answer) => answer.judged === true);
-
-    return hasAllAnswers && allJudged;
+    return submittedCount >= totalToJudge && judgedCount >= totalToJudge && totalToJudge > 0;
   })();
 
   return (
@@ -230,6 +225,9 @@ export const HostQuizScreen: React.FC<HostQuizScreenProps> = ({
             answers={allRoomAnswers}
             judgmentTypes={judgmentTypes}
             quizMode={quizMode}
+            currentQuestionAnswers={currentQuestionAnswers}
+            showCurrentAnswers={allAnswersJudged} // 全員の判定が完了した場合のみ表示
+            trailingPunctuation={trailingPunctuation}
           />
         </View>
       </View>
