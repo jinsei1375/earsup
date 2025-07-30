@@ -4,6 +4,11 @@ import React, { createContext, useContext, useState, ReactNode } from 'react';
 export interface HeaderSettingsConfig {
   showSettings?: boolean;
   onSettingsPress?: () => void;
+  showBackButton?: boolean;
+  onBackPress?: () => void;
+  showAddButton?: boolean;
+  onAddPress?: () => void;
+  addButtonTitle?: string;
 }
 
 interface HeaderSettingsContextType {

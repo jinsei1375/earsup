@@ -1,13 +1,6 @@
 // app/sentences.tsx
 import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  Alert,
-  RefreshControl,
-} from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Alert, RefreshControl } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useUserStore } from '@/stores/userStore';
@@ -16,16 +9,34 @@ import { Button } from '@/components/common/Button';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { ErrorMessage } from '@/components/common/ErrorMessage';
 import { SentenceFormModal } from '@/components/sentences/SentenceFormModal';
+import { useHeaderSettings } from '@/contexts/HeaderSettingsContext';
 import type { UserSentence } from '@/types';
 
 export default function SentencesScreen() {
   const userId = useUserStore((s) => s.userId);
+  const { setSettingsConfig } = useHeaderSettings();
   const [sentences, setSentences] = useState<UserSentence[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isFormModalVisible, setIsFormModalVisible] = useState(false);
   const [editingSentence, setEditingSentence] = useState<UserSentence | null>(null);
+
+  useEffect(() => {
+    // ヘッダー設定
+    setSettingsConfig({
+      showBackButton: true,
+      onBackPress: handleGoBack,
+      showAddButton: true,
+      onAddPress: handleAddSentence,
+      addButtonTitle: '追加',
+    });
+
+    // クリーンアップ関数でヘッダー設定をリセット
+    return () => {
+      setSettingsConfig({});
+    };
+  }, []);
 
   useEffect(() => {
     loadSentences();
@@ -69,32 +80,28 @@ export default function SentencesScreen() {
   };
 
   const handleDeleteSentence = (sentence: UserSentence) => {
-    Alert.alert(
-      '例文を削除',
-      `「${sentence.text}」を削除しますか？`,
-      [
-        {
-          text: 'キャンセル',
-          style: 'cancel',
-        },
-        {
-          text: '削除',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await UserSentenceService.deleteUserSentence(sentence.id);
-              loadSentences();
-            } catch (err: unknown) {
-              if (err instanceof Error) {
-                Alert.alert('エラー', err.message);
-              } else {
-                Alert.alert('エラー', '不明なエラーが発生しました');
-              }
+    Alert.alert('例文を削除', `「${sentence.text}」を削除しますか？`, [
+      {
+        text: 'キャンセル',
+        style: 'cancel',
+      },
+      {
+        text: '削除',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await UserSentenceService.deleteUserSentence(sentence.id);
+            loadSentences();
+          } catch (err: unknown) {
+            if (err instanceof Error) {
+              Alert.alert('エラー', err.message);
+            } else {
+              Alert.alert('エラー', '不明なエラーが発生しました');
             }
-          },
+          }
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const handleSaveSentence = async (text: string, translation: string) => {
@@ -132,24 +139,11 @@ export default function SentencesScreen() {
 
   return (
     <View className="flex-1 bg-white">
-      {/* Header */}
-      <View className="flex-row items-center justify-between p-4 border-b border-gray-200">
-        <TouchableOpacity onPress={handleGoBack} className="mr-3">
-          <Ionicons name="arrow-back" size={24} color="#666" />
-        </TouchableOpacity>
-        <Text className="text-xl font-bold flex-1">登録例文</Text>
-        <Button
-          title="追加"
-          onPress={handleAddSentence}
-          variant="primary"
-          size="small"
-          icon={<Ionicons name="add" size={20} color="white" />}
-        />
-      </View>
-
       <ScrollView
         className="flex-1"
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => loadSentences(true)} />}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={() => loadSentences(true)} />
+        }
       >
         {error && (
           <View className="p-4">
