@@ -142,10 +142,10 @@ export class SupabaseService {
     return data || [];
   }
 
-  static async getQuestionsWithTranslations(roomId: string): Promise<import('@/types').QuestionWithTranslation[]> {
+  static async getQuestionsWithTranslations(roomId: string): Promise<QuestionWithTranslation[]> {
     const questions = await this.getQuestionsForRoom(roomId);
     
-    const result: import('@/types').QuestionWithTranslation[] = [];
+    const result: QuestionWithTranslation[] = [];
     
     for (const question of questions) {
       let translation = '';
