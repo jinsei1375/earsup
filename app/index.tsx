@@ -68,29 +68,6 @@ export default function HomeScreen() {
     router.push('/sentences');
   };
 
-  const features = [
-    {
-      icon: '🎧',
-      title: 'リスニングクイズ',
-      description: '音声を聞いて答えるクイズ形式',
-    },
-    {
-      icon: '👥',
-      title: 'みんなで参加',
-      description: '複数人で同時にクイズを楽しめる',
-    },
-    {
-      icon: '🏆',
-      title: 'リアルタイム順位',
-      description: 'ポイント制でリアルタイム順位表示',
-    },
-    {
-      icon: '📱',
-      title: '簡単操作',
-      description: 'ルームコードで簡単に参加可能',
-    },
-  ];
-
   const handleNicknameChange = async (newNickname: string) => {
     if (!userId) throw new Error('ユーザーIDが見つかりません');
 
@@ -142,7 +119,7 @@ export default function HomeScreen() {
         </View>
 
         {/* メインアクションボタン */}
-        <View className="mb-6">
+        <View className="mb-8">
           <Button
             title="ルームを作成する"
             onPress={handleCreateRoom}
@@ -168,45 +145,64 @@ export default function HomeScreen() {
           />
         </View>
 
-        {/* 機能紹介セクション */}
-        <View className="mb-6">
-          <Text className="text-xl font-bold text-gray-800 mb-4 text-center">✨ アプリの特徴</Text>
-          <View className="flex-row flex-wrap justify-between">
-            {features.map((feature, index) => (
-              <View
-                key={index}
-                className="bg-white rounded-lg p-4 shadow-sm border border-gray-100 mb-3"
-                style={{ width: '48%' }}
-              >
-                <Text className="text-3xl mb-2 text-center">{feature.icon}</Text>
-                <Text className="font-bold text-gray-800 text-center mb-1 text-sm">
-                  {feature.title}
-                </Text>
-                <Text className="text-xs text-gray-600 text-center leading-4">
-                  {feature.description}
-                </Text>
+        {/* クイックスタートガイド */}
+        <View className="bg-gradient-to-r from-orange-50 to-amber-50 rounded-xl p-4 mb-6">
+          <Text className="text-lg font-bold text-orange-800 mb-3 text-center">
+            ⚡ クイックスタート
+          </Text>
+          <View className="space-y-2">
+            {[
+              { step: '1', text: 'ルームを作成またはコードで参加' },
+              { step: '2', text: 'クイズモードを選択' },
+              { step: '3', text: '音声を聞いて回答入力' },
+              { step: '4', text: 'リアルタイムで結果発表！' },
+            ].map((item) => (
+              <View key={item.step} className="flex-row items-center mb-1">
+                <View className="bg-orange-500 rounded-full w-5 h-5 items-center justify-center mr-3">
+                  <Text className="text-white text-xs font-bold">{item.step}</Text>
+                </View>
+                <Text className="text-orange-700 flex-1 text-sm">{item.text}</Text>
               </View>
             ))}
           </View>
         </View>
 
-        {/* 使い方セクション */}
-        <View className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-4 mb-6">
-          <Text className="text-lg font-bold text-green-800 mb-3 text-center">🚀 はじめ方</Text>
-          <View className="space-y-3">
-            {[
-              { step: '1', text: 'ルームを作成またはコードで参加' },
-              { step: '2', text: 'ホストが音声問題を作成・再生' },
-              { step: '3', text: '音声を聞いて回答を入力' },
-              { step: '4', text: 'リアルタイムで結果発表！' },
-            ].map((item) => (
-              <View key={item.step} className="flex-row items-center mb-2">
-                <View className="bg-green-500 rounded-full w-6 h-6 items-center justify-center mr-3">
-                  <Text className="text-white text-xs font-bold">{item.step}</Text>
+        {/* 詳細情報リンク */}
+        <View className="mb-6 space-y-3">
+          <View className="bg-white rounded-xl shadow-sm border border-gray-200 mb-2">
+            <TouchableOpacity
+              onPress={() => router.push('/features')}
+              className="flex-row items-center justify-between p-4 active:bg-gray-50"
+            >
+              <View className="flex-row items-center flex-1">
+                <View className="w-10 h-10 bg-blue-100 rounded-full items-center justify-center mr-3">
+                  <Text className="text-blue-600 text-lg">🚀</Text>
                 </View>
-                <Text className="text-green-700 flex-1">{item.text}</Text>
+                <View className="flex-1">
+                  <Text className="text-gray-800 font-semibold text-base">機能詳細</Text>
+                  <Text className="text-gray-500 text-sm">全機能の詳しい説明と今後の予定</Text>
+                </View>
               </View>
-            ))}
+              <Text className="text-gray-400 text-lg">›</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View className="bg-white rounded-xl shadow-sm border border-gray-200">
+            <TouchableOpacity
+              onPress={() => router.push('/guide')}
+              className="flex-row items-center justify-between p-4 active:bg-gray-50"
+            >
+              <View className="flex-row items-center flex-1">
+                <View className="w-10 h-10 bg-green-100 rounded-full items-center justify-center mr-3">
+                  <Text className="text-green-600 text-lg">📚</Text>
+                </View>
+                <View className="flex-1">
+                  <Text className="text-gray-800 font-semibold text-base">使い方ガイド</Text>
+                  <Text className="text-gray-500 text-sm">詳しい操作方法とコツを解説</Text>
+                </View>
+              </View>
+              <Text className="text-gray-400 text-lg">›</Text>
+            </TouchableOpacity>
           </View>
         </View>
 
