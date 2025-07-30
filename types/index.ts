@@ -26,6 +26,10 @@ export interface Question {
   updated_at?: string;
 }
 
+export interface QuestionWithTranslation extends Question {
+  translation?: string; // Japanese translation from sample sentence
+}
+
 export interface Answer {
   id: string;
   room_id: string;

@@ -131,6 +131,48 @@ export class SupabaseService {
     if (error) throw error;
   }
 
+  static async getQuestionsForRoom(roomId: string): Promise<Question[]> {
+    const { data, error } = await supabase
+      .from('questions')
+      .select('*')
+      .eq('room_id', roomId)
+      .order('created_at', { ascending: true });
+
+    if (error) throw error;
+    return data || [];
+  }
+
+  static async getQuestionsWithTranslations(roomId: string): Promise<import('@/types').QuestionWithTranslation[]> {
+    const questions = await this.getQuestionsForRoom(roomId);
+    
+    const result: import('@/types').QuestionWithTranslation[] = [];
+    
+    for (const question of questions) {
+      let translation = '';
+      
+      // Get translation from sample sentence if available
+      if (question.sample_sentence_id) {
+        try {
+          const sampleSentence = await import('@/services/sampleSentenceService').then(
+            module => module.SampleSentenceService.getSentenceById(question.sample_sentence_id!)
+          );
+          if (sampleSentence) {
+            translation = sampleSentence.translation;
+          }
+        } catch (error) {
+          console.warn('Failed to get sample sentence translation:', error);
+        }
+      }
+      
+      result.push({
+        ...question,
+        translation
+      });
+    }
+    
+    return result;
+  }
+
   // Answer operations
   static async submitAnswer(
     roomId: string,

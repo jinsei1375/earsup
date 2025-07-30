@@ -1,10 +1,12 @@
 // components/quiz/QuizResultScreen.tsx
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, ScrollView, Alert } from 'react-native';
 import type { ParticipantWithNickname, Answer } from '@/types';
 import { calculateParticipantStats, addRanksToParticipantStats } from '@/utils/quizUtils';
 import { Button } from '@/components/common/Button';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
+import { QuestionListModal } from '@/components/quiz/QuestionListModal';
+import { Ionicons } from '@expo/vector-icons';
 
 interface QuizResultScreenProps {
   participants: ParticipantWithNickname[];
@@ -14,6 +16,7 @@ interface QuizResultScreenProps {
   loading: boolean;
   judgmentTypes?: Record<string, 'correct' | 'partial' | 'incorrect'>; // 判定タイプ
   onGoHome: () => void;
+  roomId: string; // Add roomId to get questions
 }
 
 export const QuizResultScreen: React.FC<QuizResultScreenProps> = ({
@@ -24,7 +27,10 @@ export const QuizResultScreen: React.FC<QuizResultScreenProps> = ({
   loading,
   judgmentTypes = {}, // デフォルトは空のオブジェクト
   onGoHome,
+  roomId,
 }) => {
+  const [isQuestionListVisible, setIsQuestionListVisible] = useState(false);
+  
   // 統計情報を計算して順位付きでソート
   const participantStatsWithRanks = addRanksToParticipantStats(
     calculateParticipantStats(participants, allRoomAnswers, hostUserId, judgmentTypes)
@@ -105,6 +111,24 @@ export const QuizResultScreen: React.FC<QuizResultScreenProps> = ({
           </View>
         )}
 
+        {/* 問題一覧ボタン */}
+        {totalQuestions > 0 && (
+          <View className="mb-6">
+            <Button
+              title="問題一覧を見る"
+              onPress={() => setIsQuestionListVisible(true)}
+              variant="secondary"
+              size="large"
+              fullWidth
+              icon={<Ionicons name="list" size={20} color="#3B82F6" />}
+              className="mb-2"
+            />
+            <Text className="text-center text-sm text-gray-500">
+              出題された問題を確認して例文に追加できます
+            </Text>
+          </View>
+        )}
+
         {/* ホームに戻るボタン */}
         <View className="items-center">
           {loading ? (
@@ -121,6 +145,13 @@ export const QuizResultScreen: React.FC<QuizResultScreenProps> = ({
           )}
         </View>
       </View>
+      
+      {/* Question List Modal */}
+      <QuestionListModal
+        isVisible={isQuestionListVisible}
+        onClose={() => setIsQuestionListVisible(false)}
+        roomId={roomId}
+      />
     </ScrollView>
   );
 };

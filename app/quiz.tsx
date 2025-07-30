@@ -407,6 +407,7 @@ export default function QuizScreen() {
           loading={loading}
           onGoHome={handleGoHome}
           judgmentTypes={judgmentTypes}
+          roomId={roomId}
         />
 
         <ExitRoomModal
