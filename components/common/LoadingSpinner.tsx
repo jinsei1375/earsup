@@ -6,7 +6,7 @@ interface LoadingSpinnerProps {
   size?: 'small' | 'large';
   color?: string;
   className?: string;
-  variant?: 'default' | 'pulse' | 'dots' | 'sound-wave';
+  variant?: 'default' | 'pulse' | 'dots' | 'sound-wave' | 'modern-ring' | 'bounce';
 }
 
 export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
@@ -24,6 +24,7 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   const wave2 = useRef(new Animated.Value(0.5)).current;
   const wave3 = useRef(new Animated.Value(0.7)).current;
   const wave4 = useRef(new Animated.Value(0.4)).current;
+  const bounceValue = useRef(new Animated.Value(0)).current;
 
   const spinnerSize = size === 'large' ? 40 : 24;
   const dotSize = size === 'large' ? 8 : 6;
@@ -138,6 +139,28 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
       ]);
       waveAnimations.start();
       return () => waveAnimations.stop();
+    } else if (variant === 'bounce') {
+      // Bounce animation
+      bounceValue.setValue(0);
+      
+      const bounce = Animated.loop(
+        Animated.sequence([
+          Animated.timing(bounceValue, {
+            toValue: 1,
+            duration: 600,
+            easing: Easing.out(Easing.quad),
+            useNativeDriver: true,
+          }),
+          Animated.timing(bounceValue, {
+            toValue: 0,
+            duration: 600,
+            easing: Easing.in(Easing.quad),
+            useNativeDriver: true,
+          }),
+        ])
+      );
+      bounce.start();
+      return () => bounce.stop();
     }
   }, [variant]);
 
@@ -220,6 +243,54 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
               inputRange: [1, 1.3],
               outputRange: [0.8, 0.4],
             }),
+          }}
+        />
+      </View>
+    );
+  }
+
+  if (variant === 'bounce') {
+    return (
+      <View className={`items-center justify-center ${className}`}>
+        <Animated.View
+          style={{
+            width: spinnerSize,
+            height: spinnerSize,
+            borderRadius: spinnerSize / 2,
+            backgroundColor: color,
+            transform: [
+              {
+                scale: bounceValue.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0.8, 1.2],
+                }),
+              },
+              {
+                translateY: bounceValue.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0, -10],
+                }),
+              },
+            ],
+          }}
+        />
+      </View>
+    );
+  }
+
+  if (variant === 'modern-ring') {
+    return (
+      <View className={`items-center justify-center ${className}`}>
+        <Animated.View
+          style={{
+            width: spinnerSize,
+            height: spinnerSize,
+            borderRadius: spinnerSize / 2,
+            borderWidth: size === 'large' ? 4 : 3,
+            borderColor: 'transparent',
+            borderTopColor: color,
+            borderRightColor: color,
+            transform: [{ rotate: spin }],
           }}
         />
       </View>

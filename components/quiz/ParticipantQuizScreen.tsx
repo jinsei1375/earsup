@@ -12,6 +12,9 @@ import {
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { ErrorMessage } from '@/components/common/ErrorMessage';
 import { Button } from '@/components/common/Button';
+import { AnimatedButton } from '@/components/common/AnimatedButton';
+import { AnimatedTextInput } from '@/components/common/AnimatedTextInput';
+import { AnswerFeedback } from '@/components/common/AnswerFeedback';
 import {
   canParticipantAnswer,
   isQuizActive,
@@ -318,18 +321,20 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
 
         {/* 音声再生ボタン - ホストなしモードのみ */}
         {isAutoMode && (
-          <View className="mb-4">
-            <Button
-              title={`音声を再生する (${playCount}/${maxPlayCount})`}
+          <View className="mb-6">
+            <AnimatedButton
+              title={`🎧 音声を再生する (${playCount}/${maxPlayCount})`}
               onPress={handlePlayAudio}
               disabled={!questionText || playCount >= maxPlayCount || showResult}
               variant={playCount >= maxPlayCount ? 'secondary' : 'primary'}
               size="large"
               fullWidth
+              animateOnMount={true}
+              delay={100}
             />
             {playCount >= maxPlayCount && (
-              <Text className="text-center text-red-600 text-sm mt-2">
-                再生回数の上限に達しました
+              <Text className="text-center text-red-600 text-sm mt-2 font-medium">
+                ⚠️ 再生回数の上限に達しました
               </Text>
             )}
           </View>
@@ -338,99 +343,132 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
         {/* クイズコンテンツ */}
         {!showResult ? (
           // All-at-once mode - hasn't answered yet
-          <View className="w-full mb-4">
+          <View className="w-full mb-6">
             {/* ホストなしモードでは句読点を表示 */}
             {isAutoMode && (
-              <View className="flex-row items-center justify-center mb-2">
-                <Text className="text-gray-600 text-sm">
-                  句読点（. ! ?）は自動で判定されるため入力不要です
+              <View className="flex-row items-center justify-center mb-4 bg-blue-50 p-3 rounded-xl">
+                <Text className="text-blue-700 text-sm font-medium text-center">
+                  💡 句読点（. ! ?）は自動で判定されるため入力不要です
                 </Text>
               </View>
             )}
 
             <View className="flex-row items-center">
-              <TextInput
+              <AnimatedTextInput
                 ref={inputRef}
-                className="border border-gray-300 p-4 rounded-lg w-full text-xl flex-1"
-                placeholder="聞こえたフレーズを入力"
+                label="聞こえたフレーズを入力"
+                placeholder="What did you hear?"
                 value={answer}
                 onChangeText={setAnswer}
                 editable={!showResult}
                 returnKeyType="done"
                 onSubmitEditing={() => Keyboard.dismiss()}
                 onFocus={handleInputFocus}
+                variant="quiz"
+                size="large"
+                containerClassName="flex-1"
+                animateOnMount={true}
+                delay={200}
               />
               {/* ホストなしモードでは句読点を表示 */}
               {isAutoMode && trailingPunctuation && (
-                <View className="ml-2 flex-row">
-                  <Text className="text-gray-800 text-xl">{trailingPunctuation}</Text>
+                <View className="ml-3 bg-white rounded-xl p-4 shadow-lg">
+                  <Text className="text-gray-800 text-xl font-bold">{trailingPunctuation}</Text>
                 </View>
               )}
             </View>
 
-            <Button
-              title="回答する"
+            <AnimatedButton
+              title="✨ 回答する"
               onPress={handleSubmitAnswer}
               disabled={!answer.trim() || showResult || loading}
               variant="primary"
               size="large"
               fullWidth
-              className="mt-4"
+              className="mt-6"
+              animateOnMount={true}
+              delay={300}
             />
           </View>
         ) : (
           // All-at-once mode - has answered
-          <View className="bg-blue-100 p-4 rounded-lg mb-4 w-full">
+          <View className="bg-gradient-to-r from-blue-50 to-indigo-100 p-6 rounded-2xl mb-6 w-full border border-blue-200 shadow-lg">
             {!isResultDataReady ? (
               // Waiting for judgment or complete result data
               <>
-                <Text className="text-center font-bold text-blue-800 mb-1">回答を提出しました</Text>
-                <Text className="text-center text-blue-600">
+                <Text className="text-center font-bold text-blue-800 mb-2 text-lg">📝 回答を提出しました</Text>
+                <Text className="text-center text-blue-600 font-medium">
                   {isAutoMode && isRoomCreator
-                    ? '結果を準備中...'
+                    ? '✨ 結果を準備中...'
                     : isCorrect === null
-                    ? 'ホストの判定をお待ちください'
-                    : '結果を準備中...'}
+                    ? '⏳ ホストの判定をお待ちください'
+                    : '🔄 結果を準備中...'}
                 </Text>
-                <LoadingSpinner size="small" variant="dots" className="mt-2" />
+                <LoadingSpinner size="small" variant="dots" className="mt-3" />
               </>
             ) : isAnswerCorrect ? (
-              // Correct
+              // Correct - with animation
               <>
-                <Text className="text-center font-bold text-green-500 text-lg mb-1">◯正解</Text>
-                <Text className="text-center font-bold text-yellow-600 text-lg mb-2">
-                  10ポイントGET！
+                <AnswerFeedback
+                  isCorrect={true}
+                  isVisible={true}
+                  size="medium"
+                  className="mb-4"
+                />
+                <Text className="text-center font-bold text-yellow-600 text-lg mb-3">
+                  🎉 10ポイントGET！
                 </Text>
 
-                <Text className="text-center text-blue-600 mt-2">
-                  あなたの回答: 「{userAnswer?.answer_text || '取得中...'}」
-                  {isAutoMode && trailingPunctuation}
-                </Text>
+                <View className="bg-white p-4 rounded-xl shadow-sm">
+                  <Text className="text-center text-blue-600 font-medium">
+                    あなたの回答: 「{userAnswer?.answer_text || '取得中...'}」
+                    {isAutoMode && trailingPunctuation}
+                  </Text>
+                </View>
                 <TranslationDisplay />
               </>
             ) : isPartialAnswer ? (
-              // Partial (惜しい)
+              // Partial (惜しい) - with animation
               <>
+                <AnswerFeedback
+                  isCorrect={null}
+                  isVisible={true}
+                  size="medium"
+                  className="mb-4"
+                />
                 <Text className="text-center font-bold text-orange-500 text-lg mb-1">△惜しい</Text>
-                <Text className="text-center font-bold text-yellow-600 text-lg mb-2">
-                  5ポイントGET！
+                <Text className="text-center font-bold text-yellow-600 text-lg mb-3">
+                  ⭐ 5ポイントGET！
                 </Text>
-                <Text className="text-center text-blue-600 mt-2">
-                  あなたの回答: 「{userAnswer?.answer_text || '取得中...'}」
-                  {isAutoMode && trailingPunctuation}
-                </Text>
-                <Text className="text-center text-black mt-2">正解: {questionText}</Text>
+                <View className="bg-white p-4 rounded-xl shadow-sm mb-3">
+                  <Text className="text-center text-blue-600 font-medium">
+                    あなたの回答: 「{userAnswer?.answer_text || '取得中...'}」
+                    {isAutoMode && trailingPunctuation}
+                  </Text>
+                </View>
+                <View className="bg-green-50 p-4 rounded-xl border border-green-200">
+                  <Text className="text-center text-green-800 font-semibold">正解: {questionText}</Text>
+                </View>
                 <TranslationDisplay />
               </>
             ) : (
-              // Incorrect
+              // Incorrect - with animation
               <>
-                <Text className="text-center font-bold text-red-500 text-lg mb-1">×不正解</Text>
-                <Text className="text-center text-blue-600 mt-2">
-                  あなたの回答: 「{userAnswer?.answer_text || '取得中...'}」
-                  {isAutoMode && trailingPunctuation}
-                </Text>
-                <Text className="text-center text-black mt-2">正解: {questionText}</Text>
+                <AnswerFeedback
+                  isCorrect={false}
+                  isVisible={true}
+                  size="medium"
+                  className="mb-4"
+                />
+                <View className="bg-white p-4 rounded-xl shadow-sm mb-3">
+                  <Text className="text-center text-blue-600 font-medium">
+                    あなたの回答: 「{userAnswer?.answer_text || '取得中...'}」
+                    {isAutoMode && trailingPunctuation}
+                  </Text>
+                </View>
+                <View className="bg-green-50 p-4 rounded-xl border border-green-200">
+                  <Text className="text-center text-green-800 font-semibold">正解: {questionText}</Text>
+                </View>
                 <TranslationDisplay />
               </>
             )}
@@ -443,21 +481,25 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
           isCurrentQuestionFullyJudged &&
           onNextQuestion &&
           currentQuestionId && (
-            <View className="mt-4 mb-4">
-              <Button
-                title="次の問題へ"
+            <View className="mt-6 mb-6">
+              <AnimatedButton
+                title="🚀 次の問題へ"
                 onPress={onNextQuestion}
                 variant="primary"
                 size="large"
                 fullWidth
+                animateOnMount={true}
+                delay={400}
               />
-              <Button
-                title="クイズを終了する"
+              <AnimatedButton
+                title="🏁 クイズを終了する"
                 onPress={() => setShowExitModal(true)}
                 variant="danger"
                 fullWidth
                 disabled={loading}
                 className="mt-4"
+                animateOnMount={true}
+                delay={500}
               />
             </View>
           )}

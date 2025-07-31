@@ -5,6 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaView, View, StatusBar } from 'react-native';
 import AppHeader from '@/components/AppHeader';
 import { HeaderSettingsProvider, useHeaderSettings } from '@/contexts/HeaderSettingsContext';
+import { ScreenTransition } from '@/components/common/ScreenTransition';
 // グローバルCSSのインポート
 import '@/assets/css/global.css';
 
@@ -77,9 +78,16 @@ function RootLayoutContent() {
     <SafeAreaView className="flex-1 bg-white">
       <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
       <AppHeader title={title} settingsConfig={settingsConfig} />
-      <View className="flex-1" pointerEvents="auto">
-        <Slot />
-      </View>
+      <ScreenTransition
+        isVisible={isReady}
+        type="fade"
+        duration={300}
+        className="flex-1"
+      >
+        <View className="flex-1" pointerEvents="auto">
+          <Slot />
+        </View>
+      </ScreenTransition>
     </SafeAreaView>
   );
 }
