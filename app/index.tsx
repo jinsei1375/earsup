@@ -98,17 +98,19 @@ export default function HomeScreen() {
             />
           </View>
           <Text className="text-5xl font-bold text-gray-800 mb-3 tracking-tight">EarsUp</Text>
-          <Text className="text-xl text-gray-600 text-center mb-6 font-medium">リスニングクイズアプリ</Text>
+          <Text className="text-xl text-gray-600 text-center mb-6 font-medium">
+            リスニングクイズアプリ
+          </Text>
           {nickname ? (
             <View className="flex-row items-center mb-6">
               <View className="bg-gradient-to-r from-blue-500 to-purple-500 px-6 py-3 rounded-full shadow-lg">
-                <Text className="text-white font-bold text-lg">{nickname}</Text>
+                <Text className="text-gray-600 font-bold text-lg">{nickname}</Text>
               </View>
               <TouchableOpacity
                 onPress={() => setIsSettingsModalVisible(true)}
-                className="ml-3 bg-white rounded-full p-3 shadow-lg border border-gray-200"
+                className="ml-0 bg-white rounded-full p-3 shadow-lg border border-gray-200"
               >
-                <Text className="text-gray-600 text-lg">✏️</Text>
+                <Text className="text-gray-600 text-base">✏️</Text>
               </TouchableOpacity>
             </View>
           ) : (
@@ -164,7 +166,10 @@ export default function HomeScreen() {
               { step: '3', text: '音声を聞いて回答入力', icon: '🎧' },
               { step: '4', text: 'リアルタイムで結果発表！', icon: '🎉' },
             ].map((item) => (
-              <View key={item.step} className="flex-row items-center mb-2 bg-white rounded-xl p-3 shadow-sm">
+              <View
+                key={item.step}
+                className="flex-row items-center mb-2 bg-white rounded-xl p-3 shadow-sm"
+              >
                 <View className="bg-gradient-to-r from-orange-500 to-red-500 rounded-full w-8 h-8 items-center justify-center mr-4">
                   <Text className="text-white text-sm font-bold">{item.step}</Text>
                 </View>

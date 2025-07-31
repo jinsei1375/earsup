@@ -61,19 +61,19 @@ export const AnimatedButton: React.FC<AnimatedButtonProps> = ({
   const variantStyles = {
     primary: disabled
       ? 'bg-gray-300 border-gray-300'
-      : 'bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 border-blue-500 shadow-xl shadow-blue-500/30',
+      : 'bg-blue-500 border-blue-500 shadow-xl shadow-blue-500/30',
     secondary: disabled
       ? 'bg-gray-300 border-gray-300'
-      : 'bg-gradient-to-r from-gray-50 via-gray-100 to-gray-200 border-gray-300 shadow-xl',
+      : 'bg-gray-600 border-gray-600 shadow-xl shadow-gray-600/30',
     danger: disabled
       ? 'bg-gray-300 border-gray-300'
       : 'bg-gradient-to-r from-red-500 via-red-600 to-red-700 border-red-500 shadow-xl shadow-red-500/30',
     outline: disabled
-      ? 'bg-transparent border-gray-300'
-      : 'bg-transparent border-blue-500 shadow-lg',
+      ? 'bg-gray-100 border-gray-300'
+      : 'bg-blue-50 border-blue-500 shadow-lg border-2',
     ghost: disabled
-      ? 'bg-transparent border-transparent'
-      : 'bg-transparent border-transparent',
+      ? 'bg-gray-100 border-transparent'
+      : 'bg-gray-100 border-transparent hover:bg-gray-200',
     correct: disabled
       ? 'bg-green-300 border-green-300'
       : 'bg-gradient-to-r from-green-500 via-green-600 to-green-700 border-green-500 shadow-xl shadow-green-500/30',
@@ -90,7 +90,7 @@ export const AnimatedButton: React.FC<AnimatedButtonProps> = ({
 
   const textVariantStyles = {
     primary: disabled ? 'text-gray-500' : 'text-white',
-    secondary: disabled ? 'text-gray-500' : 'text-gray-700',
+    secondary: disabled ? 'text-gray-500' : 'text-white',
     danger: disabled ? 'text-gray-500' : 'text-white',
     outline: disabled ? 'text-gray-400' : 'text-blue-500',
     ghost: disabled ? 'text-gray-400' : 'text-gray-700',
@@ -106,7 +106,11 @@ export const AnimatedButton: React.FC<AnimatedButtonProps> = ({
     className,
   ].join(' ');
 
-  const textClassName = ['font-bold tracking-wide', textSizeStyles[size], textVariantStyles[variant]].join(' ');
+  const textClassName = [
+    'font-bold tracking-wide',
+    textSizeStyles[size],
+    textVariantStyles[variant],
+  ].join(' ');
 
   return (
     <Animated.View
@@ -114,7 +118,7 @@ export const AnimatedButton: React.FC<AnimatedButtonProps> = ({
         opacity: fade.fadeValue,
         transform: [
           { scale: scale.scaleValue },
-          { translateY: animateOnMount ? slide.slideValue : 0 }
+          { translateY: animateOnMount ? slide.slideValue : 0 },
         ],
       }}
     >

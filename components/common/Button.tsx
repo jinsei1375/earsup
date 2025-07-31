@@ -1,7 +1,7 @@
 // components/common/Button.tsx
 import React from 'react';
 import { TouchableOpacity, Text, View, Animated } from 'react-native';
-import { useRef, useEffect } from 'react';
+import { useRef } from 'react';
 
 interface ButtonProps {
   title?: string;
@@ -14,6 +14,16 @@ interface ButtonProps {
   icon?: React.ReactNode;
   children?: React.ReactNode;
 }
+
+type ButtonVariant =
+  | 'primary'
+  | 'secondary'
+  | 'danger'
+  | 'outline'
+  | 'ghost'
+  | 'correct'
+  | 'partial';
+type ButtonSize = 'small' | 'medium' | 'large';
 
 export const CustomButton: React.FC<ButtonProps> = ({
   title,
@@ -50,58 +60,45 @@ export const CustomButton: React.FC<ButtonProps> = ({
     }
   };
 
-  // ベーススタイル - より現代的なデザイン
-  const baseButtonStyle = 'rounded-xl border-2 items-center justify-center shadow-sm';
+  // ベーススタイル - シンプルで洗練されたデザイン
+  const baseButtonStyle = 'rounded-lg items-center justify-center';
 
-  // サイズスタイル - よりモバイルフレンドリーに
-  const sizeStyles = {
-    small: 'px-4 py-2.5',
-    medium: 'px-6 py-3.5',
-    large: 'px-8 py-4.5',
+  // サイズスタイル - 適度なパディング
+  const sizeStyles: Record<ButtonSize, string> = {
+    small: 'px-3 py-2',
+    medium: 'px-4 py-3',
+    large: 'px-6 py-4',
   };
 
-  // バリアントスタイル - グラデーションと改良された色
-  const variantStyles = {
-    primary: disabled
-      ? 'bg-gray-300 border-gray-300'
-      : 'bg-gradient-to-r from-blue-500 to-blue-600 border-blue-500 shadow-lg shadow-blue-500/25',
-    secondary: disabled
-      ? 'bg-gray-300 border-gray-300'
-      : 'bg-gradient-to-r from-gray-50 to-gray-100 border-gray-300 shadow-lg',
-    danger: disabled
-      ? 'bg-gray-300 border-gray-300'
-      : 'bg-gradient-to-r from-red-500 to-red-600 border-red-500 shadow-lg shadow-red-500/25',
+  // バリアントスタイル - シンプルで実用的
+  const variantStyles: Record<ButtonVariant, string> = {
+    primary: disabled ? 'bg-gray-300' : 'bg-blue-500',
+    secondary: disabled ? 'bg-gray-200' : 'bg-gray-100 border border-gray-300',
+    danger: disabled ? 'bg-gray-300' : 'bg-red-500',
     outline: disabled
-      ? 'bg-transparent border-gray-300'
-      : 'bg-transparent border-blue-500 shadow-lg',
-    ghost: disabled
-      ? 'bg-transparent border-transparent'
-      : 'bg-transparent border-transparent',
-    correct: disabled
-      ? 'bg-green-300 border-green-300'
-      : 'bg-gradient-to-r from-green-500 to-green-600 border-green-500 shadow-lg shadow-green-500/25',
-    partial: disabled
-      ? 'bg-orange-300 border-orange-300'
-      : 'bg-gradient-to-r from-orange-500 to-orange-600 border-orange-500 shadow-lg shadow-orange-500/25',
+      ? 'bg-transparent border border-gray-300'
+      : 'bg-transparent border border-blue-500',
+    ghost: disabled ? 'bg-transparent' : 'bg-transparent',
+    correct: disabled ? 'bg-gray-300' : 'bg-green-500',
+    partial: disabled ? 'bg-gray-300' : 'bg-orange-500',
   };
 
   // テキストスタイル
-  const textSizeStyles = {
+  const textSizeStyles: Record<ButtonSize, string> = {
     small: 'text-sm',
     medium: 'text-base',
     large: 'text-lg',
   };
 
-  const textVariantStyles = {
-    primary: disabled ? 'text-gray-500' : 'text-white',
-    secondary: disabled ? 'text-gray-500' : 'text-gray-700',
-    danger: disabled ? 'text-gray-500' : 'text-white',
-    outline: disabled ? 'text-gray-400' : 'text-blue-500',
-    ghost: disabled ? 'text-gray-400' : 'text-gray-700',
-    correct: disabled ? 'text-gray-500' : 'text-white',
-    partial: disabled ? 'text-gray-500' : 'text-white',
+  const textVariantStyles: Record<ButtonVariant, string> = {
+    primary: 'text-white',
+    secondary: 'text-gray-700',
+    danger: 'text-white',
+    outline: 'text-blue-500',
+    ghost: 'text-gray-700',
+    correct: 'text-white',
+    partial: 'text-white',
   };
-
   const buttonClassName = [
     baseButtonStyle,
     sizeStyles[size],
@@ -110,7 +107,7 @@ export const CustomButton: React.FC<ButtonProps> = ({
     className,
   ].join(' ');
 
-  const textClassName = ['font-bold', textSizeStyles[size], textVariantStyles[variant]].join(' ');
+  const textClassName = ['font-medium', textSizeStyles[size], textVariantStyles[variant]].join(' ');
 
   return (
     <Animated.View style={{ transform: [{ scale: scaleValue }] }}>

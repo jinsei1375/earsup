@@ -13,7 +13,6 @@ import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { ErrorMessage } from '@/components/common/ErrorMessage';
 import { Button } from '@/components/common/Button';
 import { AnimatedButton } from '@/components/common/AnimatedButton';
-import { AnimatedTextInput } from '@/components/common/AnimatedTextInput';
 import { AnswerFeedback } from '@/components/common/AnswerFeedback';
 import {
   canParticipantAnswer,
@@ -354,22 +353,24 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
             )}
 
             <View className="flex-row items-center">
-              <AnimatedTextInput
-                ref={inputRef}
-                label="聞こえたフレーズを入力"
-                placeholder="What did you hear?"
-                value={answer}
-                onChangeText={setAnswer}
-                editable={!showResult}
-                returnKeyType="done"
-                onSubmitEditing={() => Keyboard.dismiss()}
-                onFocus={handleInputFocus}
-                variant="quiz"
-                size="large"
-                containerClassName="flex-1"
-                animateOnMount={true}
-                delay={200}
-              />
+              <View className="flex-1">
+                <Text className="text-gray-700 text-sm font-medium mb-2 ml-1">
+                  聞こえたフレーズを入力
+                </Text>
+                <TextInput
+                  ref={inputRef}
+                  placeholder="What did you hear?"
+                  value={answer}
+                  onChangeText={setAnswer}
+                  editable={!showResult}
+                  returnKeyType="done"
+                  onSubmitEditing={() => Keyboard.dismiss()}
+                  onFocus={handleInputFocus}
+                  className="bg-white border-2 border-gray-300 rounded-xl px-4 py-4 text-lg text-gray-800 shadow-lg focus:border-blue-500"
+                  placeholderTextColor="#9CA3AF"
+                  multiline={false}
+                />
+              </View>
               {/* ホストなしモードでは句読点を表示 */}
               {isAutoMode && trailingPunctuation && (
                 <View className="ml-3 bg-white rounded-xl p-4 shadow-lg">
@@ -378,7 +379,7 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
               )}
             </View>
 
-            <AnimatedButton
+            <Button
               title="✨ 回答する"
               onPress={handleSubmitAnswer}
               disabled={!answer.trim() || showResult || loading}
@@ -386,8 +387,6 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
               size="large"
               fullWidth
               className="mt-6"
-              animateOnMount={true}
-              delay={300}
             />
           </View>
         ) : (
@@ -396,7 +395,9 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
             {!isResultDataReady ? (
               // Waiting for judgment or complete result data
               <>
-                <Text className="text-center font-bold text-blue-800 mb-2 text-lg">📝 回答を提出しました</Text>
+                <Text className="text-center font-bold text-blue-800 mb-2 text-lg">
+                  📝 回答を提出しました
+                </Text>
                 <Text className="text-center text-blue-600 font-medium">
                   {isAutoMode && isRoomCreator
                     ? '✨ 結果を準備中...'
@@ -409,12 +410,7 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
             ) : isAnswerCorrect ? (
               // Correct - with animation
               <>
-                <AnswerFeedback
-                  isCorrect={true}
-                  isVisible={true}
-                  size="medium"
-                  className="mb-4"
-                />
+                <AnswerFeedback isCorrect={true} isVisible={true} size="medium" className="mb-4" />
                 <Text className="text-center font-bold text-yellow-600 text-lg mb-3">
                   🎉 10ポイントGET！
                 </Text>
@@ -430,12 +426,7 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
             ) : isPartialAnswer ? (
               // Partial (惜しい) - with animation
               <>
-                <AnswerFeedback
-                  isCorrect={null}
-                  isVisible={true}
-                  size="medium"
-                  className="mb-4"
-                />
+                <AnswerFeedback isCorrect={null} isVisible={true} size="medium" className="mb-4" />
                 <Text className="text-center font-bold text-orange-500 text-lg mb-1">△惜しい</Text>
                 <Text className="text-center font-bold text-yellow-600 text-lg mb-3">
                   ⭐ 5ポイントGET！
@@ -447,19 +438,16 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
                   </Text>
                 </View>
                 <View className="bg-green-50 p-4 rounded-xl border border-green-200">
-                  <Text className="text-center text-green-800 font-semibold">正解: {questionText}</Text>
+                  <Text className="text-center text-green-800 font-semibold">
+                    正解: {questionText}
+                  </Text>
                 </View>
                 <TranslationDisplay />
               </>
             ) : (
               // Incorrect - with animation
               <>
-                <AnswerFeedback
-                  isCorrect={false}
-                  isVisible={true}
-                  size="medium"
-                  className="mb-4"
-                />
+                <AnswerFeedback isCorrect={false} isVisible={true} size="medium" className="mb-4" />
                 <View className="bg-white p-4 rounded-xl shadow-sm mb-3">
                   <Text className="text-center text-blue-600 font-medium">
                     あなたの回答: 「{userAnswer?.answer_text || '取得中...'}」
@@ -467,7 +455,9 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
                   </Text>
                 </View>
                 <View className="bg-green-50 p-4 rounded-xl border border-green-200">
-                  <Text className="text-center text-green-800 font-semibold">正解: {questionText}</Text>
+                  <Text className="text-center text-green-800 font-semibold">
+                    正解: {questionText}
+                  </Text>
                 </View>
                 <TranslationDisplay />
               </>
