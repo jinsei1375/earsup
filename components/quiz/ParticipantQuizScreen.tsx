@@ -12,6 +12,7 @@ import {
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { ErrorMessage } from '@/components/common/ErrorMessage';
 import { Button } from '@/components/common/Button';
+import { AnswerFeedback } from '@/components/common/AnswerFeedback';
 import {
   canParticipantAnswer,
   isQuizActive,
@@ -395,11 +396,16 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
                 <LoadingSpinner size="small" variant="dots" className="mt-2" />
               </>
             ) : isAnswerCorrect ? (
-              // Correct
+              // Correct - with animation
               <>
-                <Text className="text-center font-bold text-green-500 text-lg mb-1">◯正解</Text>
+                <AnswerFeedback
+                  isCorrect={true}
+                  isVisible={true}
+                  size="medium"
+                  className="mb-4"
+                />
                 <Text className="text-center font-bold text-yellow-600 text-lg mb-2">
-                  10ポイントGET！
+                  10ポイントGET！ 🎉
                 </Text>
 
                 <Text className="text-center text-blue-600 mt-2">
@@ -409,11 +415,17 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
                 <TranslationDisplay />
               </>
             ) : isPartialAnswer ? (
-              // Partial (惜しい)
+              // Partial (惜しい) - with animation
               <>
+                <AnswerFeedback
+                  isCorrect={null}
+                  isVisible={true}
+                  size="medium"
+                  className="mb-4"
+                />
                 <Text className="text-center font-bold text-orange-500 text-lg mb-1">△惜しい</Text>
                 <Text className="text-center font-bold text-yellow-600 text-lg mb-2">
-                  5ポイントGET！
+                  5ポイントGET！ ⭐
                 </Text>
                 <Text className="text-center text-blue-600 mt-2">
                   あなたの回答: 「{userAnswer?.answer_text || '取得中...'}」
@@ -423,14 +435,19 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
                 <TranslationDisplay />
               </>
             ) : (
-              // Incorrect
+              // Incorrect - with animation
               <>
-                <Text className="text-center font-bold text-red-500 text-lg mb-1">×不正解</Text>
+                <AnswerFeedback
+                  isCorrect={false}
+                  isVisible={true}
+                  size="medium"
+                  className="mb-4"
+                />
                 <Text className="text-center text-blue-600 mt-2">
                   あなたの回答: 「{userAnswer?.answer_text || '取得中...'}」
                   {isAutoMode && trailingPunctuation}
                 </Text>
-                <Text className="text-center text-black mt-2">正解: {questionText}</Text>
+                <Text className="text-center text-black mt-2 font-semibold">正解: {questionText}</Text>
                 <TranslationDisplay />
               </>
             )}

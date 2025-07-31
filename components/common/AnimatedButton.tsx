@@ -1,9 +1,9 @@
-// components/common/Button.tsx
-import React from 'react';
+// components/common/AnimatedButton.tsx
+import React, { useEffect } from 'react';
 import { TouchableOpacity, Text, View, Animated } from 'react-native';
-import { useRef, useEffect } from 'react';
+import { useUIAnimations } from '@/hooks/useAnimations';
 
-interface ButtonProps {
+interface AnimatedButtonProps {
   title?: string;
   onPress: () => void;
   variant?: 'primary' | 'secondary' | 'danger' | 'outline' | 'ghost' | 'correct' | 'partial';
@@ -13,9 +13,11 @@ interface ButtonProps {
   className?: string;
   icon?: React.ReactNode;
   children?: React.ReactNode;
+  animateOnMount?: boolean;
+  delay?: number;
 }
 
-export const CustomButton: React.FC<ButtonProps> = ({
+export const AnimatedButton: React.FC<AnimatedButtonProps> = ({
   title,
   onPress,
   variant = 'primary',
@@ -25,52 +27,47 @@ export const CustomButton: React.FC<ButtonProps> = ({
   className = '',
   icon,
   children,
+  animateOnMount = false,
+  delay = 0,
 }) => {
-  const scaleValue = useRef(new Animated.Value(1)).current;
+  const { scale, fade, slide, pressAnimation, enterFromBottom } = useUIAnimations();
 
-  const animatePress = () => {
-    Animated.sequence([
-      Animated.timing(scaleValue, {
-        toValue: 0.95,
-        duration: 100,
-        useNativeDriver: true,
-      }),
-      Animated.timing(scaleValue, {
-        toValue: 1,
-        duration: 100,
-        useNativeDriver: true,
-      }),
-    ]).start();
-  };
+  useEffect(() => {
+    if (animateOnMount) {
+      setTimeout(() => {
+        enterFromBottom().start();
+      }, delay);
+    } else {
+      fade.fadeIn(0).start();
+    }
+  }, [animateOnMount, delay]);
 
   const handlePress = () => {
     if (!disabled) {
-      animatePress();
+      pressAnimation().start();
       onPress();
     }
   };
 
-  // ベーススタイル - より現代的なデザイン
-  const baseButtonStyle = 'rounded-xl border-2 items-center justify-center shadow-sm';
+  // Enhanced styling with modern gradients and shadows
+  const baseButtonStyle = 'rounded-2xl border-2 items-center justify-center';
 
-  // サイズスタイル - よりモバイルフレンドリーに
   const sizeStyles = {
-    small: 'px-4 py-2.5',
-    medium: 'px-6 py-3.5',
-    large: 'px-8 py-4.5',
+    small: 'px-4 py-3',
+    medium: 'px-6 py-4',
+    large: 'px-8 py-5',
   };
 
-  // バリアントスタイル - グラデーションと改良された色
   const variantStyles = {
     primary: disabled
       ? 'bg-gray-300 border-gray-300'
-      : 'bg-gradient-to-r from-blue-500 to-blue-600 border-blue-500 shadow-lg shadow-blue-500/25',
+      : 'bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 border-blue-500 shadow-xl shadow-blue-500/30',
     secondary: disabled
       ? 'bg-gray-300 border-gray-300'
-      : 'bg-gradient-to-r from-gray-50 to-gray-100 border-gray-300 shadow-lg',
+      : 'bg-gradient-to-r from-gray-50 via-gray-100 to-gray-200 border-gray-300 shadow-xl',
     danger: disabled
       ? 'bg-gray-300 border-gray-300'
-      : 'bg-gradient-to-r from-red-500 to-red-600 border-red-500 shadow-lg shadow-red-500/25',
+      : 'bg-gradient-to-r from-red-500 via-red-600 to-red-700 border-red-500 shadow-xl shadow-red-500/30',
     outline: disabled
       ? 'bg-transparent border-gray-300'
       : 'bg-transparent border-blue-500 shadow-lg',
@@ -79,13 +76,12 @@ export const CustomButton: React.FC<ButtonProps> = ({
       : 'bg-transparent border-transparent',
     correct: disabled
       ? 'bg-green-300 border-green-300'
-      : 'bg-gradient-to-r from-green-500 to-green-600 border-green-500 shadow-lg shadow-green-500/25',
+      : 'bg-gradient-to-r from-green-500 via-green-600 to-green-700 border-green-500 shadow-xl shadow-green-500/30',
     partial: disabled
       ? 'bg-orange-300 border-orange-300'
-      : 'bg-gradient-to-r from-orange-500 to-orange-600 border-orange-500 shadow-lg shadow-orange-500/25',
+      : 'bg-gradient-to-r from-orange-500 via-orange-600 to-orange-700 border-orange-500 shadow-xl shadow-orange-500/30',
   };
 
-  // テキストスタイル
   const textSizeStyles = {
     small: 'text-sm',
     medium: 'text-base',
@@ -110,10 +106,18 @@ export const CustomButton: React.FC<ButtonProps> = ({
     className,
   ].join(' ');
 
-  const textClassName = ['font-bold', textSizeStyles[size], textVariantStyles[variant]].join(' ');
+  const textClassName = ['font-bold tracking-wide', textSizeStyles[size], textVariantStyles[variant]].join(' ');
 
   return (
-    <Animated.View style={{ transform: [{ scale: scaleValue }] }}>
+    <Animated.View
+      style={{
+        opacity: fade.fadeValue,
+        transform: [
+          { scale: scale.scaleValue },
+          { translateY: animateOnMount ? slide.slideValue : 0 }
+        ],
+      }}
+    >
       <TouchableOpacity
         className={buttonClassName}
         onPress={handlePress}
@@ -122,7 +126,7 @@ export const CustomButton: React.FC<ButtonProps> = ({
       >
         {children || (
           <View className="flex-row items-center justify-center">
-            {icon && <View className="mr-2">{icon}</View>}
+            {icon && <View className="mr-3">{icon}</View>}
             {title && <Text className={textClassName}>{title}</Text>}
           </View>
         )}
@@ -130,6 +134,3 @@ export const CustomButton: React.FC<ButtonProps> = ({
     </Animated.View>
   );
 };
-
-// Export both names for convenience and clarity
-export const Button = CustomButton;
