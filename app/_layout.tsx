@@ -38,9 +38,7 @@ function RootLayoutContent() {
   useEffect(() => {
     if (!isReady || !rootNavigationState?.key) return;
     if (!userId) {
-      setTimeout(() => {
-        router.replace('/onboarding/nickname');
-      }, 0);
+      router.replace('/onboarding/nickname');
     }
   }, [userId, rootNavigationState?.key, isReady]);
 
