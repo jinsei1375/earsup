@@ -52,7 +52,10 @@ export default function QuizScreen() {
   const isHost = role === 'host';
 
   // サンプル文からランダムに未使用の問題を選択する関数
-  const getRandomSampleSentence = async (): Promise<{ text: string; sampleSentenceId: string } | null> => {
+  const getRandomSampleSentence = async (): Promise<{
+    text: string;
+    sampleSentenceId: string;
+  } | null> => {
     try {
       const allSentences = await SampleSentenceService.getAllSentences();
       if (!allSentences || allSentences.length === 0) {
@@ -349,39 +352,8 @@ export default function QuizScreen() {
         setIsCorrect(null);
         setCurrentQuestionId(null); // 問題IDもリセット
 
-        // 次の問題を自動作成して即座に出題
+        // 次の問題に移行（問題作成画面に戻る）
         await nextQuestion();
-
-        // サンプル問題を自動作成
-        const randomQuestionData = await getRandomSampleSentence();
-        if (randomQuestionData) {
-          await new Promise((resolve) => {
-            requestAnimationFrame(() => {
-              requestAnimationFrame(resolve);
-            });
-          });
-
-          try {
-            await handleCreateQuestion(randomQuestionData.text, randomQuestionData.sampleSentenceId);
-          } catch (err) {
-            console.error('Auto question creation failed:', err);
-          }
-        } else {
-          // フォールバック: デフォルトの質問
-          const fallbackQuestion = fallbackQuestions[Math.floor(Math.random() * fallbackQuestions.length)];
-          
-          await new Promise((resolve) => {
-            requestAnimationFrame(() => {
-              requestAnimationFrame(resolve);
-            });
-          });
-
-          try {
-            await handleCreateQuestion(fallbackQuestion);
-          } catch (err) {
-            console.error('Auto question creation failed:', err);
-          }
-        }
       } else {
         // ホストありモードでは従来通り
         await nextQuestion();
