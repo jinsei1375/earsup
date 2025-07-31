@@ -6,6 +6,7 @@ import { router } from 'expo-router';
 import { SettingsModal } from '@/components/common/SettingsModal';
 import { useHeaderSettings } from '@/contexts/HeaderSettingsContext';
 import { Button } from '@/components/common/Button';
+import { AnimatedButton } from '@/components/common/AnimatedButton';
 
 export default function HomeScreen() {
   const userId = useUserStore((s) => s.userId);
@@ -120,28 +121,34 @@ export default function HomeScreen() {
 
         {/* メインアクションボタン */}
         <View className="mb-8 space-y-4">
-          <Button
+          <AnimatedButton
             title="🎯 ルームを作成する"
             onPress={handleCreateRoom}
             variant="primary"
             size="large"
             fullWidth
             className="mb-4"
+            animateOnMount={true}
+            delay={100}
           />
-          <Button
+          <AnimatedButton
             title="🤝 ルームに参加する"
             onPress={handleJoinRoom}
             variant="outline"
             size="large"
             fullWidth
             className="mb-4"
+            animateOnMount={true}
+            delay={200}
           />
-          <Button
+          <AnimatedButton
             title="📝 例文登録"
             onPress={handleManageSentences}
             variant="secondary"
             size="medium"
             fullWidth
+            animateOnMount={true}
+            delay={300}
           />
         </View>
 

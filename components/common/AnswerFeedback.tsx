@@ -1,6 +1,7 @@
 // components/common/AnswerFeedback.tsx
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, Animated, Easing } from 'react-native';
+import { CelebrationAnimation } from './CelebrationAnimation';
 
 interface AnswerFeedbackProps {
   isCorrect: boolean | null;
@@ -19,6 +20,7 @@ export const AnswerFeedback: React.FC<AnswerFeedbackProps> = ({
   const shakeValue = useRef(new Animated.Value(0)).current;
   const pulseValue = useRef(new Animated.Value(1)).current;
   const fadeValue = useRef(new Animated.Value(0)).current;
+  const [showCelebration, setShowCelebration] = useState(false);
 
   useEffect(() => {
     if (!isVisible || isCorrect === null) {
@@ -39,7 +41,9 @@ export const AnswerFeedback: React.FC<AnswerFeedbackProps> = ({
     }
 
     if (isCorrect) {
-      // 正解アニメーション：スケールアップ + パルス
+      // 正解アニメーション：スケールアップ + パルス + お祝い
+      setShowCelebration(true);
+      
       Animated.parallel([
         Animated.sequence([
           Animated.timing(scaleValue, {
@@ -169,21 +173,31 @@ export const AnswerFeedback: React.FC<AnswerFeedbackProps> = ({
   };
 
   return (
-    <Animated.View
-      className={`items-center justify-center p-6 rounded-2xl border-2 ${getBackgroundColor()} ${className}`}
-      style={{
-        opacity: fadeValue,
-        transform: [
-          { scale: scaleValue },
-          { scale: isCorrect ? pulseValue : 1 },
-          { translateX: shakeValue },
-        ],
-      }}
-    >
-      <Text style={{ fontSize: iconSize * 0.7 }}>{getIcon()}</Text>
-      <Text className={`font-bold mt-2 ${getTextColor()}`} style={{ fontSize }}>
-        {getText()}
-      </Text>
-    </Animated.View>
+    <View className="relative">
+      <Animated.View
+        className={`items-center justify-center p-6 rounded-2xl border-2 ${getBackgroundColor()} ${className}`}
+        style={{
+          opacity: fadeValue,
+          transform: [
+            { scale: scaleValue },
+            { scale: isCorrect ? pulseValue : 1 },
+            { translateX: shakeValue },
+          ],
+        }}
+      >
+        <Text style={{ fontSize: iconSize * 0.7 }}>{getIcon()}</Text>
+        <Text className={`font-bold mt-2 ${getTextColor()}`} style={{ fontSize }}>
+          {getText()}
+        </Text>
+      </Animated.View>
+      
+      {/* お祝いアニメーション */}
+      <CelebrationAnimation
+        isVisible={showCelebration && isCorrect === true}
+        type="confetti"
+        duration={2000}
+        onComplete={() => setShowCelebration(false)}
+      />
+    </View>
   );
 };
