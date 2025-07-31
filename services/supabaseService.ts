@@ -9,6 +9,7 @@ import type {
   User,
   ParticipantWithNickname,
   Stamp,
+  QuestionWithTranslation,
 } from '@/types';
 
 export class SupabaseService {
@@ -144,17 +145,17 @@ export class SupabaseService {
 
   static async getQuestionsWithTranslations(roomId: string): Promise<QuestionWithTranslation[]> {
     const questions = await this.getQuestionsForRoom(roomId);
-    
+
     const result: QuestionWithTranslation[] = [];
-    
+
     for (const question of questions) {
       let translation = '';
-      
+
       // Get translation from sample sentence if available
       if (question.sample_sentence_id) {
         try {
-          const sampleSentence = await import('@/services/sampleSentenceService').then(
-            module => module.SampleSentenceService.getSentenceById(question.sample_sentence_id!)
+          const sampleSentence = await import('@/services/sampleSentenceService').then((module) =>
+            module.SampleSentenceService.getSentenceById(question.sample_sentence_id!)
           );
           if (sampleSentence) {
             translation = sampleSentence.translation;
@@ -163,13 +164,13 @@ export class SupabaseService {
           console.warn('Failed to get sample sentence translation:', error);
         }
       }
-      
+
       result.push({
         ...question,
-        translation
+        translation,
       });
     }
-    
+
     return result;
   }
 

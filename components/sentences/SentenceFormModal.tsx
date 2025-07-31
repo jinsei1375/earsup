@@ -89,6 +89,8 @@ export const SentenceFormModal: React.FC<SentenceFormModalProps> = ({
       transparent={true}
       animationType="slide"
       onRequestClose={handleClose}
+      statusBarTranslucent={true}
+      presentationStyle="overFullScreen"
     >
       <KeyboardAvoidingView
         className="flex-1"
