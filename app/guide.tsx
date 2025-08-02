@@ -181,7 +181,6 @@ export default function GuideScreen() {
       <View className="p-6">
         {/* ヘッダーセクション */}
         <View className="items-center mb-8">
-          <Text className="text-3xl font-bold text-gray-800 mb-2">📚 使い方ガイド</Text>
           <Text className="text-lg text-gray-600 text-center">EarsUpの使い方を詳しく解説</Text>
         </View>
 

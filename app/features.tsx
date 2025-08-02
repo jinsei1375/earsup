@@ -79,7 +79,6 @@ export default function FeaturesScreen() {
       <View className="p-6">
         {/* ヘッダーセクション */}
         <View className="items-center mb-8">
-          <Text className="text-3xl font-bold text-gray-800 mb-2">✨ アプリの特徴</Text>
           <Text className="text-lg text-gray-600 text-center">EarsUpの豊富な機能をご紹介</Text>
         </View>
 
