@@ -16,9 +16,9 @@ import {
   canParticipantAnswer,
   isQuizActive,
   isQuizEnded,
-  speakText,
   extractTrailingPunctuation,
 } from '@/utils/quizUtils';
+import { audioService } from '@/services/audioService';
 import { ParticipantsList } from '@/components/room/ParticipantsList';
 import { SampleSentenceService } from '@/services/sampleSentenceService';
 import type {
@@ -73,6 +73,7 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
   const [playCount, setPlayCount] = useState(0); // 音声再生回数
   const [showExitModal, setShowExitModal] = useState(false);
   const [translation, setTranslation] = useState<string | null>(null); // 日本語訳
+  const [isPlaying, setIsPlaying] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
   const inputRef = useRef<TextInput>(null);
 
@@ -249,10 +250,19 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
     }
   };
 
-  const handlePlayAudio = () => {
-    if (!questionText || playCount >= maxPlayCount) return;
-    speakText(questionText, { rate: 1.0 });
-    setPlayCount((prev) => prev + 1);
+  const handlePlayAudio = async () => {
+    if (!questionText || playCount >= maxPlayCount || isPlaying) return;
+
+    try {
+      setIsPlaying(true);
+      // ホストなしモードは固定設定（男性、1.0x）で再生
+      await audioService.playText(questionText);
+      setPlayCount((prev) => prev + 1);
+    } catch (error) {
+      console.error('Audio playback failed:', error);
+    } finally {
+      setIsPlaying(false);
+    }
   };
 
   const handleInputFocus = () => {
@@ -320,16 +330,16 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
         {isAutoMode && (
           <View className="mb-4">
             <Button
-              title={`音声を再生する (${playCount}/${maxPlayCount})`}
+              title={isPlaying ? '再生中...' : `🎧 音声を再生する (${playCount}/${maxPlayCount})`}
               onPress={handlePlayAudio}
-              disabled={!questionText || playCount >= maxPlayCount || showResult}
+              disabled={!questionText || playCount >= maxPlayCount || showResult || isPlaying}
               variant={playCount >= maxPlayCount ? 'secondary' : 'primary'}
               size="large"
               fullWidth
             />
             {playCount >= maxPlayCount && (
-              <Text className="text-center text-red-600 text-sm mt-2">
-                再生回数の上限に達しました
+              <Text className="text-center text-red-600 text-sm mt-2 font-medium">
+                ⚠️ 再生回数の上限に達しました
               </Text>
             )}
           </View>

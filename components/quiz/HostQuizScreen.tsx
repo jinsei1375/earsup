@@ -1,14 +1,16 @@
 // components/quiz/HostQuizScreen.tsx
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { AnswersList } from './AnswersList';
 import { ParticipantsList } from '@/components/room/ParticipantsList';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { ErrorMessage } from '@/components/common/ErrorMessage';
 import { Button } from '@/components/common/Button';
+import { VoiceSettings } from '@/components/common/VoiceSettings';
 import { ExitRoomModal } from '@/components/common/ExitRoomModal';
-import { getQuizModeDisplayName, speakText, extractTrailingPunctuation } from '@/utils/quizUtils';
-import type { Answer, ParticipantWithNickname } from '@/types';
+import { getQuizModeDisplayName, extractTrailingPunctuation } from '@/utils/quizUtils';
+import { audioService } from '@/services/audioService';
+import type { Answer, ParticipantWithNickname, VoiceSettings as VoiceSettingsType } from '@/types';
 
 interface HostQuizScreenProps {
   questionText: string;
@@ -47,7 +49,10 @@ export const HostQuizScreen: React.FC<HostQuizScreenProps> = ({
   onEndQuiz,
   onNextQuestion,
 }) => {
-  const [selectedSpeed, setSelectedSpeed] = useState(1.0);
+  const [voiceSettings, setVoiceSettings] = useState<VoiceSettingsType>({
+    gender: 'male',
+    speed: 1.0,
+  });
   const [showSilentModeWarning, setShowSilentModeWarning] = useState(true);
   const [showExitModal, setShowExitModal] = useState(false);
 
@@ -62,9 +67,15 @@ export const HostQuizScreen: React.FC<HostQuizScreenProps> = ({
     ? answers.filter((answer) => answer.question_id === currentQuestionId)
     : [];
 
-  const handlePlayQuestion = () => {
+  const handlePlayQuestion = async () => {
     if (!questionText) return;
-    speakText(questionText, { rate: selectedSpeed });
+
+    try {
+      await audioService.playText(questionText, voiceSettings);
+    } catch (error) {
+      console.error('音声再生エラー:', error);
+      Alert.alert('エラー', '音声の再生に失敗しました。');
+    }
   };
 
   const handleEndQuiz = () => {
@@ -133,45 +144,18 @@ export const HostQuizScreen: React.FC<HostQuizScreenProps> = ({
       {/* メイン操作エリア - 優先表示 */}
       <Text className="text-lg mb-4 text-center font-semibold">{questionText}</Text>
 
-      {/* Speed selection */}
-      <Text className="text-sm text-gray-600 mb-2">音声再生速度:</Text>
-      <View className="flex-row flex-wrap justify-center mb-4">
-        {[
-          { speed: 0.75, label: '0.75x' },
-          { speed: 0.9, label: '0.9x' },
-          { speed: 1.0, label: '1.0x' },
-          { speed: 1.1, label: '1.1x' },
-          { speed: 1.25, label: '1.25x' },
-        ].map(({ speed, label }) => (
-          <TouchableOpacity
-            key={speed}
-            onPress={() => setSelectedSpeed(speed)}
-            className={`px-4 py-3 m-1 rounded-lg border-2 items-center justify-center min-w-[60px] ${
-              selectedSpeed === speed
-                ? 'bg-blue-500 border-blue-500 active:bg-blue-600'
-                : 'bg-transparent border-gray-300 active:bg-gray-50'
-            }`}
-          >
-            <Text
-              className={`text-center font-bold ${
-                selectedSpeed === speed ? 'text-white' : 'text-gray-700'
-              }`}
-            >
-              {label}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
+      {/* Voice settings */}
+      <VoiceSettings voiceSettings={voiceSettings} onSettingsChange={setVoiceSettings} />
 
       {/* Play button */}
       <Button
-        title={`音声を再生する (${selectedSpeed}x)`}
+        title={`音声を再生する (${voiceSettings.speed}x)`}
         onPress={handlePlayQuestion}
         disabled={!questionText}
         variant="primary"
         size="large"
         fullWidth
-        className="mb-4"
+        className="my-4"
       />
 
       {/* Answers list */}

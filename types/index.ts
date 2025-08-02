@@ -4,6 +4,13 @@ export interface User {
   nickname: string;
 }
 
+export type VoiceGender = 'male' | 'female';
+
+export interface VoiceSettings {
+  gender: VoiceGender;
+  speed: number;
+}
+
 export interface Room {
   id: string;
   code: string;
@@ -11,6 +18,7 @@ export interface Room {
   status: 'waiting' | 'ready' | 'active' | 'judged' | 'ended';
   quiz_mode: 'all-at-once-host' | 'all-at-once-auto';
   allow_partial_points?: boolean; // 惜しい判定を許可するか
+  voice_settings?: VoiceSettings; // 音声設定
   created_at: string;
   updated_at: string;
 }

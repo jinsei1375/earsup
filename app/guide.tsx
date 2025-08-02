@@ -160,6 +160,11 @@ export default function GuideScreen() {
       content: 'デバイスのマナーモード（消音モード）を解除してください',
     },
     {
+      icon: '🎙️',
+      title: '音声設定の活用',
+      content: '男性・女性の音声選択や、0.5x〜1.5xの速度調整で学習効果を最大化',
+    },
+    {
       icon: '⚡',
       title: '速度調整の活用',
       content: '初心者には0.75x、上級者には1.25xなど参加者に合わせて調整',

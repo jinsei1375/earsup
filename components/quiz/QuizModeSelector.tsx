@@ -36,7 +36,7 @@ export const QuizModeSelector: React.FC<QuizModeSelectorProps> = ({
               selectedMode === 'all-at-once-host' ? 'text-white' : 'text-gray-700'
             }`}
           >
-            一斉回答（ホストあり）
+            ホストあり
           </Text>
           <Text
             className={`text-xs text-center mt-1 ${
@@ -60,7 +60,7 @@ export const QuizModeSelector: React.FC<QuizModeSelectorProps> = ({
               selectedMode === 'all-at-once-auto' ? 'text-white' : 'text-gray-700'
             }`}
           >
-            一斉回答（ホストなし）
+            ホストなし
           </Text>
           <Text
             className={`text-xs text-center mt-1 ${
