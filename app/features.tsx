@@ -29,7 +29,6 @@ export default function FeaturesScreen() {
         '英語の音声問題を自動再生',
         '速度調整機能で聞き取りやすさを調整',
         '問題文は自由に作成・登録可能',
-        '音声の再生回数制限（ホストなしモード）',
       ],
     },
     {
@@ -40,7 +39,6 @@ export default function FeaturesScreen() {
         'ルームコードで簡単参加',
         '最大参加者数の制限なし',
         'リアルタイムで参加者の状況を表示',
-        '途中参加・退出も自由',
       ],
     },
     {
@@ -62,7 +60,6 @@ export default function FeaturesScreen() {
         'ホストありモード：ホストが判定を行う',
         'ホストなしモード：自動判定で進行',
         '惜しい判定の有効/無効設定',
-        '問題文の句読点除外設定',
       ],
     },
     {
@@ -73,18 +70,6 @@ export default function FeaturesScreen() {
         '英語フレーズと日本語訳を登録',
         '登録した例文はクイズで使用可能',
         '編集・削除機能で管理簡単',
-        '重複チェックで品質管理',
-      ],
-    },
-    {
-      icon: '📱',
-      title: 'モバイル最適化',
-      description: 'スマートフォンでの使いやすさを追求',
-      details: [
-        'レスポンシブデザイン',
-        'キーボード表示時の画面調整',
-        'マナーモード対応の音声再生',
-        'オフライン対応（一部機能）',
       ],
     },
   ];
@@ -132,14 +117,12 @@ export default function FeaturesScreen() {
           </Text>
           <View className="space-y-3">
             {[
-              'AIによる発音評価機能',
-              '学習進捗の記録・分析',
+              '1人で学習モード',
               'カスタムテーマ機能',
               'チーム戦モード',
-              '例文の共有機能',
               'オフライン学習モード',
             ].map((item, index) => (
-              <View key={index} className="flex-row items-center">
+              <View key={index} className="flex-row items-center mb-2">
                 <Text className="text-purple-500 mr-3">📋</Text>
                 <Text className="text-purple-700 flex-1">{item}</Text>
               </View>

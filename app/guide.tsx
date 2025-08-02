@@ -160,11 +160,6 @@ export default function GuideScreen() {
       content: 'デバイスのマナーモード（消音モード）を解除してください',
     },
     {
-      icon: '📝',
-      title: '例文登録のコツ',
-      content: '短くて明確なフレーズから始めて、徐々に難易度を上げましょう',
-    },
-    {
       icon: '⚡',
       title: '速度調整の活用',
       content: '初心者には0.75x、上級者には1.25xなど参加者に合わせて調整',
@@ -275,28 +270,22 @@ export default function GuideScreen() {
             🛠️ よくある問題と解決方法
           </Text>
           <View className="space-y-4">
-            <View>
+            <View className="mb-2">
               <Text className="font-semibold text-red-800 mb-1">音声が再生されない</Text>
               <Text className="text-red-700 text-sm">
                 → マナーモードを解除し、音量を確認してください
               </Text>
             </View>
-            <View>
+            <View className="mb-2">
               <Text className="font-semibold text-red-800 mb-1">ルームに参加できない</Text>
               <Text className="text-red-700 text-sm">
-                → ルームコードが正しいか、ルームがまだ有効か確認してください
+                → ルームコードが正しいか、ルームが作成済みか確認してください
               </Text>
             </View>
-            <View>
-              <Text className="font-semibold text-red-800 mb-1">例文が登録できない</Text>
-              <Text className="text-red-700 text-sm">
-                → 同じ例文が既に登録されていないか確認してください
-              </Text>
-            </View>
-            <View>
+            <View className="mb-2">
               <Text className="font-semibold text-red-800 mb-1">クイズが開始できない</Text>
               <Text className="text-red-700 text-sm">
-                → 参加者が最低1人いるか、例文が登録されているか確認してください
+                → ルーム作成者を除いて参加者が最低1人いるか確認してください
               </Text>
             </View>
           </View>
