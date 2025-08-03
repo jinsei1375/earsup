@@ -444,9 +444,7 @@ export default function QuizScreen() {
           <>
             <View className="flex-1 p-6 items-center justify-center">
               <Text className="text-xl font-bold mb-4">リスニングクイズ</Text>
-              <Text className="text-base text-gray-600 text-center mb-4">
-                次の問題を準備中です...
-              </Text>
+              <Text className="text-base text-gray-600 text-center mb-4">問題を準備中...</Text>
               <LoadingSpinner variant="sound-wave" color="#8B5CF6" size="large" className="mb-4" />
 
               {loading && <LoadingSpinner variant="default" color="#3B82F6" />}
