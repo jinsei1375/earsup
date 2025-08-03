@@ -27,15 +27,15 @@ export const SampleSentenceModal: React.FC<SampleSentenceModalProps> = ({
 }) => {
   const userId = useUserStore((s) => s.userId);
   const [activeTab, setActiveTab] = useState<TabType>('sample');
-  
+
   // Sample sentences state
   const [categories, setCategories] = useState<SampleCategory[]>([]);
   const [sentences, setSentences] = useState<SampleSentence[]>([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
-  
+
   // User sentences state
   const [userSentences, setUserSentences] = useState<UserSentence[]>([]);
-  
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -70,7 +70,7 @@ export const SampleSentenceModal: React.FC<SampleSentenceModalProps> = ({
 
   const loadUserSentences = async () => {
     if (!userId) return;
-    
+
     setLoading(true);
     setError(null);
     try {
@@ -185,9 +185,7 @@ export const SampleSentenceModal: React.FC<SampleSentenceModalProps> = ({
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => setActiveTab('user')}
-              className={`flex-1 py-3 ${
-                activeTab === 'user' ? 'border-b-2 border-blue-500' : ''
-              }`}
+              className={`flex-1 py-3 ${activeTab === 'user' ? 'border-b-2 border-blue-500' : ''}`}
             >
               <Text
                 className={`text-center font-medium ${

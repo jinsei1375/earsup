@@ -7,25 +7,25 @@ const testCases = [
   { answer: "I'm happy", correct: "I'm happy", expected: true },
   { answer: "I'm happy", correct: "I'm happy", expected: true },
   { answer: "don't worry", correct: "don't worry", expected: true },
-  
+
   // 全角・半角スペースの違い
-  { answer: "hello　world", correct: "hello world", expected: true },
-  { answer: "hello  world", correct: "hello world", expected: true },
-  { answer: "hello world", correct: "hello　world", expected: true },
-  
+  { answer: 'hello　world', correct: 'hello world', expected: true },
+  { answer: 'hello  world', correct: 'hello world', expected: true },
+  { answer: 'hello world', correct: 'hello　world', expected: true },
+
   // 全角英数字の違い
-  { answer: "Ｈｅｌｌｏ", correct: "Hello", expected: true },
-  { answer: "１２３", correct: "123", expected: true },
-  
+  { answer: 'Ｈｅｌｌｏ', correct: 'Hello', expected: true },
+  { answer: '１２３', correct: '123', expected: true },
+
   // 句読点の違い（excludePunctuation = true）
-  { answer: "Hello world", correct: "Hello world.", expected: true },
-  { answer: "Hello world!", correct: "Hello world", expected: true },
-  
+  { answer: 'Hello world', correct: 'Hello world.', expected: true },
+  { answer: 'Hello world!', correct: 'Hello world', expected: true },
+
   // 大文字小文字の違い
-  { answer: "HELLO WORLD", correct: "hello world", expected: true },
-  
+  { answer: 'HELLO WORLD', correct: 'hello world', expected: true },
+
   // 実際に異なる文章
-  { answer: "Hello world", correct: "Goodbye world", expected: false },
+  { answer: 'Hello world', correct: 'Goodbye world', expected: false },
 ];
 
 console.log('Testing improved validateAnswer function:');

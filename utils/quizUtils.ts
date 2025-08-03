@@ -14,12 +14,12 @@ export const validateAnswer = (
   // 文字列の正規化を行う関数
   const normalizeText = (text: string): string => {
     let normalized = text.trim();
-    
+
     // 全角・半角の正規化
     normalized = normalized
       // 全角英数字を半角に変換
       .replace(/[Ａ-Ｚａ-ｚ０-９]/g, (char) => {
-        return String.fromCharCode(char.charCodeAt(0) - 0xFEE0);
+        return String.fromCharCode(char.charCodeAt(0) - 0xfee0);
       })
       // 全角スペースを半角スペースに変換
       .replace(/　/g, ' ')
@@ -32,7 +32,7 @@ export const validateAnswer = (
       // クォーテーションマークの正規化
       .replace(/[""]/g, '"')
       .replace(/['']/g, "'");
-    
+
     return normalized.toLowerCase();
   };
 
