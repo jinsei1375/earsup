@@ -66,17 +66,7 @@ export default function RoomScreen() {
 
   // プラットフォーム別の通知表示
   const showNotification = (title: string, message: string) => {
-    if (Platform.OS === 'web') {
-      console.log(`${title}: ${message}`);
-      // Web用の簡易通知表示（将来的にはtoastライブラリに置き換え可能）
-      setLocalError(null); // エラーメッセージをクリア
-      setTimeout(() => {
-        setLocalError(`✅ ${message}`);
-        setTimeout(() => setLocalError(null), 3000); // 3秒後に消去
-      }, 100);
-    } else {
-      Alert.alert(title, message);
-    }
+    Alert.alert(title, message);
   };
 
   // Auto-generate room code for create mode
