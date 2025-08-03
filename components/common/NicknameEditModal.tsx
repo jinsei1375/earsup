@@ -1,16 +1,12 @@
 // components/common/NicknameEditModal.tsx
 import React, { useState } from 'react';
-import {
-  Modal,
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  Alert,
-  ActivityIndicator,
-} from 'react-native';
+import { Modal, View, Text, TextInput, Alert } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useUserStore } from '@/stores/userStore';
 import { supabase } from '@/lib/supabase';
+import { Button } from '@/components/common/Button';
+import { LoadingSpinner } from '@/components/common/LoadingSpinner';
+import { useToast } from '@/contexts/ToastContext';
 
 interface NicknameEditModalProps {
   visible: boolean;
@@ -29,17 +25,18 @@ export default function NicknameEditModal({
   const [isLoading, setIsLoading] = useState(false);
   const userId = useUserStore((s) => s.userId);
   const setUserInfo = useUserStore((s) => s.setUserInfo);
+  const { showSuccess, showError } = useToast();
 
   const handleSave = async () => {
     const trimmedNickname = newNickname.trim();
 
     if (!trimmedNickname) {
-      Alert.alert('エラー', 'ニックネームを入力してください');
+      showError('入力エラー', 'ニックネームを入力してください');
       return;
     }
 
     if (trimmedNickname.length > 20) {
-      Alert.alert('エラー', 'ニックネームは20文字以内で入力してください');
+      showError('入力エラー', 'ニックネームは20文字以内で入力してください');
       return;
     }
 
@@ -64,10 +61,11 @@ export default function NicknameEditModal({
       setUserInfo(userId!, trimmedNickname);
       onNicknameUpdate(trimmedNickname);
 
-      Alert.alert('成功', 'ニックネームを更新しました', [{ text: 'OK', onPress: onClose }]);
+      showSuccess('更新完了', 'ニックネームが正常に更新されました');
+      onClose();
     } catch (error) {
       console.error('Error updating nickname:', error);
-      Alert.alert('エラー', 'ニックネームの更新に失敗しました');
+      showError('更新エラー', 'ニックネームの更新に失敗しました');
     } finally {
       setIsLoading(false);
     }
@@ -82,7 +80,17 @@ export default function NicknameEditModal({
     <Modal visible={visible} transparent animationType="fade" onRequestClose={handleCancel}>
       <View className="flex-1 bg-black/50 justify-center items-center px-6">
         <View className="bg-white rounded-2xl p-6 w-full max-w-sm">
-          <Text className="text-xl font-bold text-gray-800 mb-4 text-center">ニックネーム変更</Text>
+          {/* Header */}
+          <View className="flex-row items-center justify-between mb-4">
+            <View style={{ width: 32 }} />
+            <Text className="text-xl font-bold text-gray-800">ニックネーム変更</Text>
+            <Button
+              onPress={handleCancel}
+              variant="ghost"
+              size="small"
+              icon={<Ionicons name="close" size={24} color="#666" />}
+            />
+          </View>
 
           <View className="mb-6">
             <Text className="text-sm text-gray-600 mb-2">新しいニックネーム</Text>
@@ -98,27 +106,32 @@ export default function NicknameEditModal({
             <Text className="text-xs text-gray-500 mt-1">{newNickname.length}/20文字</Text>
           </View>
 
-          <View className="flex-row space-x-3">
-            <TouchableOpacity
+          <View className="flex-row gap-3 mb-4">
+            <Button
+              title="キャンセル"
               onPress={handleCancel}
+              variant="danger"
+              size="large"
+              fullWidth
               disabled={isLoading}
-              className="flex-1 bg-gray-200 py-3 rounded-lg"
-            >
-              <Text className="text-gray-700 font-semibold text-center">キャンセル</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
+              className="flex-1"
+            />
+            <Button
+              title="保存"
               onPress={handleSave}
+              variant="primary"
+              size="large"
+              fullWidth
               disabled={isLoading}
-              className="flex-1 bg-blue-600 py-3 rounded-lg"
-            >
-              {isLoading ? (
-                <ActivityIndicator color="white" size="small" />
-              ) : (
-                <Text className="text-white font-semibold text-center">保存</Text>
-              )}
-            </TouchableOpacity>
+              className="flex-1"
+            />
           </View>
+
+          {isLoading && (
+            <View className="items-center py-2">
+              <LoadingSpinner variant="default" color="#3B82F6" size="small" />
+            </View>
+          )}
         </View>
       </View>
     </Modal>
