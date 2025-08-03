@@ -79,8 +79,8 @@ class AudioService {
       await Speech.speak(text, speechOptions);
       this.currentSpeech = null; // 再生完了
     } catch (error) {
-      console.error('Audio playback error:', error);
       this.currentSpeech = null;
+      console.error('Audio playback error:', error);
       throw error;
     }
   }
@@ -101,7 +101,8 @@ class AudioService {
   // 利用可能な音声の一覧を取得（デバッグ用）
   async getAvailableVoices() {
     try {
-      return await Speech.getAvailableVoicesAsync();
+      const voices = await Speech.getAvailableVoicesAsync();
+      return voices;
     } catch (error) {
       console.error('Error getting available voices:', error);
       return [];
