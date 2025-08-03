@@ -65,7 +65,7 @@ function RootLayoutContent() {
       case '/quiz':
         return 'リスニングクイズ';
       case '/sentences':
-        return '例文登録';
+        return 'マイセンテンス';
       case '/onboarding/nickname':
         return 'ニックネーム設定';
       case '/guide':

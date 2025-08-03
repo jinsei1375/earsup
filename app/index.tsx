@@ -126,7 +126,7 @@ export default function HomeScreen() {
             className="mb-4"
           />
           <Button
-            title="例文登録"
+            title="マイセンテンス"
             onPress={handleManageSentences}
             variant="secondary"
             size="medium"

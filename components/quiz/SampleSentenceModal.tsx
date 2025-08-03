@@ -199,7 +199,7 @@ export const SampleSentenceModal: React.FC<SampleSentenceModalProps> = ({
                   activeTab === 'user' ? 'text-blue-500' : 'text-gray-500'
                 }`}
               >
-                登録センテンス
+                マイセンテンス
               </Text>
             </TouchableOpacity>
           </View>
@@ -274,7 +274,7 @@ export const SampleSentenceModal: React.FC<SampleSentenceModalProps> = ({
             /* User Sentences Tab */
             <View className="flex-1">
               <Text className="p-3 font-semibold bg-gray-50 border-b border-gray-200">
-                登録したセンテンス
+                マイセンテンス
               </Text>
               {loading ? (
                 <View className="flex-1 items-center justify-center">

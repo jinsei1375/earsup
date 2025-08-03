@@ -13,10 +13,7 @@ interface QuestionListProps {
   onAddToExamples?: (question: QuestionWithTranslation) => void;
 }
 
-export const QuestionList: React.FC<QuestionListProps> = ({
-  roomId,
-  onAddToExamples,
-}) => {
+export const QuestionList: React.FC<QuestionListProps> = ({ roomId, onAddToExamples }) => {
   const userId = useUserStore((s) => s.userId);
   const [questions, setQuestions] = useState<QuestionWithTranslation[]>([]);
   const [loading, setLoading] = useState(false);
@@ -66,11 +63,7 @@ export const QuestionList: React.FC<QuestionListProps> = ({
 
       {/* Content */}
       <View style={{ maxHeight: 400 }}>
-        <ScrollView 
-          className="p-4" 
-          showsVerticalScrollIndicator={true}
-          nestedScrollEnabled={true}
-        >
+        <ScrollView className="p-4" showsVerticalScrollIndicator={true} nestedScrollEnabled={true}>
           {loading && (
             <View className="items-center py-8">
               <LoadingSpinner variant="default" color="#3B82F6" size="large" />
@@ -87,9 +80,7 @@ export const QuestionList: React.FC<QuestionListProps> = ({
           {!loading && questions.length === 0 && (
             <View className="items-center py-8">
               <Ionicons name="document-text-outline" size={64} color="#D1D5DB" />
-              <Text className="text-xl font-bold text-gray-600 mt-4 mb-2">
-                問題がありません
-              </Text>
+              <Text className="text-xl font-bold text-gray-600 mt-4 mb-2">問題がありません</Text>
               <Text className="text-gray-500 text-center">
                 このクイズではまだ問題が出題されていません
               </Text>
@@ -108,9 +99,7 @@ export const QuestionList: React.FC<QuestionListProps> = ({
                   className="bg-gray-50 rounded-lg p-4 mb-3 border border-gray-200"
                 >
                   <View className="flex-row items-start justify-between mb-2">
-                    <Text className="text-sm font-medium text-gray-600 mb-2">
-                      問題 {index + 1}
-                    </Text>
+                    <Text className="text-sm font-medium text-gray-600 mb-2">問題 {index + 1}</Text>
                     {onAddToExamples && (
                       <TouchableOpacity
                         onPress={() => handleAddToExamples(question)}
@@ -120,14 +109,14 @@ export const QuestionList: React.FC<QuestionListProps> = ({
                         style={{ elevation: 2, zIndex: 10 }}
                       >
                         <Ionicons name="add" size={16} color="white" />
-                        <Text className="text-white text-sm ml-1 font-medium">例文に追加</Text>
+                        <Text className="text-white text-sm ml-1 font-medium">
+                          マイセンテンスに追加
+                        </Text>
                       </TouchableOpacity>
                     )}
                   </View>
 
-                  <Text className="text-lg font-medium text-gray-800 mb-2">
-                    {question.text}
-                  </Text>
+                  <Text className="text-lg font-medium text-gray-800 mb-2">{question.text}</Text>
 
                   {question.translation && (
                     <Text className="text-gray-600 text-base">{question.translation}</Text>
