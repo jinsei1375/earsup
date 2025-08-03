@@ -22,16 +22,6 @@ class AudioService {
         (voice) => voice.language.startsWith('en-US') || voice.language.startsWith('en-')
       );
 
-      // デバッグ用：英語音声のみを確認
-      console.log(
-        'English voices:',
-        englishVoices.map((v) => ({
-          name: v.name,
-          language: v.language,
-          identifier: v.identifier,
-        }))
-      );
-
       // 性別に基づいて音声を選択（実際の利用可能音声に基づく）
       let selectedVoice = englishVoices.find((voice) => {
         const voiceName = voice.name.toLowerCase();
@@ -78,18 +68,6 @@ class AudioService {
       if (!selectedVoice && englishVoices.length > 0) {
         selectedVoice = englishVoices[0];
       }
-
-      // デバッグ用：選択された音声を確認
-      console.log(
-        'Selected voice:',
-        selectedVoice
-          ? {
-              name: selectedVoice.name,
-              language: selectedVoice.language,
-              gender: settings.gender,
-            }
-          : 'No voice selected'
-      );
 
       const speechOptions: Speech.SpeechOptions = {
         language: 'en-US',

@@ -13,7 +13,7 @@ import type { SampleSentence, SampleCategory, UserSentence } from '@/types';
 interface SampleSentenceModalProps {
   isVisible: boolean;
   onClose: () => void;
-  onSelectSentence: (sentence: string) => void;
+  onSelectSentence: (sentence: string, sampleSentenceId?: string) => void;
   hasCurrentText: boolean;
 }
 
@@ -106,6 +106,17 @@ export const SampleSentenceModal: React.FC<SampleSentenceModalProps> = ({
   };
 
   const handleSentenceSelect = (sentence: SampleSentence | UserSentence) => {
+    const getSampleSentenceId = (sentence: SampleSentence | UserSentence): string | undefined => {
+      // SampleSentenceの場合はそのままIDを返す
+      if ('category_id' in sentence) {
+        return sentence.id;
+      }
+      // UserSentenceの場合はsample_sentence_idはないのでundefined
+      return undefined;
+    };
+
+    const sampleSentenceId = getSampleSentenceId(sentence);
+
     if (hasCurrentText) {
       Alert.alert('入力内容の置換', 'すでに入力されている内容は削除されます。よろしいですか？', [
         {
@@ -116,13 +127,13 @@ export const SampleSentenceModal: React.FC<SampleSentenceModalProps> = ({
           text: '置換する',
           style: 'destructive',
           onPress: () => {
-            onSelectSentence(sentence.text);
+            onSelectSentence(sentence.text, sampleSentenceId);
             onClose();
           },
         },
       ]);
     } else {
-      onSelectSentence(sentence.text);
+      onSelectSentence(sentence.text, sampleSentenceId);
       onClose();
     }
   };

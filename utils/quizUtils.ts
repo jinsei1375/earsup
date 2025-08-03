@@ -11,12 +11,37 @@ export const validateAnswer = (
   correctAnswer: string,
   excludePunctuation: boolean = false
 ): boolean => {
-  let processedAnswer = answer.trim().toLowerCase();
-  let processedCorrectAnswer = correctAnswer.trim().toLowerCase();
+  // 文字列の正規化を行う関数
+  const normalizeText = (text: string): string => {
+    let normalized = text.trim();
+    
+    // 全角・半角の正規化
+    normalized = normalized
+      // 全角英数字を半角に変換
+      .replace(/[Ａ-Ｚａ-ｚ０-９]/g, (char) => {
+        return String.fromCharCode(char.charCodeAt(0) - 0xFEE0);
+      })
+      // 全角スペースを半角スペースに変換
+      .replace(/　/g, ' ')
+      // 複数の半角スペースを1つに統一
+      .replace(/\s+/g, ' ')
+      // アポストロフィの正規化（' → '）
+      .replace(/'/g, "'")
+      // ダッシュの正規化（— → -）
+      .replace(/[—–]/g, '-')
+      // クォーテーションマークの正規化
+      .replace(/[""]/g, '"')
+      .replace(/['']/g, "'");
+    
+    return normalized.toLowerCase();
+  };
+
+  let processedAnswer = normalizeText(answer);
+  let processedCorrectAnswer = normalizeText(correctAnswer);
 
   if (excludePunctuation) {
     // Remove common punctuation marks for host-less mode comparison
-    const punctuationRegex = /[.!?]/g;
+    const punctuationRegex = /[.!?,:;]/g;
     processedAnswer = processedAnswer.replace(punctuationRegex, '');
     processedCorrectAnswer = processedCorrectAnswer.replace(punctuationRegex, '');
   }
