@@ -138,15 +138,6 @@ export const SampleSentenceModal: React.FC<SampleSentenceModalProps> = ({
   const confirmReplaceSentence = () => {
     const sentence = replaceConfirmation.sentence;
     if (sentence) {
-      const getSampleSentenceId = (sentence: SampleSentence | UserSentence): string | undefined => {
-        // SampleSentenceの場合はそのままIDを返す
-        if ('category_id' in sentence) {
-          return sentence.id;
-        }
-        // UserSentenceの場合はsample_sentence_idはないのでundefined
-        return undefined;
-      };
-
       const sampleSentenceId = getSampleSentenceId(sentence);
       onSelectSentence(sentence.text, sampleSentenceId);
       onClose();
