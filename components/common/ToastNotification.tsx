@@ -69,17 +69,37 @@ export const ToastNotification: React.FC<ToastNotificationProps> = ({
           },
         ],
         opacity: animatedValue,
+        marginHorizontal: 16,
+        marginBottom: 8,
+        minWidth: '90%',
+        maxWidth: '95%',
+        alignSelf: 'center',
       }}
-      className={`${styles.bg} mx-4 mb-2 p-4 rounded-lg shadow-lg flex-row items-center`}
+      className={`${styles.bg} p-4 rounded-lg shadow-lg flex-row items-center`}
     >
       <Ionicons name={styles.icon} size={24} color={styles.iconColor} />
-      <View className="flex-1 ml-3">
-        <Text className="text-white font-semibold text-lg">{toast.title}</Text>
+      <View style={{ flex: 1, marginLeft: 12, marginRight: 8 }}>
+        <Text
+          className="text-white font-semibold text-lg"
+          style={{ color: '#FFFFFF', flexWrap: 'wrap' }}
+          numberOfLines={2}
+        >
+          {toast.title}
+        </Text>
         {toast.message && (
-          <Text className="text-white text-sm mt-1">{toast.message}</Text>
+          <Text
+            className="text-white text-sm mt-1"
+            style={{ color: '#FFFFFF', flexWrap: 'wrap' }}
+            numberOfLines={3}
+          >
+            {toast.message}
+          </Text>
         )}
       </View>
-      <TouchableOpacity onPress={() => onDismiss(toast.id)} className="ml-2">
+      <TouchableOpacity
+        onPress={() => onDismiss(toast.id)}
+        style={{ padding: 4, minWidth: 32, alignItems: 'center' }}
+      >
         <Ionicons name="close" size={20} color="#ffffff" />
       </TouchableOpacity>
     </Animated.View>

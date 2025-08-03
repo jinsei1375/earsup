@@ -5,7 +5,7 @@ import type { VoiceSettings } from '@/types';
 class AudioService {
   private currentSpeech: string | null = null;
 
-  async playText(text: string, settings: VoiceSettings = { gender: 'male', speed: 1.0 }) {
+  async playText(text: string, settings: VoiceSettings = { gender: 'female', speed: 1.0 }) {
     try {
       // 既に再生中の音声があれば停止
       if (this.currentSpeech) {
@@ -71,7 +71,7 @@ class AudioService {
 
       const speechOptions: Speech.SpeechOptions = {
         language: 'en-US',
-        pitch: settings.gender === 'male' ? 0.8 : 1.0,
+        pitch: 1.0,
         rate: settings.speed,
         voice: selectedVoice?.identifier,
       };

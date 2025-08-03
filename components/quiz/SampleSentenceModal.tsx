@@ -112,16 +112,15 @@ export const SampleSentenceModal: React.FC<SampleSentenceModalProps> = ({
     await loadSentences(categoryId);
   };
 
+  const getSampleSentenceId = (sentence: SampleSentence | UserSentence): string | undefined => {
+    // SampleSentenceの場合はそのままIDを返す
+    if ('category_id' in sentence) {
+      return sentence.id;
+    }
+    // UserSentenceの場合はsample_sentence_idはないのでundefined
+    return undefined;
+  };
   const handleSentenceSelect = (sentence: SampleSentence | UserSentence) => {
-    const getSampleSentenceId = (sentence: SampleSentence | UserSentence): string | undefined => {
-      // SampleSentenceの場合はそのままIDを返す
-      if ('category_id' in sentence) {
-        return sentence.id;
-      }
-      // UserSentenceの場合はsample_sentence_idはないのでundefined
-      return undefined;
-    };
-
     const sampleSentenceId = getSampleSentenceId(sentence);
 
     if (hasCurrentText) {
@@ -137,8 +136,8 @@ export const SampleSentenceModal: React.FC<SampleSentenceModalProps> = ({
 
   const confirmReplaceSentence = () => {
     const sentence = replaceConfirmation.sentence;
+    const sampleSentenceId = sentence ? getSampleSentenceId(sentence) : undefined;
     if (sentence) {
-      const sampleSentenceId = getSampleSentenceId(sentence);
       onSelectSentence(sentence.text, sampleSentenceId);
       onClose();
     }

@@ -26,7 +26,7 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
   const showToast = useCallback((toastData: Omit<ToastData, 'id'>) => {
     const id = Date.now().toString() + Math.random().toString(36).slice(2, 11);
     const animatedValue = new Animated.Value(0);
-    
+
     const newToast: ToastWithAnimation = {
       ...toastData,
       id,

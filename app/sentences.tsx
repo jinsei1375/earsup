@@ -17,7 +17,7 @@ import type { UserSentence } from '@/types';
 export default function SentencesScreen() {
   const userId = useUserStore((s) => s.userId);
   const { setSettingsConfig } = useHeaderSettings();
-  const { showError } = useToast();
+  const { showError, showSuccess } = useToast();
   const [sentences, setSentences] = useState<UserSentence[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -100,12 +100,13 @@ export default function SentencesScreen() {
 
     try {
       await UserSentenceService.deleteUserSentence(sentenceId);
+      showSuccess('削除完了', '例文が正常に削除されました');
       loadSentences();
     } catch (err: unknown) {
       if (err instanceof Error) {
-        showError('エラー', err.message);
+        showError('削除エラー', err.message);
       } else {
-        showError('エラー', '不明なエラーが発生しました');
+        showError('削除エラー', '例文の削除に失敗しました');
       }
     } finally {
       setDeleteConfirmation({ isVisible: false, sentence: null });
@@ -118,8 +119,10 @@ export default function SentencesScreen() {
     try {
       if (editingSentence) {
         await UserSentenceService.updateUserSentence(editingSentence.id, text, translation);
+        showSuccess('更新完了', '例文が正常に更新されました');
       } else {
         await UserSentenceService.createUserSentence(userId, text, translation);
+        showSuccess('保存完了', '例文が正常に保存されました');
       }
       setIsFormModalVisible(false);
       loadSentences();
