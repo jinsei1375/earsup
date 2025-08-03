@@ -1,6 +1,6 @@
 // components/quiz/QuizResultScreen.tsx
 import React, { useState } from 'react';
-import { View, Text, ScrollView, Alert, Platform } from 'react-native';
+import { View, Text, ScrollView, Platform } from 'react-native';
 import type { ParticipantWithNickname, Answer, QuestionWithTranslation } from '@/types';
 import { calculateParticipantStats, addRanksToParticipantStats } from '@/utils/quizUtils';
 import { Button } from '@/components/common/Button';
@@ -9,6 +9,7 @@ import { QuestionList } from '@/components/quiz/QuestionList';
 import { SentenceFormModal } from '@/components/sentences/SentenceFormModal';
 import { UserSentenceService } from '@/services/userSentenceService';
 import { useUserStore } from '@/stores/userStore';
+import { useToast } from '@/contexts/ToastContext';
 import { Ionicons } from '@expo/vector-icons';
 
 interface QuizResultScreenProps {
@@ -33,6 +34,7 @@ export const QuizResultScreen: React.FC<QuizResultScreenProps> = ({
   roomId,
 }) => {
   const userId = useUserStore((s) => s.userId);
+  const { showSuccess } = useToast();
   const [isSentenceModalVisible, setIsSentenceModalVisible] = useState(false);
   const [selectedQuestion, setSelectedQuestion] = useState<QuestionWithTranslation | null>(null);
 
@@ -72,7 +74,7 @@ export const QuizResultScreen: React.FC<QuizResultScreenProps> = ({
       if (Platform.OS === 'web') {
         console.log('例文に追加されました');
       } else {
-        Alert.alert('成功', '例文に追加されました');
+        showSuccess('成功', '例文に追加されました');
       }
     } catch (err) {
       throw err; // Let the modal handle the error

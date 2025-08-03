@@ -5,14 +5,17 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaView, View, StatusBar } from 'react-native';
 import AppHeader from '@/components/AppHeader';
 import { HeaderSettingsProvider, useHeaderSettings } from '@/contexts/HeaderSettingsContext';
+import { ToastProvider } from '@/contexts/ToastContext';
 // グローバルCSSのインポート
 import '@/assets/css/global.css';
 
 export default function RootLayout() {
   return (
-    <HeaderSettingsProvider>
-      <RootLayoutContent />
-    </HeaderSettingsProvider>
+    <ToastProvider>
+      <HeaderSettingsProvider>
+        <RootLayoutContent />
+      </HeaderSettingsProvider>
+    </ToastProvider>
   );
 }
 

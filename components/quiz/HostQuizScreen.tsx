@@ -1,6 +1,6 @@
 // components/quiz/HostQuizScreen.tsx
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { AnswersList } from './AnswersList';
 import { ParticipantsList } from '@/components/room/ParticipantsList';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
@@ -10,6 +10,7 @@ import { VoiceSettings } from '@/components/common/VoiceSettings';
 import { ExitRoomModal } from '@/components/common/ExitRoomModal';
 import { getQuizModeDisplayName, extractTrailingPunctuation } from '@/utils/quizUtils';
 import { audioService } from '@/services/audioService';
+import { useToast } from '@/contexts/ToastContext';
 import type { Answer, ParticipantWithNickname, VoiceSettings as VoiceSettingsType } from '@/types';
 
 interface HostQuizScreenProps {
@@ -49,6 +50,7 @@ export const HostQuizScreen: React.FC<HostQuizScreenProps> = ({
   onEndQuiz,
   onNextQuestion,
 }) => {
+  const { showError } = useToast();
   const [voiceSettings, setVoiceSettings] = useState<VoiceSettingsType>({
     gender: 'male',
     speed: 1.0,
@@ -74,7 +76,7 @@ export const HostQuizScreen: React.FC<HostQuizScreenProps> = ({
       await audioService.playText(questionText, voiceSettings);
     } catch (error) {
       console.error('音声再生エラー:', error);
-      Alert.alert('エラー', '音声の再生に失敗しました。');
+      showError('エラー', '音声の再生に失敗しました。');
     }
   };
 

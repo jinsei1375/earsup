@@ -5,7 +5,6 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  Alert,
   Platform,
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
@@ -23,6 +22,7 @@ import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { ErrorMessage } from '@/components/common/ErrorMessage';
 import { generateRoomCode } from '@/utils/quizUtils';
 import { Button } from '@/components/common/Button';
+import { useToast } from '@/contexts/ToastContext';
 import type { RoomScreenParams } from '@/types';
 
 export default function RoomScreen() {
@@ -30,6 +30,7 @@ export default function RoomScreen() {
   const { mode, roomId: paramRoomId } = params;
   const router = useRouter();
   const userId = useUserStore((s) => s.userId);
+  const { showInfo, showError } = useToast();
 
   // Local state for room creation/joining
   const [code, setCode] = useState('');
@@ -66,7 +67,7 @@ export default function RoomScreen() {
 
   // プラットフォーム別の通知表示
   const showNotification = (title: string, message: string) => {
-    Alert.alert(title, message);
+    showInfo(title, message);
   };
 
   // Auto-generate room code for create mode

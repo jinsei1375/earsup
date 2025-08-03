@@ -1,6 +1,6 @@
 // app/sentences.tsx
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Alert, RefreshControl } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, RefreshControl } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useUserStore } from '@/stores/userStore';
@@ -9,18 +9,25 @@ import { Button } from '@/components/common/Button';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { ErrorMessage } from '@/components/common/ErrorMessage';
 import { SentenceFormModal } from '@/components/sentences/SentenceFormModal';
+import { ConfirmationModal } from '@/components/common/ConfirmationModal';
 import { useHeaderSettings } from '@/contexts/HeaderSettingsContext';
+import { useToast } from '@/contexts/ToastContext';
 import type { UserSentence } from '@/types';
 
 export default function SentencesScreen() {
   const userId = useUserStore((s) => s.userId);
   const { setSettingsConfig } = useHeaderSettings();
+  const { showError } = useToast();
   const [sentences, setSentences] = useState<UserSentence[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isFormModalVisible, setIsFormModalVisible] = useState(false);
   const [editingSentence, setEditingSentence] = useState<UserSentence | null>(null);
+  const [deleteConfirmation, setDeleteConfirmation] = useState<{
+    isVisible: boolean;
+    sentence: UserSentence | null;
+  }>({ isVisible: false, sentence: null });
 
   useEffect(() => {
     // ヘッダー設定
@@ -80,28 +87,29 @@ export default function SentencesScreen() {
   };
 
   const handleDeleteSentence = (sentence: UserSentence) => {
-    Alert.alert('例文を削除', `「${sentence.text}」を削除しますか？`, [
-      {
-        text: 'キャンセル',
-        style: 'cancel',
-      },
-      {
-        text: '削除',
-        style: 'destructive',
-        onPress: async () => {
-          try {
-            await UserSentenceService.deleteUserSentence(sentence.id);
-            loadSentences();
-          } catch (err: unknown) {
-            if (err instanceof Error) {
-              Alert.alert('エラー', err.message);
-            } else {
-              Alert.alert('エラー', '不明なエラーが発生しました');
-            }
-          }
-        },
-      },
-    ]);
+    setDeleteConfirmation({
+      isVisible: true,
+      sentence: sentence,
+    });
+  };
+
+  const confirmDeleteSentence = async () => {
+    const sentence = deleteConfirmation.sentence;
+    if (!sentence) return;
+    const sentenceId = sentence.id;
+
+    try {
+      await UserSentenceService.deleteUserSentence(sentenceId);
+      loadSentences();
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        showError('エラー', err.message);
+      } else {
+        showError('エラー', '不明なエラーが発生しました');
+      }
+    } finally {
+      setDeleteConfirmation({ isVisible: false, sentence: null });
+    }
   };
 
   const handleSaveSentence = async (text: string, translation: string) => {
@@ -219,6 +227,16 @@ export default function SentencesScreen() {
         initialText={editingSentence?.text || ''}
         initialTranslation={editingSentence?.translation || ''}
         isEditing={!!editingSentence}
+      />
+
+      <ConfirmationModal
+        isVisible={deleteConfirmation.isVisible}
+        onClose={() => setDeleteConfirmation({ isVisible: false, sentence: null })}
+        onConfirm={confirmDeleteSentence}
+        title="例文を削除"
+        message={`「${deleteConfirmation.sentence?.text || ''}」を削除しますか？`}
+        confirmText="削除"
+        confirmVariant="destructive"
       />
     </View>
   );

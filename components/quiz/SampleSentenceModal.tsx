@@ -1,10 +1,11 @@
 // components/quiz/SampleSentenceModal.tsx
 import React, { useState, useEffect } from 'react';
-import { View, Text, Modal, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, Modal, ScrollView, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Button } from '@/components/common/Button';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { ErrorMessage } from '@/components/common/ErrorMessage';
+import { ConfirmationModal } from '@/components/common/ConfirmationModal';
 import { SampleSentenceService } from '@/services/sampleSentenceService';
 import { UserSentenceService } from '@/services/userSentenceService';
 import { useUserStore } from '@/stores/userStore';
@@ -38,6 +39,12 @@ export const SampleSentenceModal: React.FC<SampleSentenceModalProps> = ({
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Confirmation modal state
+  const [replaceConfirmation, setReplaceConfirmation] = useState<{
+    isVisible: boolean;
+    sentence: SampleSentence | UserSentence | null;
+  }>({ isVisible: false, sentence: null });
 
   useEffect(() => {
     if (isVisible) {
@@ -118,24 +125,24 @@ export const SampleSentenceModal: React.FC<SampleSentenceModalProps> = ({
     const sampleSentenceId = getSampleSentenceId(sentence);
 
     if (hasCurrentText) {
-      Alert.alert('入力内容の置換', 'すでに入力されている内容は削除されます。よろしいですか？', [
-        {
-          text: 'キャンセル',
-          style: 'cancel',
-        },
-        {
-          text: '置換する',
-          style: 'destructive',
-          onPress: () => {
-            onSelectSentence(sentence.text, sampleSentenceId);
-            onClose();
-          },
-        },
-      ]);
+      setReplaceConfirmation({
+        isVisible: true,
+        sentence: sentence,
+      });
     } else {
       onSelectSentence(sentence.text, sampleSentenceId);
       onClose();
     }
+  };
+
+  const confirmReplaceSentence = () => {
+    const sentence = replaceConfirmation.sentence;
+    if (sentence) {
+      const sampleSentenceId = getSampleSentenceId(sentence);
+      onSelectSentence(sentence.text, sampleSentenceId);
+      onClose();
+    }
+    setReplaceConfirmation({ isVisible: false, sentence: null });
   };
 
   const handleClose = () => {
@@ -144,6 +151,7 @@ export const SampleSentenceModal: React.FC<SampleSentenceModalProps> = ({
     setUserSentences([]);
     setError(null);
     setActiveTab('sample');
+    setReplaceConfirmation({ isVisible: false, sentence: null });
     onClose();
   };
 
@@ -308,6 +316,16 @@ export const SampleSentenceModal: React.FC<SampleSentenceModalProps> = ({
           )}
         </View>
       </View>
+
+      <ConfirmationModal
+        isVisible={replaceConfirmation.isVisible}
+        onClose={() => setReplaceConfirmation({ isVisible: false, sentence: null })}
+        onConfirm={confirmReplaceSentence}
+        title="入力内容の置換"
+        message="すでに入力されている内容は削除されます。よろしいですか？"
+        confirmText="置換する"
+        confirmVariant="destructive"
+      />
     </Modal>
   );
 };
