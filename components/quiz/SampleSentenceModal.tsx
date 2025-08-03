@@ -14,7 +14,7 @@ import type { SampleSentence, SampleCategory, UserSentence } from '@/types';
 interface SampleSentenceModalProps {
   isVisible: boolean;
   onClose: () => void;
-  onSelectSentence: (sentence: string) => void;
+  onSelectSentence: (sentence: string, sampleSentenceId?: string) => void;
   hasCurrentText: boolean;
 }
 
@@ -28,15 +28,15 @@ export const SampleSentenceModal: React.FC<SampleSentenceModalProps> = ({
 }) => {
   const userId = useUserStore((s) => s.userId);
   const [activeTab, setActiveTab] = useState<TabType>('sample');
-  
+
   // Sample sentences state
   const [categories, setCategories] = useState<SampleCategory[]>([]);
   const [sentences, setSentences] = useState<SampleSentence[]>([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
-  
+
   // User sentences state
   const [userSentences, setUserSentences] = useState<UserSentence[]>([]);
-  
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -77,7 +77,7 @@ export const SampleSentenceModal: React.FC<SampleSentenceModalProps> = ({
 
   const loadUserSentences = async () => {
     if (!userId) return;
-    
+
     setLoading(true);
     setError(null);
     try {
@@ -113,13 +113,24 @@ export const SampleSentenceModal: React.FC<SampleSentenceModalProps> = ({
   };
 
   const handleSentenceSelect = (sentence: SampleSentence | UserSentence) => {
+    const getSampleSentenceId = (sentence: SampleSentence | UserSentence): string | undefined => {
+      // SampleSentenceの場合はそのままIDを返す
+      if ('category_id' in sentence) {
+        return sentence.id;
+      }
+      // UserSentenceの場合はsample_sentence_idはないのでundefined
+      return undefined;
+    };
+
+    const sampleSentenceId = getSampleSentenceId(sentence);
+
     if (hasCurrentText) {
       setReplaceConfirmation({
         isVisible: true,
         sentence: sentence,
       });
     } else {
-      onSelectSentence(sentence.text);
+      onSelectSentence(sentence.text, sampleSentenceId);
       onClose();
     }
   };
@@ -127,7 +138,17 @@ export const SampleSentenceModal: React.FC<SampleSentenceModalProps> = ({
   const confirmReplaceSentence = () => {
     const sentence = replaceConfirmation.sentence;
     if (sentence) {
-      onSelectSentence(sentence.text);
+      const getSampleSentenceId = (sentence: SampleSentence | UserSentence): string | undefined => {
+        // SampleSentenceの場合はそのままIDを返す
+        if ('category_id' in sentence) {
+          return sentence.id;
+        }
+        // UserSentenceの場合はsample_sentence_idはないのでundefined
+        return undefined;
+      };
+
+      const sampleSentenceId = getSampleSentenceId(sentence);
+      onSelectSentence(sentence.text, sampleSentenceId);
       onClose();
     }
     setReplaceConfirmation({ isVisible: false, sentence: null });
@@ -181,9 +202,7 @@ export const SampleSentenceModal: React.FC<SampleSentenceModalProps> = ({
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => setActiveTab('user')}
-              className={`flex-1 py-3 ${
-                activeTab === 'user' ? 'border-b-2 border-blue-500' : ''
-              }`}
+              className={`flex-1 py-3 ${activeTab === 'user' ? 'border-b-2 border-blue-500' : ''}`}
             >
               <Text
                 className={`text-center font-medium ${

@@ -16,7 +16,7 @@ import { Button } from '@/components/common/Button';
 import { SampleSentenceModal } from './SampleSentenceModal';
 
 interface QuestionCreatorProps {
-  onCreateQuestion: (text: string) => Promise<void>;
+  onCreateQuestion: (text: string, sampleSentenceId?: string) => Promise<void>;
   loading: boolean;
   error: string | null;
 }
@@ -27,17 +27,20 @@ export const QuestionCreator: React.FC<QuestionCreatorProps> = ({
   error,
 }) => {
   const [questionText, setQuestionText] = useState('');
+  const [selectedSampleSentenceId, setSelectedSampleSentenceId] = useState<string | null>(null);
   const [isSampleModalVisible, setIsSampleModalVisible] = useState(false);
 
   const handleSubmit = async () => {
     if (questionText.trim()) {
-      await onCreateQuestion(questionText.trim());
+      await onCreateQuestion(questionText.trim(), selectedSampleSentenceId || undefined);
       setQuestionText(''); // Clear after successful creation
+      setSelectedSampleSentenceId(null); // Clear sample sentence ID
     }
   };
 
-  const handleSampleSentenceSelect = (sentence: string) => {
+  const handleSampleSentenceSelect = (sentence: string, sampleSentenceId?: string) => {
     setQuestionText(sentence);
+    setSelectedSampleSentenceId(sampleSentenceId || null);
   };
 
   return (
