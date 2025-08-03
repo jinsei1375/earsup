@@ -528,12 +528,16 @@ export default function QuizScreen() {
   if (!isHost) {
     // Show waiting screen when no question or room is waiting/ready
     if (!currentQuestion || room?.status === 'waiting' || room?.status === 'ready') {
+      const isAutoMode = room?.quiz_mode === 'all-at-once-auto';
+
       return (
         <>
           <View className="flex-1 p-6 items-center justify-center">
             <Text className="text-xl font-bold mb-4">待機中</Text>
             <Text className="text-base text-gray-600 text-center mb-4">
-              ホストが問題を準備中です。しばらくお待ちください。
+              {isAutoMode
+                ? 'クイズ準備中です。しばらくお待ちください。'
+                : 'ホストが問題を準備中です。しばらくお待ちください。'}
             </Text>
             <LoadingSpinner variant="sound-wave" color="#8B5CF6" size="large" className="mb-4" />
 
