@@ -96,9 +96,10 @@ export default function SentencesScreen() {
   const confirmDeleteSentence = async () => {
     const sentence = deleteConfirmation.sentence;
     if (!sentence) return;
+    const sentenceId = sentence.id;
 
     try {
-      await UserSentenceService.deleteUserSentence(sentence.id);
+      await UserSentenceService.deleteUserSentence(sentenceId);
       loadSentences();
     } catch (err: unknown) {
       if (err instanceof Error) {
