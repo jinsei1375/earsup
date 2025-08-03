@@ -69,6 +69,10 @@ function RootLayoutContent() {
         return '使い方ガイド';
       case '/features':
         return 'アプリの特徴';
+      case '/terms':
+        return '利用規約';
+      case '/privacy':
+        return 'プライバシーポリシー';
       default:
         // 特定の画面にマッチしない場合、最後のセグメントをキャピタライズしてタイトルとして使用
         return lastSegment.charAt(0).toUpperCase() + lastSegment.slice(1);

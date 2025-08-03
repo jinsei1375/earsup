@@ -3,7 +3,8 @@ import { View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { useUserStore } from '@/stores/userStore';
 import { supabase } from '@/lib/supabase';
 import { router } from 'expo-router';
-import { SettingsModal } from '@/components/common/SettingsModal';
+import InfoModal from '@/components/common/InfoModal';
+import NicknameEditModal from '@/components/common/NicknameEditModal';
 import { useHeaderSettings } from '@/contexts/HeaderSettingsContext';
 import { Button } from '@/components/common/Button';
 
@@ -12,7 +13,8 @@ export default function HomeScreen() {
   const storeNickname = useUserStore((s) => s.nickname);
   const setUserInfo = useUserStore((s) => s.setUserInfo);
   const [nickname, setNickname] = useState<string | null>(storeNickname);
-  const [isSettingsModalVisible, setIsSettingsModalVisible] = useState(false);
+  const [isInfoModalVisible, setIsInfoModalVisible] = useState(false);
+  const [isNicknameEditModalVisible, setIsNicknameEditModalVisible] = useState(false);
   const { setSettingsConfig } = useHeaderSettings();
 
   useEffect(() => {
@@ -49,7 +51,7 @@ export default function HomeScreen() {
   useEffect(() => {
     setSettingsConfig({
       showSettings: true,
-      onSettingsPress: () => setIsSettingsModalVisible(true),
+      onSettingsPress: () => setIsInfoModalVisible(true),
     });
 
     // クリーンアップ時に設定をリセット
@@ -68,20 +70,7 @@ export default function HomeScreen() {
     router.push('/sentences');
   };
 
-  const handleNicknameChange = async (newNickname: string) => {
-    if (!userId) throw new Error('ユーザーIDが見つかりません');
-
-    const { error } = await supabase
-      .from('users')
-      .update({ nickname: newNickname })
-      .eq('id', userId);
-
-    if (error) {
-      throw new Error(error.message);
-    }
-
-    // ストアと状態を更新
-    setUserInfo(userId, newNickname);
+  const handleNicknameUpdate = (newNickname: string) => {
     setNickname(newNickname);
   };
 
@@ -104,7 +93,7 @@ export default function HomeScreen() {
                 <Text className="text-blue-600 font-semibold">{nickname}</Text>
               </View>
               <TouchableOpacity
-                onPress={() => setIsSettingsModalVisible(true)}
+                onPress={() => setIsNicknameEditModalVisible(true)}
                 className="ml-2 bg-white rounded-full p-2 shadow-sm"
               >
                 <Text className="text-gray-600 text-sm">✏️</Text>
@@ -214,11 +203,13 @@ export default function HomeScreen() {
         </View>
       </View>
 
-      <SettingsModal
-        isVisible={isSettingsModalVisible}
-        onClose={() => setIsSettingsModalVisible(false)}
+      <InfoModal visible={isInfoModalVisible} onClose={() => setIsInfoModalVisible(false)} />
+
+      <NicknameEditModal
+        visible={isNicknameEditModalVisible}
+        onClose={() => setIsNicknameEditModalVisible(false)}
         currentNickname={nickname || ''}
-        onNicknameChange={handleNicknameChange}
+        onNicknameUpdate={handleNicknameUpdate}
       />
     </ScrollView>
   );
