@@ -447,6 +447,20 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
           </View>
         )}
 
+        {/* ホストなしモード: すべての回答判定完了後の音声再生ボタン */}
+        {isAutoMode && showResult && isResultDataReady && isCurrentQuestionFullyJudged && (
+          <View className="mt-4 mb-4">
+            <Button
+              title={isPlaying ? '再生中...' : '🎧 正解の音声を再生する'}
+              onPress={handlePlayAudio}
+              disabled={!questionText || isPlaying}
+              variant="outline"
+              size="medium"
+              fullWidth
+            />
+          </View>
+        )}
+
         {/* ホストなしモード: ルーム作成者用の次の問題ボタン */}
         {isHostlessMode &&
           isRoomCreator &&
