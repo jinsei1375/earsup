@@ -5,6 +5,7 @@ import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useUserStore } from '@/stores/userStore';
 import { UserSentenceService } from '@/services/userSentenceService';
+import { audioService } from '@/services/audioService';
 import { Button } from '@/components/common/Button';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { ErrorMessage } from '@/components/common/ErrorMessage';
@@ -28,6 +29,7 @@ export default function SentencesScreen() {
     isVisible: boolean;
     sentence: UserSentence | null;
   }>({ isVisible: false, sentence: null });
+  const [playingSentenceId, setPlayingSentenceId] = useState<string | null>(null);
 
   useEffect(() => {
     // ヘッダー設定
@@ -135,6 +137,18 @@ export default function SentencesScreen() {
     }
   };
 
+  const handlePlaySentence = async (sentence: UserSentence) => {
+    try {
+      setPlayingSentenceId(sentence.id);
+      await audioService.playText(sentence.text, { gender: 'female', speed: 1.0 });
+    } catch (error) {
+      console.error('Audio playback failed:', error);
+      showError('音声エラー', '音声の再生に失敗しました');
+    } finally {
+      setPlayingSentenceId(null);
+    }
+  };
+
   const handleGoBack = () => {
     router.back();
   };
@@ -196,6 +210,17 @@ export default function SentencesScreen() {
                     )}
                   </View>
                   <View className="flex-row">
+                    <TouchableOpacity
+                      onPress={() => handlePlaySentence(sentence)}
+                      className="p-2 mr-1"
+                      disabled={playingSentenceId === sentence.id}
+                    >
+                      <Ionicons
+                        name={playingSentenceId === sentence.id ? 'volume-high' : 'play'}
+                        size={20}
+                        color={playingSentenceId === sentence.id ? '#3B82F6' : '#10B981'}
+                      />
+                    </TouchableOpacity>
                     <TouchableOpacity
                       onPress={() => handleEditSentence(sentence)}
                       className="p-2 mr-1"

@@ -108,6 +108,34 @@ class AudioService {
       return [];
     }
   }
+
+  // 英語テキストかどうかをバリデーション
+  validateEnglishText(text: string): { isValid: boolean; error?: string } {
+    // 空文字チェック
+    if (!text || text.trim().length === 0) {
+      return { isValid: false, error: 'テキストが入力されていません' };
+    }
+
+    // 日本語文字（ひらがな、カタカナ、漢字）が含まれているかチェック
+    const japanesePattern = /[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF]/;
+    if (japanesePattern.test(text)) {
+      return {
+        isValid: false,
+        error: '英語フレーズには、英語のみ入力してください（日本語文字が含まれています）',
+      };
+    }
+
+    // 基本的な英語文字のみかチェック（英字、数字、基本的な記号のみ許可）
+    const englishPattern = /^[a-zA-Z0-9\s.,;:!?'"()\-\n\r]+$/;
+    if (!englishPattern.test(text)) {
+      return {
+        isValid: false,
+        error: '英語のフレーズのみ入力してください（使用できない文字が含まれています）',
+      };
+    }
+
+    return { isValid: true };
+  }
 }
 
 export const audioService = new AudioService();

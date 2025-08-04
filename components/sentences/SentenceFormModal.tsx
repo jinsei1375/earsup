@@ -15,6 +15,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Button } from '@/components/common/Button';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { ErrorMessage } from '@/components/common/ErrorMessage';
+import { audioService } from '@/services/audioService';
 
 interface SentenceFormModalProps {
   isVisible: boolean;
@@ -49,6 +50,13 @@ export const SentenceFormModal: React.FC<SentenceFormModalProps> = ({
   const handleSave = async () => {
     if (!text.trim()) {
       setError('英語フレーズを入力してください');
+      return;
+    }
+
+    // 英語テキストのバリデーション
+    const validation = audioService.validateEnglishText(text.trim());
+    if (!validation.isValid) {
+      setError(validation.error || '入力内容を確認してください');
       return;
     }
 
