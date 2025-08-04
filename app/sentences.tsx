@@ -100,13 +100,13 @@ export default function SentencesScreen() {
 
     try {
       await UserSentenceService.deleteUserSentence(sentenceId);
-      showSuccess('削除完了', '例文が正常に削除されました');
+      showSuccess('削除完了', '削除しました');
       loadSentences();
     } catch (err: unknown) {
       if (err instanceof Error) {
         showError('削除エラー', err.message);
       } else {
-        showError('削除エラー', '例文の削除に失敗しました');
+        showError('削除エラー', 'マイセンテンスの削除に失敗しました');
       }
     } finally {
       setDeleteConfirmation({ isVisible: false, sentence: null });
@@ -119,10 +119,10 @@ export default function SentencesScreen() {
     try {
       if (editingSentence) {
         await UserSentenceService.updateUserSentence(editingSentence.id, text, translation);
-        showSuccess('更新完了', '例文が正常に更新されました');
+        showSuccess('更新完了', '正常に更新されました');
       } else {
         await UserSentenceService.createUserSentence(userId, text, translation);
-        showSuccess('保存完了', '例文が正常に保存されました');
+        showSuccess('保存完了', '正常に保存されました');
       }
       setIsFormModalVisible(false);
       loadSentences();
@@ -236,7 +236,7 @@ export default function SentencesScreen() {
         isVisible={deleteConfirmation.isVisible}
         onClose={() => setDeleteConfirmation({ isVisible: false, sentence: null })}
         onConfirm={confirmDeleteSentence}
-        title="例文を削除"
+        title="マイセンテンスを削除"
         message={`「${deleteConfirmation.sentence?.text || ''}」を削除しますか？`}
         confirmText="削除"
         confirmVariant="destructive"

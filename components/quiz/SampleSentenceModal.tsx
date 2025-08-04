@@ -165,6 +165,7 @@ export const SampleSentenceModal: React.FC<SampleSentenceModalProps> = ({
         <View className="flex-1 mt-16 bg-white rounded-t-lg">
           {/* Header */}
           <View className="flex-row items-center justify-between p-4 border-b border-gray-200">
+            <View style={{ width: 32 }} />
             <Text className="text-xl font-bold">例文を選択</Text>
             <Button
               onPress={handleClose}

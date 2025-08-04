@@ -2,6 +2,7 @@
 import React from 'react';
 import { Modal, View, Text, TouchableOpacity, Linking, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 
 interface InfoModalProps {
   visible: boolean;
@@ -41,7 +42,14 @@ export default function InfoModal({ visible, onClose }: InfoModalProps) {
     <Modal visible={visible} transparent={true} animationType="fade" onRequestClose={onClose}>
       <View className="flex-1 justify-center items-center bg-black/50">
         <View className="bg-white rounded-lg p-6 mx-6 w-80 max-w-sm">
-          <Text className="text-lg font-bold mb-6 text-center">アプリ情報</Text>
+          {/* Header */}
+          <View className="flex-row items-center justify-between mb-6">
+            <View style={{ width: 32 }} />
+            <Text className="text-lg font-bold">アプリ情報</Text>
+            <TouchableOpacity onPress={onClose}>
+              <Ionicons name="close" size={24} color="#666" />
+            </TouchableOpacity>
+          </View>
 
           <TouchableOpacity className="py-4 border-b border-gray-200" onPress={handleTermsPress}>
             <Text className="text-base text-blue-600 text-center">利用規約</Text>
@@ -51,12 +59,8 @@ export default function InfoModal({ visible, onClose }: InfoModalProps) {
             <Text className="text-base text-blue-600 text-center">プライバシーポリシー</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity className="py-4 border-b border-gray-200" onPress={handleContactPress}>
+          <TouchableOpacity className="py-4" onPress={handleContactPress}>
             <Text className="text-base text-blue-600 text-center">お問い合わせ</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity className="py-4 mt-4" onPress={onClose}>
-            <Text className="text-base text-gray-500 text-center">閉じる</Text>
           </TouchableOpacity>
         </View>
       </View>

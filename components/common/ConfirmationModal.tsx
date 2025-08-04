@@ -2,6 +2,7 @@
 import React from 'react';
 import { View, Text, Modal, TouchableOpacity, TouchableWithoutFeedback } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { Button } from '@/components/common/Button';
 
 interface ConfirmationModalProps {
   isVisible: boolean;
@@ -37,7 +38,7 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
             <View className="bg-white rounded-lg p-6 w-full max-w-sm">
               {/* Header */}
               <View className="flex-row items-center justify-between mb-4">
-                <View className="w-6" />
+                <View style={{ width: 32 }} />
                 <Text className="text-xl font-bold">{title}</Text>
                 <TouchableOpacity onPress={onClose}>
                   <Ionicons name="close" size={24} color="#666" />
@@ -50,21 +51,23 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
               </View>
 
               {/* Action Buttons */}
-              <View className="flex-row justify-center gap-4 mb-4">
-                <TouchableOpacity
+              <View className="flex-row gap-3 mb-4">
+                <Button
+                  title={cancelText}
                   onPress={onClose}
-                  className="px-6 py-3 rounded-lg bg-gray-200 min-w-[100px]"
-                >
-                  <Text className="text-gray-700 font-semibold text-center">{cancelText}</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
+                  variant="secondary"
+                  size="large"
+                  fullWidth
+                  className="flex-1"
+                />
+                <Button
+                  title={confirmText}
                   onPress={handleConfirm}
-                  className={`px-6 py-3 rounded-lg min-w-[100px] ${
-                    confirmVariant === 'destructive' ? 'bg-red-500' : 'bg-blue-500'
-                  }`}
-                >
-                  <Text className="text-white font-semibold text-center">{confirmText}</Text>
-                </TouchableOpacity>
+                  variant={confirmVariant === 'destructive' ? 'danger' : 'primary'}
+                  size="large"
+                  fullWidth
+                  className="flex-1"
+                />
               </View>
             </View>
           </TouchableWithoutFeedback>

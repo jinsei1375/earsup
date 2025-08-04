@@ -2,6 +2,7 @@
 import React from 'react';
 import { View, Text, Modal, TouchableOpacity, TouchableWithoutFeedback } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { Button } from '@/components/common/Button';
 
 interface ExitRoomModalProps {
   isVisible: boolean;
@@ -24,7 +25,7 @@ export const ExitRoomModal: React.FC<ExitRoomModalProps> = ({
             <View className="bg-white rounded-lg p-6 w-full max-w-sm">
               {/* Header */}
               <View className="flex-row items-center justify-between mb-4">
-                <View className="w-6" />
+                <View style={{ width: 32 }} />
                 <Text className="text-xl font-bold">ルーム退出</Text>
                 <TouchableOpacity onPress={onClose}>
                   <Ionicons name="close" size={24} color="#666" />
@@ -49,21 +50,23 @@ export const ExitRoomModal: React.FC<ExitRoomModalProps> = ({
               </View>
 
               {/* Action Buttons */}
-              <View className="flex-row justify-center gap-4 mb-4">
-                <TouchableOpacity
+              <View className="flex-row gap-3 mb-4">
+                <Button
+                  title="キャンセル"
                   onPress={onClose}
-                  className="px-6 py-3 rounded-lg bg-gray-200 min-w-[100px]"
-                >
-                  <Text className="text-gray-700 font-semibold text-center">キャンセル</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
+                  variant="secondary"
+                  size="large"
+                  fullWidth
+                  className="flex-1"
+                />
+                <Button
+                  title={isHost ? '終了' : '退出'}
                   onPress={onConfirmExit}
-                  className="px-6 py-3 rounded-lg bg-red-500 min-w-[100px]"
-                >
-                  <Text className="text-white font-semibold text-center">
-                    {isHost ? '終了' : '退出'}
-                  </Text>
-                </TouchableOpacity>
+                  variant="danger"
+                  size="large"
+                  fullWidth
+                  className="flex-1"
+                />
               </View>
             </View>
           </TouchableWithoutFeedback>

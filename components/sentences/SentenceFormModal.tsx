@@ -104,6 +104,7 @@ export const SentenceFormModal: React.FC<SentenceFormModalProps> = ({
             >
               {/* Header */}
               <View className="flex-row items-center justify-between p-4 border-b border-gray-200">
+                <View style={{ width: 32 }} />
                 <Text className="text-xl font-bold">{isEditing ? '編集' : '追加'}</Text>
                 <Button
                   onPress={handleClose}
