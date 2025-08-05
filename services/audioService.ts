@@ -126,7 +126,7 @@ class AudioService {
     }
 
     // 基本的な英語文字のみかチェック（英字、数字、基本的な記号のみ許可）
-    const englishPattern = /^[a-zA-Z0-9\s.,;:!?'"()\-\n\r]+$/;
+    const englishPattern = /^[a-zA-Z0-9\s.,;:!?'’"()\-\n\r]+$/;
     if (!englishPattern.test(text)) {
       return {
         isValid: false,

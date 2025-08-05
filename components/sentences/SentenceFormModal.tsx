@@ -100,16 +100,10 @@ export const SentenceFormModal: React.FC<SentenceFormModalProps> = ({
       statusBarTranslucent={true}
       presentationStyle="overFullScreen"
     >
-      <KeyboardAvoidingView
-        className="flex-1"
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      >
+      <KeyboardAvoidingView className="flex-1">
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <View className="flex-1 bg-black/50 justify-center px-4 py-8">
-            <View
-              className="bg-white rounded-lg w-full"
-              style={{ minHeight: '60%', maxHeight: '90%' }}
-            >
+            <View className="bg-white rounded-lg w-full" style={{ minHeight: '50%' }}>
               {/* Header */}
               <View className="flex-row items-center justify-between p-4 border-b border-gray-200">
                 <View style={{ width: 32 }} />
@@ -134,7 +128,7 @@ export const SentenceFormModal: React.FC<SentenceFormModalProps> = ({
                   <Text className="text-base font-medium mb-2">英語フレーズ *</Text>
                   <TextInput
                     className="border border-gray-300 rounded-lg p-3 text-lg"
-                    style={{ minHeight: 100, textAlignVertical: 'top' }}
+                    style={{ minHeight: 70, textAlignVertical: 'top' }}
                     placeholder="例: How are you doing today?"
                     value={text}
                     onChangeText={setText}
@@ -149,7 +143,7 @@ export const SentenceFormModal: React.FC<SentenceFormModalProps> = ({
                   <Text className="text-base font-medium mb-2">日本語訳 *</Text>
                   <TextInput
                     className="border border-gray-300 rounded-lg p-3 text-lg"
-                    style={{ minHeight: 100, textAlignVertical: 'top' }}
+                    style={{ minHeight: 70, textAlignVertical: 'top' }}
                     placeholder="例: 今日はどうですか？"
                     value={translation}
                     onChangeText={setTranslation}
@@ -180,15 +174,21 @@ export const SentenceFormModal: React.FC<SentenceFormModalProps> = ({
                   />
                 </View>
 
-                {loading && (
-                  <View className="items-center py-4">
-                    <LoadingSpinner variant="default" color="#3B82F6" size="small" />
-                  </View>
-                )}
-
                 <ErrorMessage message={error} />
               </ScrollView>
             </View>
+
+            {/* Loading Overlay */}
+            {loading && (
+              <View className="absolute inset-0 bg-black/30 justify-center items-center rounded-lg">
+                <View className="bg-white rounded-lg p-6 items-center shadow-lg">
+                  <LoadingSpinner variant="default" color="#3B82F6" size="large" />
+                  <Text className="mt-3 text-gray-700 font-medium">
+                    {isEditing ? '更新中...' : '登録中...'}
+                  </Text>
+                </View>
+              </View>
+            )}
           </View>
         </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
