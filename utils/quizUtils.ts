@@ -26,7 +26,7 @@ export const validateAnswer = (
       // 複数の半角スペースを1つに統一
       .replace(/\s+/g, ' ')
       // アポストロフィの正規化（' → '）
-      .replace(/'/g, "'")
+      .replace(/’/g, "'")
       // ダッシュの正規化（— → -）
       .replace(/[—–]/g, '-')
       // クォーテーションマークの正規化

@@ -1,5 +1,5 @@
 // Test script to validate the improved validateAnswer function
-import { validateAnswer } from './utils/quizUtils';
+const { validateAnswer } = require('./utils/quizUtils.ts');
 
 // Test cases for the improved validation
 const testCases = [
@@ -7,6 +7,8 @@ const testCases = [
   { answer: "I'm happy", correct: "I'm happy", expected: true },
   { answer: "I'm happy", correct: "I'm happy", expected: true },
   { answer: "don't worry", correct: "don't worry", expected: true },
+  { answer: 'don’t worry', correct: "don't worry", expected: true },
+  { answer: "don't worry", correct: 'don’t worry', expected: true },
 
   // 全角・半角スペースの違い
   { answer: 'hello　world', correct: 'hello world', expected: true },
