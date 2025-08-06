@@ -266,7 +266,9 @@ export default function RoomScreen() {
                 <>
                   {!canStartQuiz && (
                     <Text className="text-center text-gray-600 mb-3">
-                      ホスト以外の参加者が1人以上必要です
+                      {isAutoMode
+                        ? 'ルーム作成者以外の参加者が1人以上必要です'
+                        : 'ホスト以外の参加者が1人以上必要です'}
                     </Text>
                   )}
 
@@ -316,7 +318,11 @@ export default function RoomScreen() {
 
         {!isHost && (
           <View className="mt-5 items-center">
-            <Text className="italic mb-4">ホストがクイズを開始するのを待っています...</Text>
+            <Text className="italic mb-4">
+              {room?.quiz_mode === 'all-at-once-auto'
+                ? 'ルーム作成者がクイズを開始するのを待っています...'
+                : 'ホストがクイズを開始するのを待っています...'}
+            </Text>
             <LoadingSpinner variant="sound-wave" color="#8B5CF6" size="large" />
           </View>
         )}
