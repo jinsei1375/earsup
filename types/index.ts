@@ -19,6 +19,7 @@ export interface Room {
   quiz_mode: 'all-at-once-host' | 'all-at-once-auto';
   allow_partial_points?: boolean; // 惜しい判定を許可するか
   voice_settings?: VoiceSettings; // 音声設定
+  max_replay_count?: number; // 最大リプレイ回数
   created_at: string;
   updated_at: string;
 }

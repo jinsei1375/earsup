@@ -79,7 +79,7 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
 
   const quizMode = room?.quiz_mode || 'all-at-once-host';
   const isAutoMode = quizMode === 'all-at-once-auto';
-  const maxPlayCount = isAutoMode ? 3 : Infinity; // ホストなしモードは3回まで
+  const maxPlayCount = isAutoMode ? room?.max_replay_count || 3 : Infinity; // ホストなしモードは設定された回数まで
   const hasQuestion = !!questionText && isQuizActive(room?.status || '');
   const canAnswer = canParticipantAnswer(quizMode, null, userId);
 

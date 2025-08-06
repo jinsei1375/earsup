@@ -7,6 +7,8 @@ interface QuizModeSelectorProps {
   onModeChange: (mode: 'all-at-once-host' | 'all-at-once-auto') => void;
   allowPartialPoints: boolean;
   onPartialPointsChange: (allow: boolean) => void;
+  maxReplayCount: number;
+  onMaxReplayCountChange: (count: number) => void;
   disabled?: boolean;
 }
 
@@ -15,6 +17,8 @@ export const QuizModeSelector: React.FC<QuizModeSelectorProps> = ({
   onModeChange,
   allowPartialPoints,
   onPartialPointsChange,
+  maxReplayCount,
+  onMaxReplayCountChange,
   disabled = false,
 }) => {
   return (
@@ -129,15 +133,45 @@ export const QuizModeSelector: React.FC<QuizModeSelectorProps> = ({
         </>
       )}
 
-      {/* ホストなしモードの場合の説明 */}
+      {/* ホストなしモードの場合の設定と説明 */}
       {selectedMode === 'all-at-once-auto' && (
-        <View className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
-          <Text className="text-yellow-800 font-bold mb-2">ホストなしモードの特徴</Text>
-          <Text className="text-yellow-700 text-sm mb-1">• 参加者全員が回答できます</Text>
-          <Text className="text-yellow-700 text-sm mb-1">• 1人3回まで音声を再生できます</Text>
-          <Text className="text-yellow-700 text-sm mb-1">• 回答は自動で正誤判定されます</Text>
-          <Text className="text-yellow-700 text-sm">• 惜しい判定は利用できません</Text>
-        </View>
+        <>
+          {/* 最大再生回数設定 */}
+          <Text className="mb-2 font-bold">最大再生回数</Text>
+          <View className="flex-row justify-between mb-4">
+            {[1, 2, 3, 4, 5].map((count) => (
+              <TouchableOpacity
+                key={count}
+                onPress={() => onMaxReplayCountChange(count)}
+                disabled={disabled}
+                className={`flex-1 mx-1 p-3 rounded-lg border-2 items-center justify-center ${
+                  maxReplayCount === count
+                    ? 'bg-blue-500 border-blue-500 active:bg-blue-600'
+                    : 'bg-transparent border-gray-300 active:bg-gray-50'
+                } ${disabled ? 'opacity-50' : ''}`}
+              >
+                <Text
+                  className={`text-center font-bold ${
+                    maxReplayCount === count ? 'text-white' : 'text-gray-700'
+                  }`}
+                >
+                  {count}回
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          {/* 説明 */}
+          <View className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+            <Text className="text-yellow-800 font-bold mb-2">ホストなしモードの特徴</Text>
+            <Text className="text-yellow-700 text-sm mb-1">• 参加者全員が回答できます</Text>
+            <Text className="text-yellow-700 text-sm mb-1">
+              • 1人{maxReplayCount}回まで音声を再生できます
+            </Text>
+            <Text className="text-yellow-700 text-sm mb-1">• 回答は自動で正誤判定されます</Text>
+            <Text className="text-yellow-700 text-sm">• 惜しい判定は利用できません</Text>
+          </View>
+        </>
       )}
     </View>
   );

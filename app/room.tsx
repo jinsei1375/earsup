@@ -41,6 +41,7 @@ export default function RoomScreen() {
     'all-at-once-host'
   );
   const [allowPartialPoints, setAllowPartialPoints] = useState(true); // デフォルトで惜しい判定を有効
+  const [maxReplayCount, setMaxReplayCount] = useState(3); // 最大再生回数（デフォルト3回）
 
   // Room data management
   const {
@@ -121,7 +122,13 @@ export default function RoomScreen() {
     setLocalError(null);
 
     try {
-      const roomData = await SupabaseService.createRoom(code, userId, quizMode, allowPartialPoints);
+      const roomData = await SupabaseService.createRoom(
+        code,
+        userId,
+        quizMode,
+        allowPartialPoints,
+        maxReplayCount
+      );
       setRoomId(roomData.id);
     } catch (err: any) {
       setLocalError(err.message || 'ルーム作成中にエラーが発生しました。');
@@ -371,6 +378,8 @@ export default function RoomScreen() {
                   }}
                   allowPartialPoints={allowPartialPoints}
                   onPartialPointsChange={setAllowPartialPoints}
+                  maxReplayCount={maxReplayCount}
+                  onMaxReplayCountChange={setMaxReplayCount}
                   disabled={loading}
                 />
 
