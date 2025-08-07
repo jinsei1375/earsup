@@ -28,8 +28,8 @@ export default function InfoModal({ visible, onClose }: InfoModalProps) {
       {
         text: 'お問い合わせページを開く',
         onPress: () => {
-          // TODO: NotionのURLに置き換える
-          const notionUrl = 'https://notion.so/your-contact-page';
+          const notionUrl =
+            'https://harmonious-dichondra-5c4.notion.site/24797cd176eb802ab330cbb0b2b4803a?pvs=105';
           Linking.openURL(notionUrl).catch(() => {
             Alert.alert('エラー', 'お問い合わせページを開けませんでした。');
           });

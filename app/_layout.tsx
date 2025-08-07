@@ -59,7 +59,7 @@ function RootLayoutContent() {
 
     switch (pathname) {
       case '/':
-        return 'EarsUp';
+        return '';
       case '/room':
         return 'ルーム';
       case '/quiz':

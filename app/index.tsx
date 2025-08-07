@@ -7,10 +7,12 @@ import InfoModal from '@/components/common/InfoModal';
 import NicknameEditModal from '@/components/common/NicknameEditModal';
 import { useHeaderSettings } from '@/contexts/HeaderSettingsContext';
 import { Button } from '@/components/common/Button';
+import { useToast } from '@/contexts/ToastContext';
 
 export default function HomeScreen() {
   const userId = useUserStore((s) => s.userId);
   const storeNickname = useUserStore((s) => s.nickname);
+  const { showError, showSuccess } = useToast();
   const setUserInfo = useUserStore((s) => s.setUserInfo);
   const [nickname, setNickname] = useState<string | null>(storeNickname);
   const [isInfoModalVisible, setIsInfoModalVisible] = useState(false);
@@ -72,6 +74,7 @@ export default function HomeScreen() {
 
   const handleNicknameUpdate = (newNickname: string) => {
     setNickname(newNickname);
+    showSuccess('ニックネーム更新', 'ニックネームが更新されました');
   };
 
   return (
@@ -79,12 +82,6 @@ export default function HomeScreen() {
       <View className="p-6">
         {/* ヘッダーセクション */}
         <View className="items-center mb-8 mt-4">
-          <View className="bg-white rounded-full p-2 shadow-lg mb-4">
-            <Image
-              source={require('@/assets/images/adaptive-icon.png')}
-              className="w-24 h-24 rounded-full"
-            />
-          </View>
           <Text className="text-4xl font-bold text-gray-800 mb-2">EarsUp</Text>
           <Text className="text-lg text-gray-600 text-center mb-4">リスニングクイズアプリ</Text>
           {nickname ? (
@@ -197,9 +194,7 @@ export default function HomeScreen() {
 
         {/* フッター */}
         <View className="items-center mt-4 mb-8">
-          <Text className="text-xs text-gray-400 text-center">
-            v1.0.0 • Made with ❤️ for learning
-          </Text>
+          <Text className="text-xs text-gray-400 text-center">v1.0.0</Text>
         </View>
       </View>
 

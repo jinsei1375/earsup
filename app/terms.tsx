@@ -83,7 +83,7 @@ export default function TermsOfService() {
       </View>
 
       <View className="mb-8">
-        <Text className="text-sm text-gray-500 text-center">制定日：2025年1月3日</Text>
+        <Text className="text-sm text-gray-500 text-center">制定日：2025年8月5日</Text>
       </View>
     </ScrollView>
   );

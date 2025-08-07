@@ -102,8 +102,8 @@ export default function PrivacyPolicy() {
 
       <View className="mb-8">
         <Text className="text-sm text-gray-500 text-center">
-          制定日：2025/8/3{'\n'}
-          最終更新日：2025/8/3
+          制定日：2025/8/5{'\n'}
+          最終更新日：2025/8/5
         </Text>
       </View>
     </ScrollView>
