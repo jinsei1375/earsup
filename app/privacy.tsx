@@ -1,7 +1,6 @@
 // app/privacy.tsx
 import React, { useEffect } from 'react';
 import { ScrollView, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { useHeaderSettings } from '@/contexts/HeaderSettingsContext';
 
@@ -19,7 +18,7 @@ export default function PrivacyPolicy() {
     return () => {
       setSettingsConfig({});
     };
-  }, []);
+  }, [setSettingsConfig]);
 
   return (
     <ScrollView className="flex-1 px-4 py-4">
@@ -46,7 +45,7 @@ export default function PrivacyPolicy() {
       <View className="mb-6">
         <Text className="text-lg font-semibold mb-3">3. 情報の第三者提供</Text>
         <Text className="text-base leading-6 mb-4">
-          当社は、法令に基づく場合を除き、ユーザーの同意なく個人情報を第三者に提供することはありません。
+          本アプリの運営者は、法令に基づく場合を除き、ユーザーの同意なく個人情報を第三者に提供することはありません。
         </Text>
       </View>
 
@@ -61,7 +60,7 @@ export default function PrivacyPolicy() {
       <View className="mb-6">
         <Text className="text-lg font-semibold mb-3">5. セキュリティ</Text>
         <Text className="text-base leading-6 mb-4">
-          当社は、収集した情報の安全性を確保するため、適切な技術的・組織的措置を講じています。
+          本アプリの運営者は、収集した情報の安全性を確保するため、適切な技術的・組織的措置を講じています。
         </Text>
       </View>
 
@@ -73,7 +72,7 @@ export default function PrivacyPolicy() {
         <Text className="text-base leading-6 mb-1">• Supabase（データベース）</Text>
         <Text className="text-base leading-6 mb-4">• Expo（アプリ開発プラットフォーム）</Text>
         <Text className="text-base leading-6 mb-4">
-          これらのサービスにはそれぞれのプライバシーポリシーが適用されます。
+          これらのサービスにはそれぞれのプライバシーポリシーが適用されます。当アプリは、ユーザーのニックネーム、参加したルーム情報、クイズの回答履歴等をSupabase（米国のデータセンターを利用する場合があります）に保存します。
         </Text>
       </View>
 
@@ -88,15 +87,31 @@ export default function PrivacyPolicy() {
       <View className="mb-6">
         <Text className="text-lg font-semibold mb-3">8. お問い合わせ</Text>
         <Text className="text-base leading-6 mb-4">
-          本プライバシーポリシーに関するお問い合わせは、アプリ内のお問い合わせページからご連絡ください。
+          本プライバシーポリシーに関するお問い合わせは、お問い合わせフォームからご連絡ください。
         </Text>
       </View>
 
       <View className="mb-6">
         <Text className="text-lg font-semibold mb-3">9. プライバシーポリシーの変更</Text>
         <Text className="text-base leading-6 mb-4">
-          当社は、必要に応じて本プライバシーポリシーを変更することがあります。
+          本アプリの運営者は、必要に応じて本プライバシーポリシーを変更することがあります。
           重要な変更がある場合は、アプリ内で通知いたします。
+        </Text>
+      </View>
+      <View className="mb-6">
+        <Text className="text-lg font-semibold mb-3">10. ユーザーの権利</Text>
+        <Text className="text-base leading-6 mb-1">• データの確認・修正・削除を要求する権利</Text>
+        <Text className="text-base leading-6 mb-1">• データポータビリティの権利</Text>
+        <Text className="text-base leading-6 mb-1">• サービス利用停止の権利</Text>
+      </View>
+      <View className="mb-6">
+        <Text className="text-lg font-semibold mb-3">11. お問い合わせ窓口</Text>
+        <Text className="text-base leading-6 mb-4">
+          本アプリに関するお問い合わせは、下記の窓口までご連絡ください。
+          {'\n'}
+          運営者：ensei
+          {'\n'}
+          E-mail: jinsei1375@gmail.com
         </Text>
       </View>
 
