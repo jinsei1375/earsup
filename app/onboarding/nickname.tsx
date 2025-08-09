@@ -17,12 +17,16 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Crypto from 'expo-crypto';
 import { Button } from '@/components/common/Button';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
+import { KeyboardAccessoryView } from '@/components/common/KeyboardAccessoryView';
 
 export default function NicknameScreen() {
   const [nickname, setNickname] = useState('');
   const setUserInfo = useUserStore((s) => s.setUserInfo);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // InputAccessoryView ID
+  const inputAccessoryViewID = 'nickname-input-accessory';
 
   const handleSubmit = async () => {
     if (!nickname.trim()) return;
@@ -89,6 +93,7 @@ export default function NicknameScreen() {
               onChangeText={setNickname}
               returnKeyType="done"
               onSubmitEditing={() => Keyboard.dismiss()}
+              inputAccessoryViewID={inputAccessoryViewID}
             />
             {error && <Text className="text-red-500 text-center">{error}</Text>}
             <View className="mt-6">
@@ -109,6 +114,9 @@ export default function NicknameScreen() {
           </View>
         </ScrollView>
       </TouchableWithoutFeedback>
+
+      {/* InputAccessoryView */}
+      <KeyboardAccessoryView nativeID={inputAccessoryViewID} />
     </KeyboardAvoidingView>
   );
 }

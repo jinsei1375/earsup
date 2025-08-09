@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/common/Button';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { useToast } from '@/contexts/ToastContext';
+import { KeyboardAccessoryView } from '@/components/common/KeyboardAccessoryView';
 
 interface NicknameEditModalProps {
   visible: boolean;
@@ -26,6 +27,9 @@ export default function NicknameEditModal({
   const userId = useUserStore((s) => s.userId);
   const setUserInfo = useUserStore((s) => s.setUserInfo);
   const { showSuccess, showError } = useToast();
+
+  // InputAccessoryView ID
+  const inputAccessoryViewID = 'nickname-edit-input-accessory';
 
   const handleSave = async () => {
     const trimmedNickname = newNickname.trim();
@@ -78,7 +82,7 @@ export default function NicknameEditModal({
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={handleCancel}>
-      <View className="flex-1 bg-black/50 justify-center items-center px-6">
+      <View className="flex-1 bg-black/50 justify-start items-center px-6 pt-40">
         <View className="bg-white rounded-2xl p-6 w-full max-w-sm">
           {/* Header */}
           <View className="flex-row items-center justify-between mb-4">
@@ -102,6 +106,7 @@ export default function NicknameEditModal({
               maxLength={20}
               autoFocus
               selectTextOnFocus
+              inputAccessoryViewID={inputAccessoryViewID}
             />
             <Text className="text-xs text-gray-500 mt-1">{newNickname.length}/20文字</Text>
           </View>
@@ -134,6 +139,9 @@ export default function NicknameEditModal({
           )}
         </View>
       </View>
+
+      {/* InputAccessoryView */}
+      <KeyboardAccessoryView nativeID={inputAccessoryViewID} />
     </Modal>
   );
 }

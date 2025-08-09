@@ -8,7 +8,6 @@ import {
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
   Keyboard,
-  Platform,
   ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -16,6 +15,7 @@ import { Button } from '@/components/common/Button';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { ErrorMessage } from '@/components/common/ErrorMessage';
 import { audioService } from '@/services/audioService';
+import { KeyboardAccessoryView } from '@/components/common/KeyboardAccessoryView';
 
 interface SentenceFormModalProps {
   isVisible: boolean;
@@ -38,6 +38,9 @@ export const SentenceFormModal: React.FC<SentenceFormModalProps> = ({
   const [translation, setTranslation] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // InputAccessoryView用のID
+  const inputAccessoryViewID = 'sentence-form-accessory';
 
   useEffect(() => {
     if (isVisible) {
@@ -92,106 +95,113 @@ export const SentenceFormModal: React.FC<SentenceFormModalProps> = ({
   };
 
   return (
-    <Modal
-      visible={isVisible}
-      transparent={true}
-      animationType="slide"
-      onRequestClose={handleClose}
-      statusBarTranslucent={true}
-      presentationStyle="overFullScreen"
-    >
-      <KeyboardAvoidingView className="flex-1">
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <View className="flex-1 bg-black/50 justify-center px-4 py-8">
-            <View className="bg-white rounded-lg w-full" style={{ minHeight: '50%' }}>
-              {/* Header */}
-              <View className="flex-row items-center justify-between p-4 border-b border-gray-200">
-                <View style={{ width: 32 }} />
-                <Text className="text-xl font-bold">{isEditing ? '編集' : '追加'}</Text>
-                <Button
-                  onPress={handleClose}
-                  variant="ghost"
-                  size="small"
-                  icon={<Ionicons name="close" size={24} color="#666" />}
-                />
-              </View>
-
-              <ScrollView
-                className="p-4"
-                style={{ flex: 1 }}
-                keyboardShouldPersistTaps="handled"
-                showsVerticalScrollIndicator={false}
-                contentContainerStyle={{ flexGrow: 1 }}
-              >
-                {/* English Text Input */}
-                <View className="mb-4">
-                  <Text className="text-base font-medium mb-2">英語フレーズ *</Text>
-                  <TextInput
-                    className="border border-gray-300 rounded-lg p-3 text-lg"
-                    style={{ minHeight: 70, textAlignVertical: 'top' }}
-                    placeholder="例: How are you doing today?"
-                    value={text}
-                    onChangeText={setText}
-                    multiline
-                    numberOfLines={4}
-                    autoFocus={!isEditing}
-                  />
-                </View>
-
-                {/* Japanese Translation Input */}
-                <View className="mb-6">
-                  <Text className="text-base font-medium mb-2">日本語訳 *</Text>
-                  <TextInput
-                    className="border border-gray-300 rounded-lg p-3 text-lg"
-                    style={{ minHeight: 70, textAlignVertical: 'top' }}
-                    placeholder="例: 今日はどうですか？"
-                    value={translation}
-                    onChangeText={setTranslation}
-                    multiline
-                    numberOfLines={4}
-                  />
-                </View>
-
-                {/* Action Buttons */}
-                <View className="flex-row gap-3 mb-4">
+    <>
+      <Modal
+        visible={isVisible}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={handleClose}
+        statusBarTranslucent={true}
+        presentationStyle="overFullScreen"
+      >
+        <KeyboardAvoidingView className="flex-1" enabled={false}>
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <View className="flex-1 bg-black/50 justify-start px-4 pt-16">
+              <View className="bg-white rounded-lg w-full" style={{ minHeight: '50%' }}>
+                {/* Header */}
+                <View className="flex-row items-center justify-between p-4 border-b border-gray-200">
+                  <View style={{ width: 32 }} />
+                  <Text className="text-xl font-bold">{isEditing ? '編集' : '追加'}</Text>
                   <Button
-                    title="キャンセル"
                     onPress={handleClose}
-                    variant="danger"
-                    size="large"
-                    fullWidth
-                    disabled={loading}
-                    className="flex-1"
-                  />
-                  <Button
-                    title={isEditing ? '更新' : '登録'}
-                    onPress={handleSave}
-                    variant="primary"
-                    size="large"
-                    fullWidth
-                    disabled={loading || !text.trim() || !translation.trim()}
-                    className="flex-1"
+                    variant="ghost"
+                    size="small"
+                    icon={<Ionicons name="close" size={24} color="#666" />}
                   />
                 </View>
 
-                <ErrorMessage message={error} />
-              </ScrollView>
-            </View>
+                <ScrollView
+                  className="p-4"
+                  style={{ flex: 1 }}
+                  keyboardShouldPersistTaps="handled"
+                  showsVerticalScrollIndicator={false}
+                  contentContainerStyle={{ flexGrow: 1 }}
+                >
+                  {/* English Text Input */}
+                  <View className="mb-4">
+                    <Text className="text-base font-medium mb-2">英語フレーズ *</Text>
+                    <TextInput
+                      className="border border-gray-300 rounded-lg p-3 text-lg"
+                      style={{ minHeight: 70, textAlignVertical: 'top' }}
+                      placeholder="例: How are you doing today?"
+                      value={text}
+                      onChangeText={setText}
+                      multiline
+                      numberOfLines={4}
+                      autoFocus={!isEditing}
+                      inputAccessoryViewID={inputAccessoryViewID}
+                    />
+                  </View>
 
-            {/* Loading Overlay */}
-            {loading && (
-              <View className="absolute inset-0 bg-black/30 justify-center items-center rounded-lg">
-                <View className="bg-white rounded-lg p-6 items-center shadow-lg">
-                  <LoadingSpinner variant="default" color="#3B82F6" size="large" />
-                  <Text className="mt-3 text-gray-700 font-medium">
-                    {isEditing ? '更新中...' : '登録中...'}
-                  </Text>
-                </View>
+                  {/* Japanese Translation Input */}
+                  <View className="mb-6">
+                    <Text className="text-base font-medium mb-2">日本語訳 *</Text>
+                    <TextInput
+                      className="border border-gray-300 rounded-lg p-3 text-lg"
+                      style={{ minHeight: 70, textAlignVertical: 'top' }}
+                      placeholder="例: 今日はどうですか？"
+                      value={translation}
+                      onChangeText={setTranslation}
+                      multiline
+                      numberOfLines={4}
+                      inputAccessoryViewID={inputAccessoryViewID}
+                    />
+                  </View>
+
+                  {/* Action Buttons */}
+                  <View className="flex-row gap-3 mb-4">
+                    <Button
+                      title="キャンセル"
+                      onPress={handleClose}
+                      variant="danger"
+                      size="large"
+                      fullWidth
+                      disabled={loading}
+                      className="flex-1"
+                    />
+                    <Button
+                      title={isEditing ? '更新' : '登録'}
+                      onPress={handleSave}
+                      variant="primary"
+                      size="large"
+                      fullWidth
+                      disabled={loading || !text.trim() || !translation.trim()}
+                      className="flex-1"
+                    />
+                  </View>
+
+                  <ErrorMessage message={error} />
+                </ScrollView>
               </View>
-            )}
-          </View>
-        </TouchableWithoutFeedback>
-      </KeyboardAvoidingView>
-    </Modal>
+
+              {/* Loading Overlay */}
+              {loading && (
+                <View className="absolute inset-0 bg-black/30 justify-center items-center rounded-lg">
+                  <View className="bg-white rounded-lg p-6 items-center shadow-lg">
+                    <LoadingSpinner variant="default" color="#3B82F6" size="large" />
+                    <Text className="mt-3 text-gray-700 font-medium">
+                      {isEditing ? '更新中...' : '登録中...'}
+                    </Text>
+                  </View>
+                </View>
+              )}
+            </View>
+          </TouchableWithoutFeedback>
+        </KeyboardAvoidingView>
+
+        {/* InputAccessoryView */}
+        <KeyboardAccessoryView nativeID={inputAccessoryViewID} />
+      </Modal>
+    </>
   );
 };
