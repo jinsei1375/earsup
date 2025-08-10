@@ -24,6 +24,7 @@ import { generateRoomCode } from '@/utils/quizUtils';
 import { Button } from '@/components/common/Button';
 import { useToast } from '@/contexts/ToastContext';
 import { KeyboardAccessoryView } from '@/components/common/KeyboardAccessoryView';
+import { useErrorHandler } from '@/hooks/useErrorHandler';
 import type { RoomScreenParams } from '@/types';
 
 export default function RoomScreen() {
@@ -32,6 +33,7 @@ export default function RoomScreen() {
   const router = useRouter();
   const userId = useUserStore((s) => s.userId);
   const { showInfo, showError } = useToast();
+  const { handleError } = useErrorHandler();
 
   // InputAccessoryView ID
   const inputAccessoryViewID = 'room-input-accessory';
@@ -245,8 +247,7 @@ export default function RoomScreen() {
               await Clipboard.setStringAsync(room?.code || '');
               showNotification('コピー完了', '合言葉がクリップボードにコピーされました');
             } catch (error) {
-              console.error('Copy failed:', error);
-              showNotification('エラー', 'コピーに失敗しました');
+              await handleError(error, 'コピーエラー');
             }
           }}
           className="p-6 rounded-xl border-2 border-dashed border-blue-400 bg-blue-50 my-5 active:bg-blue-100"
@@ -362,8 +363,7 @@ export default function RoomScreen() {
                       await Clipboard.setStringAsync(code);
                       showNotification('コピー完了', '合言葉がクリップボードにコピーされました');
                     } catch (error) {
-                      console.error('Copy failed:', error);
-                      showNotification('エラー', 'コピーに失敗しました');
+                      await handleError(error, 'コピーエラー');
                     }
                   }}
                   className="p-6 rounded-xl border-2 border-dashed border-blue-400 bg-blue-50 my-5 active:bg-blue-100"

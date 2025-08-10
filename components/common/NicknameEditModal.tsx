@@ -1,6 +1,6 @@
 // components/common/NicknameEditModal.tsx
 import React, { useState } from 'react';
-import { Modal, View, Text, TextInput, Alert } from 'react-native';
+import { Modal, View, Text, TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useUserStore } from '@/stores/userStore';
 import { supabase } from '@/lib/supabase';
@@ -8,6 +8,7 @@ import { Button } from '@/components/common/Button';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { useToast } from '@/contexts/ToastContext';
 import { KeyboardAccessoryView } from '@/components/common/KeyboardAccessoryView';
+import { useErrorHandler } from '@/hooks/useErrorHandler';
 
 interface NicknameEditModalProps {
   visible: boolean;
@@ -27,6 +28,7 @@ export default function NicknameEditModal({
   const userId = useUserStore((s) => s.userId);
   const setUserInfo = useUserStore((s) => s.setUserInfo);
   const { showSuccess, showError } = useToast();
+  const { handleError } = useErrorHandler();
 
   // InputAccessoryView ID
   const inputAccessoryViewID = 'nickname-edit-input-accessory';
@@ -68,8 +70,7 @@ export default function NicknameEditModal({
       showSuccess('更新完了', 'ニックネームが正常に更新されました');
       onClose();
     } catch (error) {
-      console.error('Error updating nickname:', error);
-      showError('更新エラー', 'ニックネームの更新に失敗しました');
+      await handleError(error, 'ニックネーム更新エラー');
     } finally {
       setIsLoading(false);
     }

@@ -13,6 +13,7 @@ import { ExitRoomModal } from '@/components/common/ExitRoomModal';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { ErrorMessage } from '@/components/common/ErrorMessage';
 import { useHeaderSettings } from '@/contexts/HeaderSettingsContext';
+import { useErrorHandler } from '@/hooks/useErrorHandler';
 import type { QuizScreenParams } from '@/types';
 
 const fallbackQuestions = [
@@ -82,7 +83,7 @@ export default function QuizScreen() {
 
       return { text: randomSentence.text, sampleSentenceId: randomSentence.id };
     } catch (error) {
-      console.error('Failed to get random sample sentence:', error);
+      await handleError(error, 'ランダム例文の取得に失敗しました');
       return null;
     }
   };
@@ -112,6 +113,8 @@ export default function QuizScreen() {
     pollingInterval: 3000,
     enableRealtime: true,
   });
+
+  const { handleError } = useErrorHandler();
 
   // Handle room status changes
   useEffect(() => {
@@ -254,7 +257,7 @@ export default function QuizScreen() {
     try {
       await createQuestion(text, sampleSentenceId);
     } catch (err) {
-      console.error('Question creation failed:', err);
+      await handleError(err, '質問の作成に失敗しました');
     }
   };
 
@@ -281,7 +284,7 @@ export default function QuizScreen() {
         setIsCorrect(null); // Wait for host judgment
       }
     } catch (err) {
-      console.error('Answer submission failed:', err);
+      await handleError(err, '回答の送信に失敗しました');
     }
   };
 
@@ -300,7 +303,7 @@ export default function QuizScreen() {
 
       await judgeAnswer(answerId, judgmentResult);
     } catch (err) {
-      console.error('Answer judgment failed:', err);
+      await handleError(err, '回答の判定に失敗しました');
     }
   };
 
@@ -310,7 +313,7 @@ export default function QuizScreen() {
       // 結果画面を表示するために自動遷移を削除
       // room.status が 'ended' になることで結果画面が表示される
     } catch (err) {
-      console.error('End quiz failed:', err);
+      await handleError(err, 'クイズの終了に失敗しました');
       // エラー時のみ自動遷移
       setTimeout(() => router.replace('/'), 1000);
     }
@@ -328,7 +331,7 @@ export default function QuizScreen() {
         router.replace('/');
       }, 100);
     } catch (err: any) {
-      console.error('Exit room failed:', err);
+      await handleError(err, 'ルームからの退出に失敗しました');
       // エラーが発生してもホーム画面に戻る
       setTimeout(() => {
         router.replace('/');
@@ -359,7 +362,7 @@ export default function QuizScreen() {
         await nextQuestion();
       }
     } catch (err) {
-      console.error('Next question failed:', err);
+      await handleError(err, '次の問題への移行に失敗しました');
     }
   };
 

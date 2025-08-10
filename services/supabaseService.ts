@@ -1,5 +1,6 @@
 // services/supabaseService.ts
 import { supabase } from '@/lib/supabase';
+import { analyzeError } from '@/utils/errorUtils';
 import type {
   Room,
   Question,
@@ -12,6 +13,13 @@ import type {
   QuestionWithTranslation,
 } from '@/types';
 
+// Enhanced error handling for Supabase operations
+const handleSupabaseError = async (error: any, operation: string) => {
+  const errorInfo = await analyzeError(error);
+  console.error(`Supabase ${operation} error:`, { originalError: error, errorInfo });
+  throw new Error(errorInfo.message);
+};
+
 export class SupabaseService {
   // Room operations
   static async createRoom(
@@ -21,32 +29,48 @@ export class SupabaseService {
     allowPartialPoints: boolean = true,
     maxReplayCount: number = 3
   ): Promise<Room> {
-    const { data, error } = await supabase
-      .from('rooms')
-      .insert({
-        code,
-        host_user_id: hostUserId,
-        status: 'waiting',
-        quiz_mode: quizMode,
-        allow_partial_points: allowPartialPoints,
-        max_replay_count: maxReplayCount,
-      })
-      .select()
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from('rooms')
+        .insert({
+          code,
+          host_user_id: hostUserId,
+          status: 'waiting',
+          quiz_mode: quizMode,
+          allow_partial_points: allowPartialPoints,
+          max_replay_count: maxReplayCount,
+        })
+        .select()
+        .single();
 
-    if (error) throw error;
-    return data;
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      await handleSupabaseError(error, 'createRoom');
+      throw error; // Re-throw for caller handling
+    }
   }
 
   static async findRoomByCode(code: string): Promise<Room | null> {
-    const { data, error } = await supabase
-      .from('rooms')
-      .select()
-      .eq('code', code.toUpperCase())
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from('rooms')
+        .select()
+        .eq('code', code.toUpperCase())
+        .single();
 
-    if (error) return null;
-    return data;
+      if (error) {
+        if (error.code === 'PGRST116') {
+          // No rows found - this is expected behavior, not an error
+          return null;
+        }
+        throw error;
+      }
+      return data;
+    } catch (error) {
+      await handleSupabaseError(error, 'findRoomByCode');
+      return null; // Return null for not found, rather than throwing
+    }
   }
 
   static async getRoomById(roomId: string): Promise<Room | null> {

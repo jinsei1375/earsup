@@ -18,12 +18,14 @@ import * as Crypto from 'expo-crypto';
 import { Button } from '@/components/common/Button';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { KeyboardAccessoryView } from '@/components/common/KeyboardAccessoryView';
+import { useErrorHandler } from '@/hooks/useErrorHandler';
 
 export default function NicknameScreen() {
   const [nickname, setNickname] = useState('');
   const setUserInfo = useUserStore((s) => s.setUserInfo);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { handleError } = useErrorHandler();
 
   // InputAccessoryView ID
   const inputAccessoryViewID = 'nickname-input-accessory';
@@ -65,7 +67,7 @@ export default function NicknameScreen() {
       console.log('ユーザー登録完了:', { userId, nickname });
       router.replace('/'); // ホームに遷移
     } catch (err: any) {
-      console.error('ニックネーム登録エラー:', err);
+      await handleError(err, 'ニックネーム登録エラー');
       setError(err.message || 'ニックネームの登録中にエラーが発生しました');
     } finally {
       setLoading(false);
