@@ -30,29 +30,28 @@ export const StampDisplay: React.FC<StampDisplayProps> = ({ stamps, className = 
   return (
     <View className={`bg-gray-50 rounded-lg p-3 ${className}`}>
       <Text className="text-sm font-medium mb-2 text-gray-700">みんなのスタンプ</Text>
-      <ScrollView 
-        className="max-h-24" 
+      <ScrollView
+        className="max-h-24"
         showsVerticalScrollIndicator={false}
         nestedScrollEnabled={true}
       >
         {stamps.map((stamp) => {
-          const config = STAMP_CONFIG[stamp.stamp_type] || { 
-            icon: 'help-circle', 
-            color: APP_COLORS.secondary, 
-            text: stamp.stamp_type 
+          const config = STAMP_CONFIG[stamp.stamp_type] || {
+            icon: 'help-circle',
+            color: APP_COLORS.secondary,
+            text: stamp.stamp_type,
           };
-          
+
           return (
             <View key={stamp.id} className="flex-row items-center mb-1 last:mb-0">
-              <FeatureIcon 
-                name={config.icon as any} 
-                size={16} 
+              <FeatureIcon
+                name={config.icon as any}
+                size={16}
                 color={config.color}
                 className="mr-2"
               />
               <Text className="text-xs text-gray-600 flex-1">
-                <Text className="font-medium">{stamp.nickname || '不明なユーザー'}</Text>
-                {' '}
+                <Text className="font-medium">{stamp.nickname || '不明なユーザー'}</Text>{' '}
                 <Text>{config.text}</Text>
               </Text>
               <Text className="text-xs text-gray-400 ml-2">

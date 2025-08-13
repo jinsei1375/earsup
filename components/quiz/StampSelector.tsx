@@ -68,9 +68,9 @@ export const StampSelector: React.FC<StampSelectorProps> = ({
                 className="bg-gray-100 rounded-xl p-3 items-center min-w-24 mr-2 mb-2"
                 style={{ opacity: loading ? 0.5 : 1 }}
               >
-                <FeatureIcon 
-                  name={stamp.icon as any} 
-                  size={24} 
+                <FeatureIcon
+                  name={stamp.icon as any}
+                  size={24}
                   color={stamp.color}
                   backgroundColor={stamp.color}
                   borderRadius="small"

@@ -96,9 +96,9 @@ export default function FeaturesScreen() {
               className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-2"
             >
               <View className="flex-row items-center mb-4">
-                <FeatureIcon 
-                  name={feature.icon as any} 
-                  size={32} 
+                <FeatureIcon
+                  name={feature.icon as any}
+                  size={32}
                   color={feature.color}
                   backgroundColor={feature.color}
                   borderRadius="medium"
@@ -136,7 +136,12 @@ export default function FeaturesScreen() {
               'オフライン学習モード',
             ].map((item, index) => (
               <View key={index} className="flex-row items-center mb-2">
-                <FeatureIcon name="checkmark-circle" size={16} color={APP_COLORS.info} className="mr-3" />
+                <FeatureIcon
+                  name="checkmark-circle"
+                  size={16}
+                  color={APP_COLORS.info}
+                  className="mr-3"
+                />
                 <Text className="text-purple-700 flex-1">{item}</Text>
               </View>
             ))}

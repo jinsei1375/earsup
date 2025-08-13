@@ -222,7 +222,12 @@ export default function GuideScreen() {
         {/* ホストありモード */}
         <View className="mb-8">
           <View className="flex-row items-center mb-4">
-            <FeatureIcon name="radio-button-on" size={20} color={APP_COLORS.success} className="mr-2" />
+            <FeatureIcon
+              name="radio-button-on"
+              size={20}
+              color={APP_COLORS.success}
+              className="mr-2"
+            />
             <Text className="text-xl font-bold text-gray-800">ホストありモード</Text>
           </View>
           <Text className="text-gray-600 mb-4">
@@ -277,9 +282,9 @@ export default function GuideScreen() {
             {tips.map((tip, index) => (
               <View key={index} className="bg-yellow-50 rounded-lg p-4 mb-2">
                 <View className="flex-row items-center mb-2">
-                  <FeatureIcon 
-                    name={tip.icon as any} 
-                    size={20} 
+                  <FeatureIcon
+                    name={tip.icon as any}
+                    size={20}
                     color={tip.color}
                     backgroundColor={tip.color}
                     borderRadius="small"
