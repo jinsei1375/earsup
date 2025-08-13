@@ -25,6 +25,7 @@ import { Button } from '@/components/common/Button';
 import { useToast } from '@/contexts/ToastContext';
 import { KeyboardAccessoryView } from '@/components/common/KeyboardAccessoryView';
 import { useErrorHandler } from '@/hooks/useErrorHandler';
+import { FeatureIcon, APP_COLORS } from '@/components/common/FeatureIcon';
 import type { RoomScreenParams } from '@/types';
 
 export default function RoomScreen() {
@@ -256,7 +257,10 @@ export default function RoomScreen() {
           <Text className="text-[32px] font-bold tracking-[4px] text-blue-700 text-center">
             {room?.code || ''}
           </Text>
-          <Text className="text-sm text-blue-600 text-center mt-2">📋 タップしてコピー</Text>
+          <View className="flex-row items-center justify-center mt-2">
+            <FeatureIcon name="copy" size={14} color={APP_COLORS.primary} />
+            <Text className="text-sm text-blue-600 ml-1">タップしてコピー</Text>
+          </View>
         </TouchableOpacity>
 
         {isHost ? (
@@ -372,9 +376,10 @@ export default function RoomScreen() {
                   <Text className="text-[32px] font-bold tracking-[4px] text-blue-700 text-center">
                     {code}
                   </Text>
-                  <Text className="text-sm text-blue-600 text-center mt-2">
-                    📋 タップしてコピー
-                  </Text>
+                  <View className="flex-row items-center justify-center mt-2">
+                    <FeatureIcon name="copy" size={14} color={APP_COLORS.primary} />
+                    <Text className="text-sm text-blue-600 ml-1">タップしてコピー</Text>
+                  </View>
                 </TouchableOpacity>
 
                 <QuizModeSelector

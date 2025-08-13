@@ -2,23 +2,24 @@
 import React, { useState } from 'react';
 import { View, Text, Modal, TouchableOpacity, ScrollView } from 'react-native';
 import { Button } from '@/components/common/Button';
+import { FeatureIcon, APP_COLORS } from '@/components/common/FeatureIcon';
 
 interface StampSelectorProps {
   visible: boolean;
   onClose: () => void;
   onSelectStamp: (stamp: { type: string; x: number; y: number }) => void;
   loading?: boolean;
-  stamps?: { type: string; emoji: string; text: string }[]; // DBから取得した場合
+  stamps?: { type: string; icon: string; text: string; color: string }[]; // DBから取得した場合
 }
 
-// デフォルトの絵文字スタンプ
+// デフォルトのアイコンスタンプ
 export const AVAILABLE_STAMPS = [
-  { type: 'amazing', emoji: '😍', text: 'すごい！' },
-  { type: 'frustrated', emoji: '😤', text: '悔しい！' },
-  { type: 'thumbs_up', emoji: '👍', text: 'いいね！' },
-  { type: 'thinking', emoji: '🤔', text: '難しい...' },
-  { type: 'surprised', emoji: '😲', text: 'びっくり！' },
-  { type: 'heart', emoji: '❤️', text: 'すき！' },
+  { type: 'amazing', icon: 'heart', text: 'すごい！', color: APP_COLORS.danger },
+  { type: 'frustrated', icon: 'sad', text: '悔しい！', color: APP_COLORS.warning },
+  { type: 'thumbs_up', icon: 'thumbs-up', text: 'いいね！', color: APP_COLORS.success },
+  { type: 'thinking', icon: 'help-circle', text: '難しい...', color: APP_COLORS.info },
+  { type: 'surprised', icon: 'alert-circle', text: 'びっくり！', color: APP_COLORS.warning },
+  { type: 'heart', icon: 'heart', text: 'すき！', color: APP_COLORS.danger },
 ];
 
 export const StampSelector: React.FC<StampSelectorProps> = ({
@@ -52,7 +53,7 @@ export const StampSelector: React.FC<StampSelectorProps> = ({
           <View className="flex-row justify-between items-center mb-4">
             <Text className="text-lg font-bold">スタンプを選択</Text>
             <TouchableOpacity onPress={onClose}>
-              <Text className="text-gray-500 text-lg">✕</Text>
+              <FeatureIcon name="close" size={20} color={APP_COLORS.secondary} />
             </TouchableOpacity>
           </View>
           <ScrollView
@@ -64,10 +65,17 @@ export const StampSelector: React.FC<StampSelectorProps> = ({
                 key={stamp.type}
                 onPress={() => handleStampSelect(stamp.type)}
                 disabled={loading}
-                className="bg-gray-100 rounded-xl p-2 items-center min-w-24 mr-2 mb-2"
+                className="bg-gray-100 rounded-xl p-3 items-center min-w-24 mr-2 mb-2"
                 style={{ opacity: loading ? 0.5 : 1 }}
               >
-                <Text className="text-2xl mb-1">{stamp.emoji}</Text>
+                <FeatureIcon 
+                  name={stamp.icon as any} 
+                  size={24} 
+                  color={stamp.color}
+                  backgroundColor={stamp.color}
+                  borderRadius="small"
+                  className="mb-2"
+                />
                 <Text className="text-xs text-center font-medium">{stamp.text}</Text>
               </TouchableOpacity>
             ))}

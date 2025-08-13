@@ -12,6 +12,7 @@ import {
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { ErrorMessage } from '@/components/common/ErrorMessage';
 import { Button } from '@/components/common/Button';
+import { FeatureIcon, APP_COLORS } from '@/components/common/FeatureIcon';
 import {
   canParticipantAnswer,
   isQuizActive,
@@ -330,7 +331,7 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
         {isAutoMode && (
           <View className="mb-4">
             <Button
-              title={isPlaying ? '再生中...' : `🎧 音声を再生する (${playCount}/${maxPlayCount})`}
+              title={isPlaying ? '再生中...' : `音声を再生する (${playCount}/${maxPlayCount})`}
               onPress={handlePlayAudio}
               disabled={!questionText || playCount >= maxPlayCount || showResult || isPlaying}
               variant={playCount >= maxPlayCount ? 'secondary' : 'primary'}
@@ -338,9 +339,12 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
               fullWidth
             />
             {playCount >= maxPlayCount && (
-              <Text className="text-center text-red-600 text-sm mt-2 font-medium">
-                ⚠️ 再生回数の上限に達しました
-              </Text>
+              <View className="flex-row items-center justify-center mt-2">
+                <FeatureIcon name="warning" size={16} color={APP_COLORS.danger} />
+                <Text className="text-red-600 text-sm font-medium ml-1">
+                  再生回数の上限に達しました
+                </Text>
+              </View>
             )}
           </View>
         )}
@@ -451,7 +455,7 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
         {isAutoMode && showResult && isResultDataReady && isCurrentQuestionFullyJudged && (
           <View className="mt-4 mb-4">
             <Button
-              title={isPlaying ? '再生中...' : '🎧 正解の音声を再生する'}
+              title={isPlaying ? '再生中...' : '正解の音声を再生する'}
               onPress={handlePlayAudio}
               disabled={!questionText || isPlaying}
               variant="outline"

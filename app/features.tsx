@@ -3,6 +3,7 @@ import React, { useEffect } from 'react';
 import { View, Text, ScrollView } from 'react-native';
 import { router } from 'expo-router';
 import { useHeaderSettings } from '@/contexts/HeaderSettingsContext';
+import { FeatureIcon, APP_COLORS } from '@/components/common/FeatureIcon';
 
 export default function FeaturesScreen() {
   const { setSettingsConfig } = useHeaderSettings();
@@ -22,9 +23,10 @@ export default function FeaturesScreen() {
 
   const features = [
     {
-      icon: '🎧',
+      icon: 'headset',
       title: 'リスニングクイズ',
       description: '音声を聞いて答えるクイズ形式で英語学習',
+      color: APP_COLORS.primary,
       details: [
         '英語の音声問題を自動再生',
         '速度調整機能で聞き取りやすさを調整',
@@ -32,9 +34,10 @@ export default function FeaturesScreen() {
       ],
     },
     {
-      icon: '👥',
+      icon: 'people',
       title: 'リアルタイム参加',
       description: '複数人で同時にクイズを楽しめる',
+      color: APP_COLORS.success,
       details: [
         'ルームコードで簡単参加',
         '最大参加者数の制限なし',
@@ -42,9 +45,10 @@ export default function FeaturesScreen() {
       ],
     },
     {
-      icon: '🏆',
+      icon: 'trophy',
       title: 'ポイント・ランキング',
       description: 'ポイント制でリアルタイム順位表示',
+      color: APP_COLORS.warning,
       details: [
         '正解で10ポイント、惜しいで5ポイント',
         'タイ記録にも対応した順位システム',
@@ -53,9 +57,10 @@ export default function FeaturesScreen() {
       ],
     },
     {
-      icon: '⚙️',
+      icon: 'settings',
       title: '柔軟なクイズモード',
       description: '用途に応じて選べる2つのモード',
+      color: APP_COLORS.info,
       details: [
         'ホストありモード：ホストが判定を行う',
         'ホストなしモード：自動判定で進行',
@@ -63,9 +68,10 @@ export default function FeaturesScreen() {
       ],
     },
     {
-      icon: '📝',
+      icon: 'document-text',
       title: '例文管理',
       description: '自分だけの例文データベース',
+      color: APP_COLORS.secondary,
       details: [
         '英語フレーズと日本語訳を登録',
         '登録した例文はクイズで使用可能',
@@ -90,7 +96,14 @@ export default function FeaturesScreen() {
               className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-2"
             >
               <View className="flex-row items-center mb-4">
-                <Text className="text-4xl mr-4">{feature.icon}</Text>
+                <FeatureIcon 
+                  name={feature.icon as any} 
+                  size={32} 
+                  color={feature.color}
+                  backgroundColor={feature.color}
+                  borderRadius="medium"
+                  className="mr-4"
+                />
                 <View className="flex-1">
                   <Text className="text-xl font-bold text-gray-800 mb-1">{feature.title}</Text>
                   <Text className="text-gray-600">{feature.description}</Text>
@@ -111,9 +124,10 @@ export default function FeaturesScreen() {
 
         {/* 今後の予定セクション */}
         <View className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-6 mt-8">
-          <Text className="text-xl font-bold text-purple-800 mb-4 text-center">
-            🚀 今後の機能追加予定
-          </Text>
+          <View className="flex-row items-center justify-center mb-4">
+            <FeatureIcon name="rocket" size={20} color={APP_COLORS.info} className="mr-2" />
+            <Text className="text-xl font-bold text-purple-800">今後の機能追加予定</Text>
+          </View>
           <View className="space-y-3">
             {[
               '1人で学習モード',
@@ -122,7 +136,7 @@ export default function FeaturesScreen() {
               'オフライン学習モード',
             ].map((item, index) => (
               <View key={index} className="flex-row items-center mb-2">
-                <Text className="text-purple-500 mr-3">📋</Text>
+                <FeatureIcon name="checkmark-circle" size={16} color={APP_COLORS.info} className="mr-3" />
                 <Text className="text-purple-700 flex-1">{item}</Text>
               </View>
             ))}

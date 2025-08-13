@@ -8,6 +8,7 @@ import NicknameEditModal from '@/components/common/NicknameEditModal';
 import { useHeaderSettings } from '@/contexts/HeaderSettingsContext';
 import { Button } from '@/components/common/Button';
 import { useToast } from '@/contexts/ToastContext';
+import { FeatureIcon, APP_COLORS } from '@/components/common/FeatureIcon';
 
 export default function HomeScreen() {
   const userId = useUserStore((s) => s.userId);
@@ -93,7 +94,7 @@ export default function HomeScreen() {
                 onPress={() => setIsNicknameEditModalVisible(true)}
                 className="ml-2 bg-white rounded-full p-2 shadow-sm"
               >
-                <Text className="text-gray-600 text-sm">✏️</Text>
+                <FeatureIcon name="create" size={16} color={APP_COLORS.secondary} />
               </TouchableOpacity>
             </View>
           ) : (
@@ -133,9 +134,10 @@ export default function HomeScreen() {
 
         {/* クイックスタートガイド */}
         <View className="bg-gradient-to-r from-orange-50 to-amber-50 rounded-xl p-4 mb-6">
-          <Text className="text-lg font-bold text-orange-800 mb-3 text-center">
-            ⚡ クイックスタート
-          </Text>
+          <View className="flex-row items-center justify-center mb-3">
+            <FeatureIcon name="flash" size={20} color={APP_COLORS.warning} className="mr-2" />
+            <Text className="text-lg font-bold text-orange-800">クイックスタート</Text>
+          </View>
           <View className="space-y-2">
             {[
               { step: '1', text: 'ルームを作成またはコードで参加' },
@@ -162,7 +164,7 @@ export default function HomeScreen() {
             >
               <View className="flex-row items-center flex-1">
                 <View className="w-10 h-10 bg-blue-100 rounded-full items-center justify-center mr-3">
-                  <Text className="text-blue-600 text-lg">🚀</Text>
+                  <FeatureIcon name="rocket" size={18} color={APP_COLORS.primary} />
                 </View>
                 <View className="flex-1">
                   <Text className="text-gray-800 font-semibold text-base">機能詳細</Text>
@@ -180,7 +182,7 @@ export default function HomeScreen() {
             >
               <View className="flex-row items-center flex-1">
                 <View className="w-10 h-10 bg-green-100 rounded-full items-center justify-center mr-3">
-                  <Text className="text-green-600 text-lg">📚</Text>
+                  <FeatureIcon name="book" size={18} color={APP_COLORS.success} />
                 </View>
                 <View className="flex-1">
                   <Text className="text-gray-800 font-semibold text-base">使い方ガイド</Text>

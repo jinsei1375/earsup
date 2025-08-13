@@ -5,6 +5,7 @@ import type { ParticipantWithNickname, Answer } from '@/types';
 import { calculateParticipantStats, calculateParticipantRank } from '@/utils/quizUtils';
 import { Button } from '@/components/common/Button';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
+import { FeatureIcon, APP_COLORS } from '@/components/common/FeatureIcon';
 
 interface ParticipantsListProps {
   participants: ParticipantWithNickname[];
@@ -217,9 +218,10 @@ export const ParticipantsList: React.FC<ParticipantsListProps> = ({
                             {/* Streak information */}
                             <View className="flex-row items-center">
                               {stats.currentStreak > 0 && (
-                                <View className="bg-orange-100 px-2 py-1 rounded-full mr-1">
-                                  <Text className="text-xs text-orange-700 font-bold">
-                                    🔥{String(stats.currentStreak)}連続
+                                <View className="bg-orange-100 px-2 py-1 rounded-full mr-1 flex-row items-center">
+                                  <FeatureIcon name="flame" size={12} color={APP_COLORS.warning} />
+                                  <Text className="text-xs text-orange-700 font-bold ml-1">
+                                    {String(stats.currentStreak)}連続
                                   </Text>
                                 </View>
                               )}

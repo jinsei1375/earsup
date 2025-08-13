@@ -8,6 +8,7 @@ import { ErrorMessage } from '@/components/common/ErrorMessage';
 import { Button } from '@/components/common/Button';
 import { VoiceSettings } from '@/components/common/VoiceSettings';
 import { ExitRoomModal } from '@/components/common/ExitRoomModal';
+import { FeatureIcon, APP_COLORS } from '@/components/common/FeatureIcon';
 import { getQuizModeDisplayName, extractTrailingPunctuation } from '@/utils/quizUtils';
 import { audioService } from '@/services/audioService';
 import { useToast } from '@/contexts/ToastContext';
@@ -128,7 +129,10 @@ export const HostQuizScreen: React.FC<HostQuizScreenProps> = ({
         <View className="mb-4 p-3 bg-yellow-100 border border-yellow-400 rounded-lg w-full">
           <View className="flex-row justify-between items-start">
             <View className="flex-1">
-              <Text className="text-yellow-800 text-sm font-bold mb-1">⚠️ 音声に関する注意</Text>
+              <View className="flex-row items-center mb-1">
+                <FeatureIcon name="warning" size={16} color={APP_COLORS.warning} />
+                <Text className="text-yellow-800 text-sm font-bold ml-1">音声に関する注意</Text>
+              </View>
               <Text className="text-yellow-700 text-xs">
                 音声が聞こえない場合は、デバイスのマナーモード（消音モード）を解除してください。
               </Text>

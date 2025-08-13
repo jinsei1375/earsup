@@ -3,6 +3,7 @@ import React, { useEffect } from 'react';
 import { View, Text, ScrollView } from 'react-native';
 import { router } from 'expo-router';
 import { useHeaderSettings } from '@/contexts/HeaderSettingsContext';
+import { FeatureIcon, APP_COLORS } from '@/components/common/FeatureIcon';
 
 export default function GuideScreen() {
   const { setSettingsConfig } = useHeaderSettings();
@@ -155,29 +156,34 @@ export default function GuideScreen() {
 
   const tips = [
     {
-      icon: '🔊',
+      icon: 'volume-high',
       title: '音声が聞こえない場合',
       content: 'デバイスのマナーモード（消音モード）を解除してください',
+      color: APP_COLORS.primary,
     },
     {
-      icon: '🎙️',
+      icon: 'mic',
       title: '音声設定の活用',
       content: '男性・女性の音声選択や、0.5x〜1.5xの速度調整で学習効果を最大化',
+      color: APP_COLORS.success,
     },
     {
-      icon: '⚡',
+      icon: 'flash',
       title: '速度調整の活用',
       content: '初心者には0.75x、上級者には1.25xなど参加者に合わせて調整',
+      color: APP_COLORS.warning,
     },
     {
-      icon: '🎯',
-      title: '効果的な判定',
-      content: 'ホストありモードでは「惜しい」判定を積極的に活用して学習を促進',
+      icon: 'target',
+      title: '効果的なクイズ作成',
+      content: '短くて覚えやすいフレーズを選ぶと、より楽しく学習できます',
+      color: APP_COLORS.info,
     },
     {
-      icon: '👥',
-      title: 'チーム学習',
-      content: '友達や同僚とルームを共有して、一緒に英語学習を楽しみましょう',
+      icon: 'people',
+      title: 'グループ学習のコツ',
+      content: '参加者のレベルに合わせて問題の難易度を調整しましょう',
+      color: APP_COLORS.secondary,
     },
   ];
 
@@ -191,7 +197,10 @@ export default function GuideScreen() {
 
         {/* 初期設定セクション */}
         <View className="mb-8">
-          <Text className="text-xl font-bold text-gray-800 mb-4">🚀 初期設定</Text>
+          <View className="flex-row items-center mb-4">
+            <FeatureIcon name="rocket" size={20} color={APP_COLORS.primary} className="mr-2" />
+            <Text className="text-xl font-bold text-gray-800">初期設定</Text>
+          </View>
           <View className="space-y-4">
             {setupSteps.map((step, index) => (
               <View key={index} className="bg-blue-50 rounded-lg p-4 mb-2">
@@ -212,7 +221,10 @@ export default function GuideScreen() {
 
         {/* ホストありモード */}
         <View className="mb-8">
-          <Text className="text-xl font-bold text-gray-800 mb-4">🎯 ホストありモード</Text>
+          <View className="flex-row items-center mb-4">
+            <FeatureIcon name="radio-button-on" size={20} color={APP_COLORS.success} className="mr-2" />
+            <Text className="text-xl font-bold text-gray-800">ホストありモード</Text>
+          </View>
           <Text className="text-gray-600 mb-4">
             ホストが問題作成・音声再生・判定を行うモードです。柔軟な判定が可能で、教育現場に最適です。
           </Text>
@@ -233,7 +245,10 @@ export default function GuideScreen() {
 
         {/* ホストなしモード */}
         <View className="mb-8">
-          <Text className="text-xl font-bold text-gray-800 mb-4">🤖 ホストなしモード</Text>
+          <View className="flex-row items-center mb-4">
+            <FeatureIcon name="cog" size={20} color={APP_COLORS.info} className="mr-2" />
+            <Text className="text-xl font-bold text-gray-800">ホストなしモード</Text>
+          </View>
           <Text className="text-gray-600 mb-4">
             事前登録した例文を使用して自動進行するモードです。友達同士の気軽な学習に最適です。
           </Text>
@@ -254,12 +269,22 @@ export default function GuideScreen() {
 
         {/* ヒント・コツ */}
         <View className="mb-8">
-          <Text className="text-xl font-bold text-gray-800 mb-4">💡 ヒント・コツ</Text>
+          <View className="flex-row items-center mb-4">
+            <FeatureIcon name="bulb" size={20} color={APP_COLORS.warning} className="mr-2" />
+            <Text className="text-xl font-bold text-gray-800">ヒント・コツ</Text>
+          </View>
           <View className="space-y-4">
             {tips.map((tip, index) => (
               <View key={index} className="bg-yellow-50 rounded-lg p-4 mb-2">
                 <View className="flex-row items-center mb-2">
-                  <Text className="text-2xl mr-3">{tip.icon}</Text>
+                  <FeatureIcon 
+                    name={tip.icon as any} 
+                    size={20} 
+                    color={tip.color}
+                    backgroundColor={tip.color}
+                    borderRadius="small"
+                    className="mr-3"
+                  />
                   <Text className="font-bold text-yellow-800 flex-1">{tip.title}</Text>
                 </View>
                 <Text className="text-yellow-700">{tip.content}</Text>
@@ -270,9 +295,10 @@ export default function GuideScreen() {
 
         {/* トラブルシューティング */}
         <View className="bg-red-50 rounded-xl p-6 mb-8">
-          <Text className="text-xl font-bold text-red-800 mb-4 text-center">
-            🛠️ よくある問題と解決方法
-          </Text>
+          <View className="flex-row items-center mb-4">
+            <FeatureIcon name="build" size={20} color={APP_COLORS.danger} className="mr-2" />
+            <Text className="text-xl font-bold text-red-800">よくある問題と解決方法</Text>
+          </View>
           <View className="space-y-4">
             <View className="mb-2">
               <Text className="font-semibold text-red-800 mb-1">音声が再生されない</Text>
