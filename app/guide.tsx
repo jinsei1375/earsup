@@ -251,7 +251,12 @@ export default function GuideScreen() {
         {/* ホストなしモード */}
         <View className="mb-8">
           <View className="flex-row items-center mb-4">
-            <FeatureIcon name="cog" size={20} color={APP_COLORS.info} className="mr-2" />
+            <FeatureIcon
+              name="radio-button-on"
+              size={20}
+              color={APP_COLORS.info}
+              className="mr-2"
+            />
             <Text className="text-xl font-bold text-gray-800">ホストなしモード</Text>
           </View>
           <Text className="text-gray-600 mb-4">
