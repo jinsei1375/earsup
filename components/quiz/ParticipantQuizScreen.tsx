@@ -22,6 +22,8 @@ import {
 import { audioService } from '@/services/audioService';
 import { ParticipantsList } from '@/components/room/ParticipantsList';
 import { SampleSentenceService } from '@/services/sampleSentenceService';
+import { DiffDisplay } from './DiffDisplay';
+import { generateDiff, getJudgmentResult } from '@/utils/diffUtils';
 import type {
   Room,
   RealtimeConnectionState,
@@ -435,6 +437,17 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
                 </Text>
                 <Text className="text-center text-black mt-2">正解: {questionText}</Text>
                 <TranslationDisplay />
+
+                {/* ホストなしモードでの差分表示 */}
+                {isAutoMode && userAnswer?.answer_text && questionText && (
+                  <View className="mt-4">
+                    <DiffDisplay
+                      diffResult={generateDiff(userAnswer.answer_text, questionText)}
+                      userAnswer={userAnswer.answer_text}
+                      correctAnswer={questionText}
+                    />
+                  </View>
+                )}
               </>
             ) : (
               // Incorrect
@@ -446,6 +459,17 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
                 </Text>
                 <Text className="text-center text-black mt-2">正解: {questionText}</Text>
                 <TranslationDisplay />
+
+                {/* ホストなしモードでの差分表示 */}
+                {isAutoMode && userAnswer?.answer_text && questionText && (
+                  <View className="mt-4">
+                    <DiffDisplay
+                      diffResult={generateDiff(userAnswer.answer_text, questionText)}
+                      userAnswer={userAnswer.answer_text}
+                      correctAnswer={questionText}
+                    />
+                  </View>
+                )}
               </>
             )}
           </View>

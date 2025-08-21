@@ -1,6 +1,7 @@
 // utils/quizUtils.ts
 import * as Speech from 'expo-speech';
 import type { Answer, ParticipantWithNickname } from '@/types';
+import { generateDiff, getJudgmentResult } from './diffUtils';
 
 export const generateRoomCode = (): string => {
   return Math.random().toString(36).slice(-6).toUpperCase();
@@ -47,6 +48,31 @@ export const validateAnswer = (
   }
 
   return processedAnswer === processedCorrectAnswer;
+};
+
+/**
+ * 差分ベースの回答評価（ホストなしモード用）
+ */
+export const evaluateAnswerWithDiff = (
+  answer: string,
+  correctAnswer: string,
+  excludePunctuation: boolean = true // デフォルトで句読点を除外
+): 'correct' | 'close' | 'incorrect' => {
+  if (!answer || !correctAnswer) {
+    return 'incorrect';
+  }
+
+  // 常に句読点を除外する場合の処理
+  let processedAnswer = answer.trim();
+  let processedCorrectAnswer = correctAnswer.trim();
+
+  if (excludePunctuation) {
+    // 文末の句読点を除去
+    processedAnswer = processedAnswer.replace(/[.!?]+$/, '');
+    processedCorrectAnswer = processedCorrectAnswer.replace(/[.!?]+$/, '');
+  }
+
+  return getJudgmentResult(processedAnswer, processedCorrectAnswer);
 };
 
 export const speakText = (
