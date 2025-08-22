@@ -251,15 +251,15 @@ export default function RoomScreen() {
               await handleError(error, 'コピーエラー');
             }
           }}
-          className="p-6 rounded-xl border-2 border-dashed border-blue-400 bg-blue-50 my-5 active:bg-blue-100"
+          className="p-6 rounded-xl border-2 border-dashed border-app-primary bg-app-primary-light my-5 active:bg-app-primary-light"
           activeOpacity={0.8}
         >
-          <Text className="text-[32px] font-bold tracking-[4px] text-blue-700 text-center">
+          <Text className="text-[32px] font-bold tracking-[4px] text-app-primary-dark text-center">
             {room?.code || ''}
           </Text>
           <View className="flex-row items-center justify-center mt-2">
             <FeatureIcon name="copy" size={14} color={APP_COLORS.primary} />
-            <Text className="text-sm text-blue-600 ml-1">タップしてコピー</Text>
+            <Text className="text-sm text-app-primary ml-1">タップしてコピー</Text>
           </View>
         </TouchableOpacity>
 
@@ -370,15 +370,15 @@ export default function RoomScreen() {
                       await handleError(error, 'コピーエラー');
                     }
                   }}
-                  className="p-6 rounded-xl border-2 border-dashed border-blue-400 bg-blue-50 my-5 active:bg-blue-100"
+                  className="p-6 rounded-xl border-2 border-dashed border-app-primary bg-app-primary-light my-5 active:bg-app-primary-light"
                   activeOpacity={0.8}
                 >
-                  <Text className="text-[32px] font-bold tracking-[4px] text-blue-700 text-center">
+                  <Text className="text-[32px] font-bold tracking-[4px] text-app-primary-dark text-center">
                     {code}
                   </Text>
                   <View className="flex-row items-center justify-center mt-2">
                     <FeatureIcon name="copy" size={14} color={APP_COLORS.primary} />
-                    <Text className="text-sm text-blue-600 ml-1">タップしてコピー</Text>
+                    <Text className="text-sm text-app-primary ml-1">タップしてコピー</Text>
                   </View>
                 </TouchableOpacity>
 

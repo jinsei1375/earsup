@@ -103,7 +103,7 @@ export const QuestionList: React.FC<QuestionListProps> = ({ roomId, onAddToExamp
                     {onAddToExamples && (
                       <TouchableOpacity
                         onPress={() => handleAddToExamples(question)}
-                        className="bg-blue-500 px-3 py-1 rounded-md flex-row items-center"
+                        className="bg-app-primary px-3 py-1 rounded-md flex-row items-center"
                         activeOpacity={0.7}
                         disabled={loading}
                         style={{ elevation: 2, zIndex: 10 }}

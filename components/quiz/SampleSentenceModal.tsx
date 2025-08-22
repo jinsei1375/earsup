@@ -180,12 +180,12 @@ export const SampleSentenceModal: React.FC<SampleSentenceModalProps> = ({
             <TouchableOpacity
               onPress={() => setActiveTab('sample')}
               className={`flex-1 py-3 ${
-                activeTab === 'sample' ? 'border-b-2 border-blue-500' : ''
+                activeTab === 'sample' ? 'border-b-2 border-app-primary' : ''
               }`}
             >
               <Text
                 className={`text-center font-medium ${
-                  activeTab === 'sample' ? 'text-blue-500' : 'text-gray-500'
+                  activeTab === 'sample' ? 'text-app-primary' : 'text-gray-500'
                 }`}
               >
                 サンプル文
@@ -193,11 +193,11 @@ export const SampleSentenceModal: React.FC<SampleSentenceModalProps> = ({
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => setActiveTab('user')}
-              className={`flex-1 py-3 ${activeTab === 'user' ? 'border-b-2 border-blue-500' : ''}`}
+              className={`flex-1 py-3 ${activeTab === 'user' ? 'border-b-2 border-app-primary' : ''}`}
             >
               <Text
                 className={`text-center font-medium ${
-                  activeTab === 'user' ? 'text-blue-500' : 'text-gray-500'
+                  activeTab === 'user' ? 'text-app-primary' : 'text-gray-500'
                 }`}
               >
                 マイセンテンス
@@ -219,14 +219,14 @@ export const SampleSentenceModal: React.FC<SampleSentenceModalProps> = ({
                       onPress={() => handleCategorySelect(category.id)}
                       className={`p-3 border-b border-gray-100 ${
                         selectedCategoryId === category.id
-                          ? 'bg-blue-50 border-l-4 border-l-blue-500'
+                          ? 'bg-app-primary-light border-l-4 border-l-blue-500'
                           : ''
                       }`}
                     >
                       <Text
                         className={`${
                           selectedCategoryId === category.id
-                            ? 'text-blue-700 font-semibold'
+                            ? 'text-app-primary-dark font-semibold'
                             : 'text-gray-700'
                         }`}
                       >

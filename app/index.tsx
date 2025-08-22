@@ -88,13 +88,13 @@ export default function HomeScreen() {
           {nickname ? (
             <View className="flex-row items-center mb-4">
               <View className="bg-white px-4 py-2 rounded-full shadow-sm">
-                <Text className="text-blue-600 font-semibold">{nickname}</Text>
+                <Text className="text-app-primary font-semibold">{nickname}</Text>
               </View>
               <TouchableOpacity
                 onPress={() => setIsNicknameEditModalVisible(true)}
                 className="ml-2 bg-white rounded-full p-2 shadow-sm"
               >
-                <FeatureIcon name="create" size={16} color={APP_COLORS.secondary} />
+                <FeatureIcon name="create" size={16} color={APP_COLORS.gray600} />
               </TouchableOpacity>
             </View>
           ) : (
@@ -136,7 +136,7 @@ export default function HomeScreen() {
         <View className="bg-gradient-to-r from-orange-50 to-amber-50 rounded-xl p-4 mb-6">
           <View className="flex-row items-center justify-center mb-3">
             <FeatureIcon name="flash" size={20} color={APP_COLORS.warning} className="mr-2" />
-            <Text className="text-lg font-bold text-orange-800">クイックスタート</Text>
+            <Text className="text-lg font-bold text-app-orange-dark">クイックスタート</Text>
           </View>
           <View className="space-y-2">
             {[
@@ -146,10 +146,10 @@ export default function HomeScreen() {
               { step: '4', text: 'リアルタイムで結果発表！' },
             ].map((item) => (
               <View key={item.step} className="flex-row items-center mb-1">
-                <View className="bg-orange-500 rounded-full w-5 h-5 items-center justify-center mr-3">
+                <View className="bg-app-orange rounded-full w-5 h-5 items-center justify-center mr-3">
                   <Text className="text-white text-xs font-bold">{item.step}</Text>
                 </View>
-                <Text className="text-orange-700 flex-1 text-sm">{item.text}</Text>
+                <Text className="text-app-orange-dark flex-1 text-sm">{item.text}</Text>
               </View>
             ))}
           </View>
@@ -163,7 +163,7 @@ export default function HomeScreen() {
               className="flex-row items-center justify-between p-4 active:bg-gray-50"
             >
               <View className="flex-row items-center flex-1">
-                <View className="w-10 h-10 bg-blue-100 rounded-full items-center justify-center mr-3">
+                <View className="w-10 h-10 bg-app-primary-light rounded-full items-center justify-center mr-3">
                   <FeatureIcon name="rocket" size={18} color={APP_COLORS.primary} />
                 </View>
                 <View className="flex-1">
@@ -182,7 +182,7 @@ export default function HomeScreen() {
               className="flex-row items-center justify-between p-4 active:bg-gray-50"
             >
               <View className="flex-row items-center flex-1">
-                <View className="w-10 h-10 bg-purple-100 rounded-full items-center justify-center mr-3">
+                <View className="w-10 h-10 bg-app-purple-light rounded-full items-center justify-center mr-3">
                   <FeatureIcon name="analytics" size={18} color={APP_COLORS.info} />
                 </View>
                 <View className="flex-1">
@@ -200,7 +200,7 @@ export default function HomeScreen() {
               className="flex-row items-center justify-between p-4 active:bg-gray-50"
             >
               <View className="flex-row items-center flex-1">
-                <View className="w-10 h-10 bg-green-100 rounded-full items-center justify-center mr-3">
+                <View className="w-10 h-10 bg-app-success-light rounded-full items-center justify-center mr-3">
                   <FeatureIcon name="book" size={18} color={APP_COLORS.success} />
                 </View>
                 <View className="flex-1">

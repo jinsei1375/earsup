@@ -9,7 +9,7 @@ interface ErrorMessageProps {
 
 export const ErrorMessage: React.FC<ErrorMessageProps> = ({
   message,
-  className = 'mt-4 text-red-500',
+  className = 'mt-4 text-app-danger',
 }) => {
   if (!message) return null;
   

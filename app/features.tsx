@@ -71,7 +71,7 @@ export default function FeaturesScreen() {
       icon: 'document-text',
       title: '例文管理',
       description: '自分だけの例文データベース',
-      color: APP_COLORS.secondary,
+      color: APP_COLORS.gray600,
       details: [
         '英語フレーズと日本語訳を登録',
         '登録した例文はクイズで使用可能',
@@ -113,7 +113,7 @@ export default function FeaturesScreen() {
               <View className="space-y-2">
                 {feature.details.map((detail, detailIndex) => (
                   <View key={detailIndex} className="flex-row items-start">
-                    <Text className="text-blue-500 mr-2">•</Text>
+                    <Text className="text-app-primary mr-2">•</Text>
                     <Text className="text-gray-700 flex-1 leading-6">{detail}</Text>
                   </View>
                 ))}
@@ -126,7 +126,7 @@ export default function FeaturesScreen() {
         <View className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-6 mt-8">
           <View className="flex-row items-center justify-center mb-4">
             <FeatureIcon name="rocket" size={20} color={APP_COLORS.info} className="mr-2" />
-            <Text className="text-xl font-bold text-purple-800">今後の機能追加予定</Text>
+            <Text className="text-xl font-bold text-app-purple-dark">今後の機能追加予定</Text>
           </View>
           <View className="space-y-3">
             {[
@@ -142,7 +142,7 @@ export default function FeaturesScreen() {
                   color={APP_COLORS.info}
                   className="mr-3"
                 />
-                <Text className="text-purple-700 flex-1">{item}</Text>
+                <Text className="text-app-purple-dark flex-1">{item}</Text>
               </View>
             ))}
           </View>

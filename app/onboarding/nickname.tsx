@@ -97,7 +97,7 @@ export default function NicknameScreen() {
               onSubmitEditing={() => Keyboard.dismiss()}
               inputAccessoryViewID={inputAccessoryViewID}
             />
-            {error && <Text className="text-red-500 text-center">{error}</Text>}
+            {error && <Text className="text-app-danger text-center">{error}</Text>}
             <View className="mt-6">
               <Button
                 title={loading ? '登録中...' : '登録して始める'}

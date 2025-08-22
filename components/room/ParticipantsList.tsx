@@ -130,7 +130,7 @@ export const ParticipantsList: React.FC<ParticipantsListProps> = ({
                   key={participant.id}
                   className={`mb-3 p-3 rounded-xl shadow-sm ${
                     isCurrentUser
-                      ? 'bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200'
+                      ? 'bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-app-primary-light'
                       : 'bg-white border border-gray-200'
                   }`}
                 >
@@ -138,17 +138,17 @@ export const ParticipantsList: React.FC<ParticipantsListProps> = ({
                     <View className="flex-1">
                       <View className="flex-row items-center">
                         {isCurrentUser && (
-                          <View className="bg-blue-500 rounded-full w-3 h-3 mr-2" />
+                          <View className="bg-app-primary rounded-full w-3 h-3 mr-2" />
                         )}
                         <Text
                           className={`text-base font-semibold ${
-                            isCurrentUser ? 'text-blue-800' : 'text-gray-800'
+                            isCurrentUser ? 'text-app-primary-dark' : 'text-gray-800'
                           }`}
                         >
                           {participant.nickname}
                         </Text>
                         {isHost && !isAutoMode && (
-                          <View className="ml-2 bg-blue-500 px-2 py-0.5 rounded-full">
+                          <View className="ml-2 bg-app-primary px-2 py-0.5 rounded-full">
                             <Text className="text-xs text-white font-bold">ホスト</Text>
                           </View>
                         )}
@@ -156,23 +156,23 @@ export const ParticipantsList: React.FC<ParticipantsListProps> = ({
                           <View
                             className={`ml-2 px-1.5 py-0.5 rounded-full ${
                               rank === 1
-                                ? 'bg-yellow-100'
+                                ? 'bg-app-warning-light'
                                 : rank === 2
                                 ? 'bg-gray-100'
                                 : rank === 3
-                                ? 'bg-orange-100'
-                                : 'bg-blue-50'
+                                ? 'bg-app-orange-light'
+                                : 'bg-app-primary-light'
                             }`}
                           >
                             <Text
                               className={`text-xs font-bold ${
                                 rank === 1
-                                  ? 'text-yellow-700'
+                                  ? 'text-app-warning-dark'
                                   : rank === 2
                                   ? 'text-gray-700'
                                   : rank === 3
-                                  ? 'text-orange-700'
-                                  : 'text-blue-600'
+                                  ? 'text-app-orange-dark'
+                                  : 'text-app-primary'
                               }`}
                             >
                               {rank}位
@@ -185,7 +185,7 @@ export const ParticipantsList: React.FC<ParticipantsListProps> = ({
                     {stats && (
                       <View className="items-end min-w-[100px]">
                         <View className="flex-row items-center mb-1">
-                          <Text className="text-2xl font-bold text-blue-600 mr-1">
+                          <Text className="text-2xl font-bold text-app-primary mr-1">
                             {String(stats.points)}
                           </Text>
                           <Text className="text-xs text-gray-500">ポイント</Text>
@@ -198,7 +198,7 @@ export const ParticipantsList: React.FC<ParticipantsListProps> = ({
                           <>
                             <View className="w-20 h-2 bg-gray-200 rounded-full mb-1">
                               <View
-                                className="h-full bg-green-500 rounded-full"
+                                className="h-full bg-app-success rounded-full"
                                 style={{
                                   width: `${getProgressWidth(
                                     stats.correctAnswers,
@@ -207,7 +207,7 @@ export const ParticipantsList: React.FC<ParticipantsListProps> = ({
                                 }}
                               />
                             </View>
-                            <Text className="text-xs text-green-600 font-medium mb-1">
+                            <Text className="text-xs text-app-success-dark font-medium mb-1">
                               正解率{' '}
                               {String(
                                 Math.round((stats.correctAnswers / stats.totalAnswers) * 100)
@@ -218,16 +218,16 @@ export const ParticipantsList: React.FC<ParticipantsListProps> = ({
                             {/* Streak information */}
                             <View className="flex-row items-center">
                               {stats.currentStreak > 0 && (
-                                <View className="bg-orange-100 px-2 py-1 rounded-full mr-1 flex-row items-center">
+                                <View className="bg-app-orange-light px-2 py-1 rounded-full mr-1 flex-row items-center">
                                   <FeatureIcon name="flame" size={12} color={APP_COLORS.warning} />
-                                  <Text className="text-xs text-orange-700 font-bold ml-1">
+                                  <Text className="text-xs text-app-orange-dark font-bold ml-1">
                                     {String(stats.currentStreak)}連続
                                   </Text>
                                 </View>
                               )}
                               {stats.maxStreak > 1 && (
-                                <View className="bg-purple-100 px-2 py-1 rounded-full">
-                                  <Text className="text-xs text-purple-700 font-medium">
+                                <View className="bg-app-purple-light px-2 py-1 rounded-full">
+                                  <Text className="text-xs text-app-purple-dark font-medium">
                                     最高{String(stats.maxStreak)}連続
                                   </Text>
                                 </View>
@@ -263,19 +263,19 @@ export const ParticipantsList: React.FC<ParticipantsListProps> = ({
                           <View
                             className={`ml-2 px-2 py-1 rounded-full ${
                               currentAnswer.judge_result === 'correct'
-                                ? 'bg-green-100'
+                                ? 'bg-app-success-light'
                                 : currentAnswer.judge_result === 'partial'
-                                ? 'bg-orange-100'
-                                : 'bg-red-100'
+                                ? 'bg-app-orange-light'
+                                : 'bg-app-danger-light'
                             }`}
                           >
                             <Text
                               className={`text-xs font-medium ${
                                 currentAnswer.judge_result === 'correct'
-                                  ? 'text-green-700'
+                                  ? 'text-app-success-dark'
                                   : currentAnswer.judge_result === 'partial'
-                                  ? 'text-orange-700'
-                                  : 'text-red-700'
+                                  ? 'text-app-orange-dark'
+                                  : 'text-app-danger-dark'
                               }`}
                             >
                               {currentAnswer.judge_result === 'correct'

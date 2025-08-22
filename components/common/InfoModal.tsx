@@ -52,15 +52,15 @@ export default function InfoModal({ visible, onClose }: InfoModalProps) {
           </View>
 
           <TouchableOpacity className="py-4 border-b border-gray-200" onPress={handleTermsPress}>
-            <Text className="text-base text-blue-600 text-center">利用規約</Text>
+            <Text className="text-base text-app-primary text-center">利用規約</Text>
           </TouchableOpacity>
 
           <TouchableOpacity className="py-4 border-b border-gray-200" onPress={handlePrivacyPress}>
-            <Text className="text-base text-blue-600 text-center">プライバシーポリシー</Text>
+            <Text className="text-base text-app-primary text-center">プライバシーポリシー</Text>
           </TouchableOpacity>
 
           <TouchableOpacity className="py-4" onPress={handleContactPress}>
-            <Text className="text-base text-blue-600 text-center">お問い合わせ</Text>
+            <Text className="text-base text-app-primary text-center">お問い合わせ</Text>
           </TouchableOpacity>
         </View>
       </View>

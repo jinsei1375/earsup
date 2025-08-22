@@ -183,7 +183,7 @@ export default function GuideScreen() {
       icon: 'people',
       title: 'グループ学習のコツ',
       content: '参加者のレベルに合わせて問題の難易度を調整しましょう',
-      color: APP_COLORS.secondary,
+      color: APP_COLORS.gray600,
     },
   ];
 
@@ -203,14 +203,14 @@ export default function GuideScreen() {
           </View>
           <View className="space-y-4">
             {setupSteps.map((step, index) => (
-              <View key={index} className="bg-blue-50 rounded-lg p-4 mb-2">
-                <Text className="font-bold text-blue-800 mb-2">{step.title}</Text>
-                <Text className="text-blue-700 mb-3">{step.description}</Text>
+              <View key={index} className="bg-app-primary-light rounded-lg p-4 mb-2">
+                <Text className="font-bold text-app-primary-dark mb-2">{step.title}</Text>
+                <Text className="text-app-primary-dark mb-3">{step.description}</Text>
                 <View className="space-y-1">
                   {step.details.map((detail, detailIndex) => (
                     <View key={detailIndex} className="flex-row items-start">
-                      <Text className="text-blue-500 mr-2">•</Text>
-                      <Text className="text-blue-600 flex-1">{detail}</Text>
+                      <Text className="text-app-primary mr-2">•</Text>
+                      <Text className="text-app-primary flex-1">{detail}</Text>
                     </View>
                   ))}
                 </View>
@@ -235,13 +235,16 @@ export default function GuideScreen() {
           </Text>
           <View className="space-y-3">
             {hostModeSteps.map((step, index) => (
-              <View key={index} className="flex-row items-start bg-green-50 rounded-lg p-3 mb-2">
-                <View className="bg-green-500 rounded-full w-6 h-6 items-center justify-center mr-3 mt-0.5">
+              <View
+                key={index}
+                className="flex-row items-start bg-app-success-light rounded-lg p-3 mb-2"
+              >
+                <View className="bg-app-success rounded-full w-6 h-6 items-center justify-center mr-3 mt-0.5">
                   <Text className="text-white text-xs font-bold">{step.step}</Text>
                 </View>
                 <View className="flex-1">
-                  <Text className="font-semibold text-green-800">{step.title}</Text>
-                  <Text className="text-green-700 text-sm">{step.content}</Text>
+                  <Text className="font-semibold text-app-success-dark">{step.title}</Text>
+                  <Text className="text-app-success-dark text-sm">{step.content}</Text>
                 </View>
               </View>
             ))}
@@ -264,13 +267,16 @@ export default function GuideScreen() {
           </Text>
           <View className="space-y-3">
             {autoModeSteps.map((step, index) => (
-              <View key={index} className="flex-row items-start bg-purple-50 rounded-lg p-3 mb-2">
-                <View className="bg-purple-500 rounded-full w-6 h-6 items-center justify-center mr-3 mt-0.5">
+              <View
+                key={index}
+                className="flex-row items-start bg-app-purple-light rounded-lg p-3 mb-2"
+              >
+                <View className="bg-app-purple rounded-full w-6 h-6 items-center justify-center mr-3 mt-0.5">
                   <Text className="text-white text-xs font-bold">{step.step}</Text>
                 </View>
                 <View className="flex-1">
-                  <Text className="font-semibold text-purple-800">{step.title}</Text>
-                  <Text className="text-purple-700 text-sm">{step.content}</Text>
+                  <Text className="font-semibold text-app-purple-dark">{step.title}</Text>
+                  <Text className="text-app-purple-dark text-sm">{step.content}</Text>
                 </View>
               </View>
             ))}
@@ -285,7 +291,7 @@ export default function GuideScreen() {
           </View>
           <View className="space-y-4">
             {tips.map((tip, index) => (
-              <View key={index} className="bg-yellow-50 rounded-lg p-4 mb-2">
+              <View key={index} className="bg-app-warning-light rounded-lg p-4 mb-2">
                 <View className="flex-row items-center mb-2">
                   <FeatureIcon
                     name={tip.icon as any}
@@ -295,36 +301,36 @@ export default function GuideScreen() {
                     borderRadius="small"
                     className="mr-3"
                   />
-                  <Text className="font-bold text-yellow-800 flex-1">{tip.title}</Text>
+                  <Text className="font-bold text-app-warning-dark flex-1">{tip.title}</Text>
                 </View>
-                <Text className="text-yellow-700">{tip.content}</Text>
+                <Text className="text-app-warning-dark">{tip.content}</Text>
               </View>
             ))}
           </View>
         </View>
 
         {/* トラブルシューティング */}
-        <View className="bg-red-50 rounded-xl p-6 mb-8">
+        <View className="bg-app-danger-light rounded-xl p-6 mb-8">
           <View className="flex-row items-center mb-4">
             <FeatureIcon name="build" size={20} color={APP_COLORS.danger} className="mr-2" />
-            <Text className="text-xl font-bold text-red-800">よくある問題と解決方法</Text>
+            <Text className="text-xl font-bold text-app-danger-dark">よくある問題と解決方法</Text>
           </View>
           <View className="space-y-4">
             <View className="mb-2">
-              <Text className="font-semibold text-red-800 mb-1">音声が再生されない</Text>
-              <Text className="text-red-700 text-sm">
+              <Text className="font-semibold text-app-danger-dark mb-1">音声が再生されない</Text>
+              <Text className="text-app-danger-dark text-sm">
                 → マナーモードを解除し、音量を確認してください
               </Text>
             </View>
             <View className="mb-2">
-              <Text className="font-semibold text-red-800 mb-1">ルームに参加できない</Text>
-              <Text className="text-red-700 text-sm">
+              <Text className="font-semibold text-app-danger-dark mb-1">ルームに参加できない</Text>
+              <Text className="text-app-danger-dark text-sm">
                 → ルームコードが正しいか、ルームが作成済みか確認してください
               </Text>
             </View>
             <View className="mb-2">
-              <Text className="font-semibold text-red-800 mb-1">クイズが開始できない</Text>
-              <Text className="text-red-700 text-sm">
+              <Text className="font-semibold text-app-danger-dark mb-1">クイズが開始できない</Text>
+              <Text className="text-app-danger-dark text-sm">
                 → ルーム作成者を除いて参加者が最低1人いるか確認してください
               </Text>
             </View>

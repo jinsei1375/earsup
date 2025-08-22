@@ -80,12 +80,12 @@ export default function DiffDemoScreen() {
     <ScrollView className="flex-1">
       <View className="p-4">
         {/* 使用方法の説明 */}
-        <View className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-4">
+        <View className="bg-app-primary-light border border-app-primary rounded-xl p-4 mb-4">
           <View className="flex-row items-center mb-2">
             <FeatureIcon name="information-circle" size={20} color={APP_COLORS.primary} />
-            <Text className="ml-2 font-bold text-blue-800">使用方法</Text>
+            <Text className="ml-2 font-bold text-app-primary-dark">使用方法</Text>
           </View>
-          <Text className="text-sm text-blue-700">
+          <Text className="text-sm text-app-primary-dark">
             • 上記の入力欄で任意の文章を試すことができます{'\n'}•
             サンプルケースをタップすると入力欄に反映されます{'\n'}•
             差分表示では単語単位で正解・間違いを色分けして表示します{'\n'}•
@@ -95,28 +95,28 @@ export default function DiffDemoScreen() {
         </View>
         {/* カスタム入力 */}
         <View className="bg-white rounded-xl p-4 mb-4 shadow-sm">
-          <Text className="text-lg font-bold text-gray-800 mb-4">カスタム入力</Text>
+          <Text className="text-lg font-bold text-app-neutral-800 mb-4">カスタム入力</Text>
 
-          <Text className="text-sm font-medium text-gray-700 mb-2">ユーザーの回答</Text>
+          <Text className="text-sm font-medium text-app-neutral-700 mb-2">ユーザーの回答</Text>
           <TextInput
             value={userAnswer}
             onChangeText={setUserAnswer}
             placeholder="ユーザーの回答を入力..."
-            className="border border-gray-300 rounded-lg p-3 mb-3 text-base"
+            className="border border-app-neutral-300 rounded-lg p-3 mb-3 text-base"
             multiline
           />
 
-          <Text className="text-sm font-medium text-gray-700 mb-2">正解</Text>
+          <Text className="text-sm font-medium text-app-neutral-700 mb-2">正解</Text>
           <TextInput
             value={correctAnswer}
             onChangeText={setCorrectAnswer}
             placeholder="正解を入力..."
-            className="border border-gray-300 rounded-lg p-3 mb-4 text-base"
+            className="border border-app-neutral-300 rounded-lg p-3 mb-4 text-base"
             multiline
           />
 
-          <View className="flex-row items-center justify-between bg-gray-50 rounded-lg p-3">
-            <Text className="font-medium text-gray-700">判定結果:</Text>
+          <View className="flex-row items-center justify-between bg-app-neutral-50 rounded-lg p-3">
+            <Text className="font-medium text-app-neutral-700">判定結果:</Text>
             <View className="flex-row items-center">
               <FeatureIcon
                 name={
@@ -138,10 +138,10 @@ export default function DiffDemoScreen() {
               <Text
                 className={`ml-1 font-bold ${
                   judgment === 'correct'
-                    ? 'text-green-600'
+                    ? 'text-app-success-dark'
                     : judgment === 'close'
-                    ? 'text-yellow-600'
-                    : 'text-red-600'
+                    ? 'text-app-warning-dark'
+                    : 'text-app-danger-dark'
                 }`}
               >
                 {judgment === 'correct' ? '正解' : judgment === 'close' ? '惜しい' : '不正解'}
@@ -160,7 +160,7 @@ export default function DiffDemoScreen() {
 
         {/* サンプルケース */}
         <View className="bg-white rounded-xl p-4 shadow-sm">
-          <Text className="text-lg font-bold text-gray-800 mb-4">サンプルケース</Text>
+          <Text className="text-lg font-bold text-app-neutral-800 mb-4">サンプルケース</Text>
 
           {exampleCases.map((example, index) => (
             <View key={index} className={`mb-3 ${index === exampleCases.length - 1 ? 'mb-0' : ''}`}>
@@ -169,10 +169,10 @@ export default function DiffDemoScreen() {
                   setUserAnswer(example.user);
                   setCorrectAnswer(example.correct);
                 }}
-                className="border border-gray-200 rounded-lg p-3"
+                className="border border-app-neutral-200 rounded-lg p-3"
               >
                 <View className="flex-row items-center justify-between mb-2">
-                  <Text className="font-bold text-gray-800">{example.name}</Text>
+                  <Text className="font-bold text-app-neutral-800">{example.name}</Text>
                   <View className="flex-row items-center">
                     {(() => {
                       const sampleJudgment = getJudgmentResult(example.user, example.correct);
@@ -198,10 +198,10 @@ export default function DiffDemoScreen() {
                           <Text
                             className={`ml-1 text-sm font-medium ${
                               sampleJudgment === 'correct'
-                                ? 'text-green-600'
+                                ? 'text-app-success-dark'
                                 : sampleJudgment === 'close'
-                                ? 'text-yellow-600'
-                                : 'text-red-600'
+                                ? 'text-app-warning'
+                                : 'text-app-danger'
                             }`}
                           >
                             {sampleJudgment === 'correct'
@@ -215,10 +215,10 @@ export default function DiffDemoScreen() {
                     })()}
                   </View>
                 </View>
-                <Text className="text-sm text-gray-600 mb-1">
+                <Text className="text-sm text-app-neutral-600 mb-1">
                   <Text className="font-medium">回答:</Text> {example.user}
                 </Text>
-                <Text className="text-sm text-gray-600">
+                <Text className="text-sm text-app-neutral-600">
                   <Text className="font-medium">正解:</Text> {example.correct}
                 </Text>
               </TouchableOpacity>

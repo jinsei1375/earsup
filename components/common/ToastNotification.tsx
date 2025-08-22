@@ -35,20 +35,20 @@ export const ToastNotification: React.FC<ToastNotificationProps> = ({
     switch (toast.type) {
       case 'success':
         return {
-          bg: 'bg-green-500',
+          bg: 'bg-app-success',
           icon: 'checkmark-circle' as const,
           iconColor: '#ffffff',
         };
       case 'error':
         return {
-          bg: 'bg-red-500',
+          bg: 'bg-app-danger',
           icon: 'close-circle' as const,
           iconColor: '#ffffff',
         };
       case 'info':
       default:
         return {
-          bg: 'bg-blue-500',
+          bg: 'bg-app-primary',
           icon: 'information-circle' as const,
           iconColor: '#ffffff',
         };

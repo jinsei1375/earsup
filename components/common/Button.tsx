@@ -39,25 +39,25 @@ export const CustomButton: React.FC<ButtonProps> = ({
   const variantStyles = {
     primary: disabled
       ? 'bg-gray-300 border-gray-300'
-      : 'bg-blue-500 border-blue-500 active:bg-blue-600',
+      : 'bg-app-primary border-app-primary active:bg-app-primary-dark',
     secondary: disabled
       ? 'bg-gray-300 border-gray-300'
       : 'bg-gray-100 border-gray-300 active:bg-gray-200',
     danger: disabled
       ? 'bg-gray-300 border-gray-300'
-      : 'bg-red-500 border-red-500 active:bg-red-600',
+      : 'bg-app-danger border-app-danger active:bg-app-danger-dark',
     outline: disabled
       ? 'bg-transparent border-gray-300'
-      : 'bg-transparent border-blue-500 active:bg-blue-50',
+      : 'bg-transparent border-app-primary active:bg-app-primary-light',
     ghost: disabled
       ? 'bg-transparent border-transparent'
       : 'bg-transparent border-transparent active:bg-gray-100',
     correct: disabled
-      ? 'bg-green-300 border-green-300'
-      : 'bg-green-500 border-green-500 active:bg-green-600',
+      ? 'bg-gray-300 border-gray-300'
+      : 'bg-app-success border-app-success active:bg-app-success-dark',
     partial: disabled
-      ? 'bg-orange-300 border-orange-300'
-      : 'bg-orange-500 border-orange-500 active:bg-orange-600',
+      ? 'bg-gray-300 border-gray-300'
+      : 'bg-app-orange border-app-orange active:bg-app-orange-dark',
   };
 
   // テキストスタイル
@@ -71,7 +71,7 @@ export const CustomButton: React.FC<ButtonProps> = ({
     primary: disabled ? 'text-gray-500' : 'text-white',
     secondary: disabled ? 'text-gray-500' : 'text-gray-700',
     danger: disabled ? 'text-gray-500' : 'text-white',
-    outline: disabled ? 'text-gray-400' : 'text-blue-500',
+    outline: disabled ? 'text-gray-400' : 'text-app-primary',
     ghost: disabled ? 'text-gray-400' : 'text-gray-700',
     correct: disabled ? 'text-gray-500' : 'text-white',
     partial: disabled ? 'text-gray-500' : 'text-white',

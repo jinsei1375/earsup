@@ -21,15 +21,15 @@ const STAMP_CONFIG: Record<string, { icon: string; color: string; text: string }
 export const StampDisplay: React.FC<StampDisplayProps> = ({ stamps, className = '' }) => {
   if (!stamps || stamps.length === 0) {
     return (
-      <View className={`bg-gray-50 rounded-lg p-3 ${className}`}>
-        <Text className="text-gray-500 text-sm text-center">まだスタンプがありません</Text>
+      <View className={`bg-app-neutral-50 rounded-lg p-3 ${className}`}>
+        <Text className="text-app-neutral-500 text-sm text-center">まだスタンプがありません</Text>
       </View>
     );
   }
 
   return (
-    <View className={`bg-gray-50 rounded-lg p-3 ${className}`}>
-      <Text className="text-sm font-medium mb-2 text-gray-700">みんなのスタンプ</Text>
+    <View className={`bg-app-neutral-50 rounded-lg p-3 ${className}`}>
+      <Text className="text-sm font-medium mb-2 text-app-neutral-700">みんなのスタンプ</Text>
       <ScrollView
         className="max-h-24"
         showsVerticalScrollIndicator={false}
@@ -38,7 +38,7 @@ export const StampDisplay: React.FC<StampDisplayProps> = ({ stamps, className = 
         {stamps.map((stamp) => {
           const config = STAMP_CONFIG[stamp.stamp_type] || {
             icon: 'help-circle',
-            color: APP_COLORS.secondary,
+            color: APP_COLORS.gray600,
             text: stamp.stamp_type,
           };
 
@@ -50,15 +50,9 @@ export const StampDisplay: React.FC<StampDisplayProps> = ({ stamps, className = 
                 color={config.color}
                 className="mr-2"
               />
-              <Text className="text-xs text-gray-600 flex-1">
-                <Text className="font-medium">{stamp.nickname || '不明なユーザー'}</Text>{' '}
-                <Text>{config.text}</Text>
-              </Text>
-              <Text className="text-xs text-gray-400 ml-2">
-                {new Date(stamp.created_at).toLocaleTimeString('ja-JP', {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })}
+              <Text className="text-xs text-app-neutral-600 flex-1">{stamp.stamp_type}</Text>
+              <Text className="text-xs text-app-neutral-400 ml-2">
+                {new Date(stamp.created_at).toLocaleTimeString()}
               </Text>
             </View>
           );

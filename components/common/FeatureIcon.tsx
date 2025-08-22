@@ -47,14 +47,64 @@ export const FeatureIcon: React.FC<FeatureIconProps> = ({
   return <Ionicons name={name} size={size} color={color} />;
 };
 
-// アプリで使用する共通カラー
+// アプリで使用する共通カラー（Tailwindカスタムカラーと同期）
 export const APP_COLORS = {
-  primary: '#3B82F6', // Blue
-  success: '#10B981', // Green
-  warning: '#F59E0B', // Amber
-  danger: '#EF4444', // Red
-  info: '#6366F1', // Indigo
-  secondary: '#6B7280', // Gray
+  // プライマリカラー
+  primary: '#3B82F6', // app-primary
+  primaryLight: '#DBEAFE', // app-primary-light
+  primaryDark: '#1E40AF', // app-primary-dark
+
+  // 成功・正解
+  success: '#10B981', // app-success
+  successLight: '#D1FAE5', // app-success-light
+  successDark: '#059669', // app-success-dark
+
+  // 警告・惜しい
+  warning: '#F59E0B', // app-warning
+  warningLight: '#FEF3C7', // app-warning-light
+  warningDark: '#D97706', // app-warning-dark
+
+  // 危険・エラー・不正解
+  danger: '#EF4444', // app-danger
+  dangerLight: '#FEE2E2', // app-danger-light
+  dangerDark: '#DC2626', // app-danger-dark
+
+  // 情報・セカンダリ
+  info: '#6366F1', // app-info
+  infoLight: '#E0E7FF', // app-info-light
+  infoDark: '#4338CA', // app-info-dark
+
+  // パープル（ホストなしモード用）
+  purple: '#8B5CF6', // app-purple
+  purpleLight: '#EDE9FE', // app-purple-light
+  purpleDark: '#7C3AED', // app-purple-dark
+
+  // オレンジ（クイックスタート用）
+  orange: '#F97316', // app-orange
+  orangeLight: '#FED7AA', // app-orange-light
+  orangeDark: '#EA580C', // app-orange-dark
+
+  // イエロー（ランキング等）
+  yellow: '#EAB308', // app-yellow
+  yellowLight: '#FEF3C7', // app-yellow-light
+  yellowDark: '#CA8A04', // app-yellow-dark
+
+  // グレースケール（Tailwindデフォルトを使用）
+  gray50: '#F9FAFB',
+  gray100: '#F3F4F6',
+  gray200: '#E5E7EB',
+  gray300: '#D1D5DB',
+  gray400: '#9CA3AF',
+  gray500: '#6B7280',
+  gray600: '#4B5563',
+  gray700: '#374151',
+  gray800: '#1F2937',
+  gray900: '#111827',
+
+  // その他
+  white: '#FFFFFF',
+  black: '#000000',
+  transparent: 'transparent',
 };
 
 // 絵文字からアイコンへのマッピング（参考用）

@@ -120,28 +120,30 @@ export const HostQuizScreen: React.FC<HostQuizScreenProps> = ({
     <ScrollView className="flex-1 p-6 pb-10" showsVerticalScrollIndicator={false}>
       {/* Quiz mode display */}
       <View className="flex-row items-center justify-center mb-4">
-        <Text className="text-sm bg-blue-100 px-3 py-1 rounded-full">
+        <Text className="text-sm bg-app-primary-light px-3 py-1 rounded-full">
           {getQuizModeDisplayName(quizMode)}
         </Text>
       </View>
       {/* Silent mode warning */}
       {showSilentModeWarning && (
-        <View className="mb-4 p-3 bg-yellow-100 border border-yellow-400 rounded-lg w-full">
+        <View className="mb-4 p-3 bg-app-warning-light border border-yellow-400 rounded-lg w-full">
           <View className="flex-row justify-between items-start">
             <View className="flex-1">
               <View className="flex-row items-center mb-1">
                 <FeatureIcon name="warning" size={16} color={APP_COLORS.warning} />
-                <Text className="text-yellow-800 text-sm font-bold ml-1">音声に関する注意</Text>
+                <Text className="text-app-warning-dark text-sm font-bold ml-1">
+                  音声に関する注意
+                </Text>
               </View>
-              <Text className="text-yellow-700 text-xs">
+              <Text className="text-app-warning-dark text-xs">
                 音声が聞こえない場合は、デバイスのマナーモード（消音モード）を解除してください。
               </Text>
             </View>
             <TouchableOpacity
               onPress={() => setShowSilentModeWarning(false)}
-              className="ml-2 p-2 rounded-lg border-2 border-transparent active:bg-yellow-200 items-center justify-center"
+              className="ml-2 p-2 rounded-lg border-2 border-transparent active:bg-app-warning-light items-center justify-center"
             >
-              <Text className="text-yellow-600 text-lg font-bold">×</Text>
+              <Text className="text-app-warning text-lg font-bold">×</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -181,7 +183,7 @@ export const HostQuizScreen: React.FC<HostQuizScreenProps> = ({
       {/* 次の問題へボタン（全ての回答が判定されている場合のみ表示） */}
       {allAnswersJudged && (
         <View className="mb-4">
-          <Text className="text-center text-green-600 text-sm mb-2">
+          <Text className="text-center text-app-success-dark text-sm mb-2">
             ✅ 全ての参加者の判定が完了しました
           </Text>
           <Button

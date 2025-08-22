@@ -1,7 +1,5 @@
 // components/quiz/StampSelector.tsx
-import React, { useState } from 'react';
 import { View, Text, Modal, TouchableOpacity, ScrollView } from 'react-native';
-import { Button } from '@/components/common/Button';
 import { FeatureIcon, APP_COLORS } from '@/components/common/FeatureIcon';
 
 interface StampSelectorProps {
@@ -53,7 +51,7 @@ export const StampSelector: React.FC<StampSelectorProps> = ({
           <View className="flex-row justify-between items-center mb-4">
             <Text className="text-lg font-bold">スタンプを選択</Text>
             <TouchableOpacity onPress={onClose}>
-              <FeatureIcon name="close" size={20} color={APP_COLORS.secondary} />
+              <FeatureIcon name="close" size={20} color={APP_COLORS.gray600} />
             </TouchableOpacity>
           </View>
           <ScrollView
@@ -65,7 +63,7 @@ export const StampSelector: React.FC<StampSelectorProps> = ({
                 key={stamp.type}
                 onPress={() => handleStampSelect(stamp.type)}
                 disabled={loading}
-                className="bg-gray-100 rounded-xl p-3 items-center min-w-24 mr-2 mb-2"
+                className="bg-app-neutral-100 rounded-xl p-3 items-center min-w-24 mr-2 mb-2"
                 style={{ opacity: loading ? 0.5 : 1 }}
               >
                 <FeatureIcon

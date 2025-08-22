@@ -23,7 +23,7 @@ export const KeyboardAccessoryView: React.FC<KeyboardAccessoryViewProps> = ({
         <View />
         <TouchableOpacity
           onPress={handleDone}
-          className="flex-row items-center px-3 py-1 bg-blue-500 rounded-lg"
+          className="flex-row items-center px-3 py-1 bg-app-primary rounded-lg"
           activeOpacity={0.7}
         >
           <Ionicons name="chevron-down" size={16} color="white" />

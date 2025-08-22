@@ -14,7 +14,7 @@ export const RealtimeStatus: React.FC<RealtimeStatusProps> = ({
 }) => {
   return (
     <View className="items-center mb-3">
-      <Text className={`text-sm ${connectionState.connected ? 'text-green-600' : 'text-gray-500'}`}>
+      <Text className={`text-sm ${connectionState.connected ? 'text-app-success-dark' : 'text-gray-500'}`}>
         ● {connectionState.connected ? 'リアルタイム更新中' : 'ポーリング更新中'}
       </Text>
       {showLastUpdate && connectionState.lastUpdate && (

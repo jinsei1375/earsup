@@ -31,7 +31,7 @@ export const QuizModeSelector: React.FC<QuizModeSelectorProps> = ({
           disabled={disabled}
           className={`flex-1 mr-2 p-4 rounded-lg border-2 items-center justify-center ${
             selectedMode === 'all-at-once-host'
-              ? 'bg-blue-500 border-blue-500 active:bg-blue-600'
+              ? 'bg-app-primary border-app-primary'
               : 'bg-transparent border-gray-300 active:bg-gray-50'
           } ${disabled ? 'opacity-50' : ''}`}
         >
@@ -44,7 +44,7 @@ export const QuizModeSelector: React.FC<QuizModeSelectorProps> = ({
           </Text>
           <Text
             className={`text-xs text-center mt-1 ${
-              selectedMode === 'all-at-once-host' ? 'text-blue-100' : 'text-gray-500'
+              selectedMode === 'all-at-once-host' ? 'text-white' : 'text-gray-500'
             }`}
           >
             ホストが問題を作成・判定
@@ -55,7 +55,7 @@ export const QuizModeSelector: React.FC<QuizModeSelectorProps> = ({
           disabled={disabled}
           className={`flex-1 ml-2 p-4 rounded-lg border-2 items-center justify-center ${
             selectedMode === 'all-at-once-auto'
-              ? 'bg-blue-500 border-blue-500 active:bg-blue-600'
+              ? 'bg-app-primary border-app-primary'
               : 'bg-transparent border-gray-300 active:bg-gray-50'
           } ${disabled ? 'opacity-50' : ''}`}
         >
@@ -68,7 +68,7 @@ export const QuizModeSelector: React.FC<QuizModeSelectorProps> = ({
           </Text>
           <Text
             className={`text-xs text-center mt-1 ${
-              selectedMode === 'all-at-once-auto' ? 'text-blue-100' : 'text-gray-500'
+              selectedMode === 'all-at-once-auto' ? 'text-white' : 'text-gray-500'
             }`}
           >
             自動クイズ・自動判定
@@ -86,7 +86,7 @@ export const QuizModeSelector: React.FC<QuizModeSelectorProps> = ({
               disabled={disabled}
               className={`flex-1 mr-2 p-4 rounded-lg border-2 items-center justify-center ${
                 !allowPartialPoints
-                  ? 'bg-blue-500 border-blue-500 active:bg-blue-600'
+                  ? 'bg-app-primary border-app-primary'
                   : 'bg-transparent border-gray-300 active:bg-gray-50'
               } ${disabled ? 'opacity-50' : ''}`}
             >
@@ -99,7 +99,7 @@ export const QuizModeSelector: React.FC<QuizModeSelectorProps> = ({
               </Text>
               <Text
                 className={`text-xs text-center mt-1 ${
-                  !allowPartialPoints ? 'text-blue-100' : 'text-gray-500'
+                  !allowPartialPoints ? 'text-white' : 'text-gray-500'
                 }`}
               >
                 正解: 10pt、不正解: 0pt
@@ -110,7 +110,7 @@ export const QuizModeSelector: React.FC<QuizModeSelectorProps> = ({
               disabled={disabled}
               className={`flex-1 ml-2 p-4 rounded-lg border-2 items-center justify-center ${
                 allowPartialPoints
-                  ? 'bg-blue-500 border-blue-500 active:bg-blue-600'
+                  ? 'bg-app-primary border-app-primary'
                   : 'bg-transparent border-gray-300 active:bg-gray-50'
               } ${disabled ? 'opacity-50' : ''}`}
             >
@@ -123,7 +123,7 @@ export const QuizModeSelector: React.FC<QuizModeSelectorProps> = ({
               </Text>
               <Text
                 className={`text-xs text-center mt-1 ${
-                  allowPartialPoints ? 'text-blue-100' : 'text-gray-500'
+                  allowPartialPoints ? 'text-white' : 'text-gray-500'
                 }`}
               >
                 惜しい: 5ptを選択可能
@@ -146,7 +146,7 @@ export const QuizModeSelector: React.FC<QuizModeSelectorProps> = ({
                 disabled={disabled}
                 className={`flex-1 mx-1 p-3 rounded-lg border-2 items-center justify-center ${
                   maxReplayCount === count
-                    ? 'bg-blue-500 border-blue-500 active:bg-blue-600'
+                    ? 'bg-app-primary border-app-primary'
                     : 'bg-transparent border-gray-300 active:bg-gray-50'
                 } ${disabled ? 'opacity-50' : ''}`}
               >
@@ -162,14 +162,16 @@ export const QuizModeSelector: React.FC<QuizModeSelectorProps> = ({
           </View>
 
           {/* 説明 */}
-          <View className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
-            <Text className="text-yellow-800 font-bold mb-2">ホストなしモードの特徴</Text>
-            <Text className="text-yellow-700 text-sm mb-1">• 参加者全員が回答できます</Text>
-            <Text className="text-yellow-700 text-sm mb-1">
+          <View className="bg-app-warning-light p-4 rounded-lg border border-app-warning">
+            <Text className="text-app-warning-dark font-bold mb-2">ホストなしモードの特徴</Text>
+            <Text className="text-app-warning-dark text-sm mb-1">• 参加者全員が回答できます</Text>
+            <Text className="text-app-warning-dark text-sm mb-1">
               • 1人{maxReplayCount}回まで音声を再生できます
             </Text>
-            <Text className="text-yellow-700 text-sm mb-1">• 回答は自動で正誤判定されます</Text>
-            <Text className="text-yellow-700 text-sm">• 惜しい判定は利用できません</Text>
+            <Text className="text-app-warning-dark text-sm mb-1">
+              • 回答は自動で正誤判定されます
+            </Text>
+            <Text className="text-app-warning-dark text-sm">• 惜しい判定は利用できません</Text>
           </View>
         </>
       )}

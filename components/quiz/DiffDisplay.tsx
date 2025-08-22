@@ -1,4 +1,3 @@
-// components/quiz/DiffDisplay.tsx
 import React from 'react';
 import { View, Text } from 'react-native';
 import { DiffResult, DiffWord } from '@/utils/diffUtils';
@@ -17,21 +16,22 @@ interface DiffWordDisplayProps {
 }
 
 const DiffWordDisplay: React.FC<DiffWordDisplayProps> = ({ word, isCorrectAnswer = false }) => {
-  const getWordStyle = (type: DiffWord['type'], isCorrect: boolean) => {
-    switch (type) {
+  const getWordStyle = (word: DiffWord, isCorrect: boolean): string => {
+    switch (word.type) {
       case 'match':
-        return 'text-green-700 bg-green-100';
+        return 'text-app-success-dark bg-app-success-light';
       case 'different':
-        return isCorrect ? 'text-blue-700 bg-blue-100' : 'text-red-700 bg-red-100';
+        return isCorrect
+          ? 'text-app-primary-dark bg-app-primary-light'
+          : 'text-app-danger-dark bg-app-danger-light';
       case 'missing':
-        return 'text-orange-700 bg-orange-100';
+        return 'text-app-orange-dark bg-app-orange-light';
       case 'extra':
-        return 'text-red-700 bg-red-100';
+        return 'text-app-danger-dark bg-app-danger-light';
       default:
         return 'text-gray-700';
     }
   };
-
   const getWordIcon = (type: DiffWord['type']) => {
     switch (type) {
       case 'match':
@@ -50,7 +50,7 @@ const DiffWordDisplay: React.FC<DiffWordDisplayProps> = ({ word, isCorrectAnswer
   return (
     <View
       className={`inline-flex flex-row items-center rounded px-1.5 py-0.5 mx-0.5 mb-1 ${getWordStyle(
-        word.type,
+        word,
         isCorrectAnswer
       )}`}
     >
@@ -58,14 +58,14 @@ const DiffWordDisplay: React.FC<DiffWordDisplayProps> = ({ word, isCorrectAnswer
       <Text
         className={`text-sm font-medium ${
           word.type === 'match'
-            ? 'text-green-700'
+            ? 'text-app-success-dark'
             : word.type === 'different'
             ? isCorrectAnswer
-              ? 'text-blue-700'
-              : 'text-red-700'
+              ? 'text-app-primary-dark'
+              : 'text-app-danger-dark'
             : word.type === 'missing'
-            ? 'text-orange-700'
-            : 'text-red-700'
+            ? 'text-app-orange-dark'
+            : 'text-app-danger-dark'
         }`}
       >
         {word.text}
@@ -81,9 +81,9 @@ export const DiffDisplay: React.FC<DiffDisplayProps> = ({
   className = '',
 }) => {
   const getAccuracyColor = (accuracy: number) => {
-    if (accuracy >= 90) return 'text-green-600';
-    if (accuracy >= 70) return 'text-yellow-600';
-    return 'text-red-600';
+    if (accuracy >= 90) return 'text-app-success-dark';
+    if (accuracy >= 70) return 'text-app-warning-dark';
+    return 'text-app-danger-dark';
   };
 
   const getAccuracyIcon = (accuracy: number) => {
@@ -93,9 +93,11 @@ export const DiffDisplay: React.FC<DiffDisplayProps> = ({
   };
 
   return (
-    <View className={`bg-white border border-gray-200 rounded-xl p-4 ${className}`}>
+    <View className={`bg-white border-[${APP_COLORS.gray200}] rounded-xl p-4 ${className}`}>
       {/* ヘッダー - 正答率表示 */}
-      <View className="flex-row items-center justify-between mb-4 pb-3 border-b border-gray-100">
+      <View
+        className={`flex-row items-center justify-between mb-4 pb-3 border-b border-[${APP_COLORS.gray100}]`}
+      >
         <View className="flex-row items-center">
           <FeatureIcon
             name={getAccuracyIcon(diffResult.accuracy)}
@@ -145,7 +147,7 @@ export const DiffDisplay: React.FC<DiffDisplayProps> = ({
           <FeatureIcon name="checkmark-circle" size={16} color={APP_COLORS.success} />
           <Text className="ml-2 text-sm font-semibold text-gray-700">正解</Text>
         </View>
-        <View className="bg-green-50 rounded-lg p-3 min-h-[60px]">
+        <View className="bg-app-success-light rounded-lg p-3 min-h-[60px]">
           <View className="flex-row flex-wrap items-start">
             {diffResult.correctWords.map((word, index) => (
               <DiffWordDisplay key={`correct-${index}`} word={word} isCorrectAnswer={true} />
@@ -159,19 +161,19 @@ export const DiffDisplay: React.FC<DiffDisplayProps> = ({
         <Text className="text-xs font-semibold text-gray-600 mb-2">凡例</Text>
         <View className="flex-row flex-wrap">
           <View className="flex-row items-center mr-4 mb-1">
-            <View className="w-3 h-3 bg-green-100 rounded mr-1" />
+            <View className="w-3 h-3 bg-app-success-light rounded mr-1" />
             <Text className="text-xs text-gray-600">完全一致</Text>
           </View>
           <View className="flex-row items-center mr-4 mb-1">
-            <View className="w-3 h-3 bg-red-100 rounded mr-1" />
+            <View className="w-3 h-3 bg-app-danger-light rounded mr-1" />
             <Text className="text-xs text-gray-600">間違い</Text>
           </View>
           <View className="flex-row items-center mr-4 mb-1">
-            <View className="w-3 h-3 bg-orange-100 rounded mr-1" />
+            <View className="w-3 h-3 bg-app-orange-light rounded mr-1" />
             <Text className="text-xs text-gray-600">不足</Text>
           </View>
           <View className="flex-row items-center mb-1">
-            <View className="w-3 h-3 bg-blue-100 rounded mr-1" />
+            <View className="w-3 h-3 bg-app-primary-light rounded mr-1" />
             <Text className="text-xs text-gray-600">大文字小文字・タイポ</Text>
           </View>
         </View>

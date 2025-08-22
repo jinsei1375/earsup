@@ -59,11 +59,11 @@ export const AnswersList: React.FC<AnswersListProps> = ({
             let borderColorClass = 'border-gray-300 bg-gray-50';
             if (answer.judged) {
               if (judgmentResult === 'correct') {
-                borderColorClass = 'border-green-500 bg-green-50';
+                borderColorClass = 'border-app-success bg-app-success-light';
               } else if (isPartial) {
-                borderColorClass = 'border-orange-500 bg-orange-50';
+                borderColorClass = 'border-app-orange bg-app-orange-light';
               } else {
-                borderColorClass = 'border-red-500 bg-red-50';
+                borderColorClass = 'border-app-danger bg-app-danger-light';
               }
             }
 
@@ -116,13 +116,13 @@ export const AnswersList: React.FC<AnswersListProps> = ({
                     if (answer.judged) {
                       if (judgmentResult === 'correct') {
                         resultText = '✓ 正解';
-                        className = 'text-green-500 font-bold';
+                        className = 'text-app-success font-bold';
                       } else if (isPartial && allowPartialPoints) {
                         resultText = '△ 惜しい';
-                        className = 'text-orange-500 font-bold';
+                        className = 'text-app-orange font-bold';
                       } else {
                         resultText = '✗ 不正解';
-                        className = 'text-red-500 font-bold';
+                        className = 'text-app-danger font-bold';
                       }
                     }
 

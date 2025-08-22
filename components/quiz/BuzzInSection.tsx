@@ -32,7 +32,7 @@ export const BuzzInSection: React.FC<BuzzInSectionProps> = ({
       </View>
 
       {currentBuzzer ? (
-        <View className="bg-yellow-100 p-3 rounded-lg mt-2">
+        <View className="bg-app-warning-light p-3 rounded-lg mt-2">
           <Text className="text-center">
             {participants.find((p) => p.id === currentBuzzer)?.nickname || '不明な参加者'}
             さんがバズインしました

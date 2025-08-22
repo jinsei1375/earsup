@@ -286,7 +286,7 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
   if (isQuizEnded(room?.status || '')) {
     return (
       <View className="flex-1 p-6 items-center justify-center">
-        <Text className="text-green-600 font-bold text-lg mb-3">クイズが終了しました</Text>
+        <Text className="text-app-success-dark font-bold text-lg mb-3">クイズが終了しました</Text>
         <Text className="mb-3">ホーム画面に移動しています...</Text>
         <LoadingSpinner size="large" variant="pulse" color="#10B981" />
       </View>
@@ -325,7 +325,7 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <Text className="text-lg font-bold text-green-500 mb-4 text-center">
+        <Text className="text-lg font-bold text-app-success mb-4 text-center">
           聞こえたフレーズを入力してください
         </Text>
 
@@ -343,7 +343,7 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
             {playCount >= maxPlayCount && (
               <View className="flex-row items-center justify-center mt-2">
                 <FeatureIcon name="warning" size={16} color={APP_COLORS.danger} />
-                <Text className="text-red-600 text-sm font-medium ml-1">
+                <Text className="text-app-danger text-sm font-medium ml-1">
                   再生回数の上限に達しました
                 </Text>
               </View>
@@ -396,12 +396,14 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
           </View>
         ) : (
           // All-at-once mode - has answered
-          <View className="bg-blue-100 p-4 rounded-lg mb-4 w-full">
+          <View className="bg-app-primary-light p-4 rounded-lg mb-4 w-full">
             {!isResultDataReady ? (
               // Waiting for judgment or complete result data
               <>
-                <Text className="text-center font-bold text-blue-800 mb-1">回答を提出しました</Text>
-                <Text className="text-center text-blue-600">
+                <Text className="text-center font-bold text-app-primary-dark mb-1">
+                  回答を提出しました
+                </Text>
+                <Text className="text-center text-app-primary">
                   {isAutoMode && isRoomCreator
                     ? '結果を準備中...'
                     : isCorrect === null
@@ -413,12 +415,12 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
             ) : isAnswerCorrect ? (
               // Correct
               <>
-                <Text className="text-center font-bold text-green-500 text-lg mb-1">◯正解</Text>
-                <Text className="text-center font-bold text-yellow-600 text-lg mb-2">
+                <Text className="text-center font-bold text-app-success text-lg mb-1">◯正解</Text>
+                <Text className="text-center font-bold text-app-warning text-lg mb-2">
                   10ポイントGET！
                 </Text>
 
-                <Text className="text-center text-blue-600 mt-2">
+                <Text className="text-center text-app-primary mt-2">
                   あなたの回答: 「{userAnswer?.answer_text || '取得中...'}」
                   {isAutoMode && trailingPunctuation}
                 </Text>
@@ -427,11 +429,11 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
             ) : isPartialAnswer ? (
               // Partial (惜しい)
               <>
-                <Text className="text-center font-bold text-orange-500 text-lg mb-1">△惜しい</Text>
-                <Text className="text-center font-bold text-yellow-600 text-lg mb-2">
+                <Text className="text-center font-bold text-app-orange text-lg mb-1">△惜しい</Text>
+                <Text className="text-center font-bold text-app-warning text-lg mb-2">
                   5ポイントGET！
                 </Text>
-                <Text className="text-center text-blue-600 mt-2">
+                <Text className="text-center text-app-primary mt-2">
                   あなたの回答: 「{userAnswer?.answer_text || '取得中...'}」
                   {isAutoMode && trailingPunctuation}
                 </Text>
@@ -452,8 +454,8 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
             ) : (
               // Incorrect
               <>
-                <Text className="text-center font-bold text-red-500 text-lg mb-1">×不正解</Text>
-                <Text className="text-center text-blue-600 mt-2">
+                <Text className="text-center font-bold text-app-danger text-lg mb-1">×不正解</Text>
+                <Text className="text-center text-app-primary mt-2">
                   あなたの回答: 「{userAnswer?.answer_text || '取得中...'}」
                   {isAutoMode && trailingPunctuation}
                 </Text>

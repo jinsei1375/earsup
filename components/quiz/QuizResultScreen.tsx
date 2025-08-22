@@ -86,7 +86,7 @@ export const QuizResultScreen: React.FC<QuizResultScreenProps> = ({
       <View className="p-6">
         {/* ヘッダー */}
         <View className="items-center mb-6">
-          <Text className="text-3xl font-bold text-green-600 mb-2">最終結果</Text>
+          <Text className="text-3xl font-bold text-app-success-dark mb-2">最終結果</Text>
           {totalQuestions > 0 && (
             <Text className="text-sm text-gray-500 mt-1">全{totalQuestions}問</Text>
           )}
@@ -110,11 +110,11 @@ export const QuizResultScreen: React.FC<QuizResultScreenProps> = ({
                       key={stat.userId}
                       className={`flex-row items-center justify-between p-3 rounded-lg mb-2 ${
                         rank === 1
-                          ? 'bg-yellow-100'
+                          ? 'bg-app-warning-light'
                           : rank === 2
                           ? 'bg-gray-100'
                           : rank === 3
-                          ? 'bg-orange-100'
+                          ? 'bg-app-orange-light'
                           : 'bg-white'
                       }`}
                     >
@@ -133,7 +133,7 @@ export const QuizResultScreen: React.FC<QuizResultScreenProps> = ({
                         </View>
                       </View>
                       <View className="items-center">
-                        <Text className="text-2xl font-bold text-blue-600">{stat.points}</Text>
+                        <Text className="text-2xl font-bold text-app-primary">{stat.points}</Text>
                         <Text className="text-xs text-gray-500">ポイント</Text>
                       </View>
                     </View>
