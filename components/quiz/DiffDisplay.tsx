@@ -74,22 +74,11 @@ const DiffWordDisplay: React.FC<DiffWordDisplayProps> = ({ word, isCorrectAnswer
   );
 };
 
-export const DiffDisplay: React.FC<DiffDisplayProps> = ({
-  diffResult,
-  userAnswer,
-  correctAnswer,
-  className = '',
-}) => {
+export const DiffDisplay: React.FC<DiffDisplayProps> = ({ diffResult, className = '' }) => {
   const getAccuracyColor = (accuracy: number) => {
     if (accuracy >= 90) return 'text-app-success-dark';
     if (accuracy >= 70) return 'text-app-warning-dark';
     return 'text-app-danger-dark';
-  };
-
-  const getAccuracyIcon = (accuracy: number) => {
-    if (accuracy >= 90) return 'trophy';
-    if (accuracy >= 70) return 'thumbs-up';
-    return 'close-circle';
   };
 
   return (
@@ -99,17 +88,6 @@ export const DiffDisplay: React.FC<DiffDisplayProps> = ({
         className={`flex-row items-center justify-between mb-4 pb-3 border-b border-[${APP_COLORS.gray100}]`}
       >
         <View className="flex-row items-center">
-          <FeatureIcon
-            name={getAccuracyIcon(diffResult.accuracy)}
-            size={20}
-            color={
-              diffResult.accuracy >= 90
-                ? APP_COLORS.success
-                : diffResult.accuracy >= 70
-                ? APP_COLORS.warning
-                : APP_COLORS.danger
-            }
-          />
           <Text className="ml-2 text-lg font-bold text-gray-800">回答比較</Text>
         </View>
         <View className="flex-row items-center">

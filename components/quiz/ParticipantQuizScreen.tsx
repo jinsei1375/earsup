@@ -23,6 +23,7 @@ import { audioService } from '@/services/audioService';
 import { ParticipantsList } from '@/components/room/ParticipantsList';
 import { SampleSentenceService } from '@/services/sampleSentenceService';
 import { DiffDisplay } from './DiffDisplay';
+import { WordSeparateInput } from './WordSeparateInput';
 import { generateDiff, getJudgmentResult } from '@/utils/diffUtils';
 import type {
   Room,
@@ -355,44 +356,59 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
         {!showResult ? (
           // All-at-once mode - hasn't answered yet
           <View className="w-full mb-4">
-            {/* ホストなしモードでは句読点を表示 */}
-            {isAutoMode && (
-              <View className="flex-row items-center justify-center mb-2">
-                <Text className="text-gray-600 text-sm">
-                  句読点（. ! ?）は自動で判定されるため入力不要です
-                </Text>
+            {/* 入力方式による条件分岐 */}
+            {room?.quiz_input_type === 'word_separate' ? (
+              // 単語区切り入力
+              <WordSeparateInput
+                questionText={questionText}
+                disabled={showResult}
+                onSubmit={async (answer: string) => {
+                  setAnswer(answer);
+                  await handleSubmitAnswer();
+                }}
+                isSubmitting={loading}
+              />
+            ) : (
+              // 従来の文章入力
+              <View>
+                {/* ホストなしモードでは句読点を表示 */}
+                {isAutoMode && (
+                  <View className="flex-row items-center justify-center mb-2">
+                    <Text className="text-gray-600 text-sm">
+                      句読点（. ! ?）は自動で判定されるため入力不要です
+                    </Text>
+                  </View>
+                )}
+
+                <View className="flex-row items-center">
+                  <TextInput
+                    ref={inputRef}
+                    className="border border-gray-300 p-4 rounded-lg w-full text-xl flex-1"
+                    placeholder="聞こえたフレーズを入力"
+                    value={answer}
+                    onChangeText={setAnswer}
+                    editable={!showResult}
+                    returnKeyType="done"
+                    onSubmitEditing={() => Keyboard.dismiss()}
+                    onFocus={handleInputFocus}
+                  />
+                  {/* ホストなしモードでは句読点を表示 */}
+                  {isAutoMode && trailingPunctuation && (
+                    <View className="ml-2 flex-row">
+                      <Text className="text-gray-800 text-xl">{trailingPunctuation}</Text>
+                    </View>
+                  )}
+                </View>
+
+                <Button
+                  title="回答する"
+                  onPress={handleSubmitAnswer}
+                  disabled={!answer.trim() || loading}
+                  variant="primary"
+                  className="mt-4"
+                />
               </View>
             )}
-
-            <View className="flex-row items-center">
-              <TextInput
-                ref={inputRef}
-                className="border border-gray-300 p-4 rounded-lg w-full text-xl flex-1"
-                placeholder="聞こえたフレーズを入力"
-                value={answer}
-                onChangeText={setAnswer}
-                editable={!showResult}
-                returnKeyType="done"
-                onSubmitEditing={() => Keyboard.dismiss()}
-                onFocus={handleInputFocus}
-              />
-              {/* ホストなしモードでは句読点を表示 */}
-              {isAutoMode && trailingPunctuation && (
-                <View className="ml-2 flex-row">
-                  <Text className="text-gray-800 text-xl">{trailingPunctuation}</Text>
-                </View>
-              )}
-            </View>
-
-            <Button
-              title="回答する"
-              onPress={handleSubmitAnswer}
-              disabled={!answer.trim() || showResult || loading}
-              variant="primary"
-              size="large"
-              fullWidth
-              className="mt-4"
-            />
           </View>
         ) : (
           // All-at-once mode - has answered

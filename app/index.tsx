@@ -194,6 +194,24 @@ export default function HomeScreen() {
             </TouchableOpacity>
           </View>
 
+          <View className="bg-white rounded-xl shadow-sm border border-gray-200 mb-2">
+            <TouchableOpacity
+              onPress={() => router.push('/word-input-demo')}
+              className="flex-row items-center justify-between p-4 active:bg-gray-50"
+            >
+              <View className="flex-row items-center flex-1">
+                <View className="w-10 h-10 bg-app-purple-light rounded-full items-center justify-center mr-3">
+                  <FeatureIcon name="create" size={18} color={APP_COLORS.purple} />
+                </View>
+                <View className="flex-1">
+                  <Text className="text-gray-800 font-semibold text-base">単語入力デモ</Text>
+                  <Text className="text-gray-500 text-sm">単語区切りでの入力体験</Text>
+                </View>
+              </View>
+              <Text className="text-gray-400 text-lg">›</Text>
+            </TouchableOpacity>
+          </View>
+
           <View className="bg-white rounded-xl shadow-sm border border-gray-200">
             <TouchableOpacity
               onPress={() => router.push('/guide')}

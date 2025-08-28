@@ -5,6 +5,8 @@ import { View, Text, TouchableOpacity } from 'react-native';
 interface QuizModeSelectorProps {
   selectedMode: 'all-at-once-host' | 'all-at-once-auto';
   onModeChange: (mode: 'all-at-once-host' | 'all-at-once-auto') => void;
+  quizInputType: 'sentence' | 'word_separate';
+  onQuizInputTypeChange: (type: 'sentence' | 'word_separate') => void;
   allowPartialPoints: boolean;
   onPartialPointsChange: (allow: boolean) => void;
   maxReplayCount: number;
@@ -15,6 +17,8 @@ interface QuizModeSelectorProps {
 export const QuizModeSelector: React.FC<QuizModeSelectorProps> = ({
   selectedMode,
   onModeChange,
+  quizInputType,
+  onQuizInputTypeChange,
   allowPartialPoints,
   onPartialPointsChange,
   maxReplayCount,
@@ -76,39 +80,68 @@ export const QuizModeSelector: React.FC<QuizModeSelectorProps> = ({
         </TouchableOpacity>
       </View>
 
+      {/* 入力タイプ選択 */}
+      <Text className="mb-2 font-bold">回答入力方式</Text>
+      <View className="flex-row justify-between mb-4">
+        <TouchableOpacity
+          onPress={() => onQuizInputTypeChange('sentence')}
+          disabled={disabled}
+          className={`flex-1 mr-2 p-4 rounded-lg border-2 items-center justify-center ${
+            quizInputType === 'sentence'
+              ? 'bg-app-primary border-app-primary'
+              : 'bg-transparent border-gray-300 active:bg-gray-50'
+          } ${disabled ? 'opacity-50' : ''}`}
+        >
+          <Text
+            className={`text-center font-bold ${
+              quizInputType === 'sentence' ? 'text-white' : 'text-gray-700'
+            }`}
+          >
+            文章入力
+          </Text>
+          <Text
+            className={`text-xs text-center mt-1 ${
+              quizInputType === 'sentence' ? 'text-white' : 'text-gray-500'
+            }`}
+          >
+            従来の文章全体入力
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => onQuizInputTypeChange('word_separate')}
+          disabled={disabled}
+          className={`flex-1 ml-2 p-4 rounded-lg border-2 items-center justify-center ${
+            quizInputType === 'word_separate'
+              ? 'bg-app-primary border-app-primary'
+              : 'bg-transparent border-gray-300 active:bg-gray-50'
+          } ${disabled ? 'opacity-50' : ''}`}
+        >
+          <Text
+            className={`text-center font-bold ${
+              quizInputType === 'word_separate' ? 'text-white' : 'text-gray-700'
+            }`}
+          >
+            単語区切り
+          </Text>
+          <Text
+            className={`text-xs text-center mt-1 ${
+              quizInputType === 'word_separate' ? 'text-white' : 'text-gray-500'
+            }`}
+          >
+            単語ごとに分けて入力
+          </Text>
+        </TouchableOpacity>
+      </View>
+
       {/* 判定設定 - ホストありモードのみ表示 */}
       {selectedMode === 'all-at-once-host' && (
         <>
           <Text className="mb-2 font-bold">判定設定</Text>
           <View className="flex-row justify-between mb-4">
             <TouchableOpacity
-              onPress={() => onPartialPointsChange(false)}
-              disabled={disabled}
-              className={`flex-1 mr-2 p-4 rounded-lg border-2 items-center justify-center ${
-                !allowPartialPoints
-                  ? 'bg-app-primary border-app-primary'
-                  : 'bg-transparent border-gray-300 active:bg-gray-50'
-              } ${disabled ? 'opacity-50' : ''}`}
-            >
-              <Text
-                className={`text-center font-bold ${
-                  !allowPartialPoints ? 'text-white' : 'text-gray-700'
-                }`}
-              >
-                正誤判定のみ
-              </Text>
-              <Text
-                className={`text-xs text-center mt-1 ${
-                  !allowPartialPoints ? 'text-white' : 'text-gray-500'
-                }`}
-              >
-                正解: 10pt、不正解: 0pt
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
               onPress={() => onPartialPointsChange(true)}
               disabled={disabled}
-              className={`flex-1 ml-2 p-4 rounded-lg border-2 items-center justify-center ${
+              className={`flex-1 mr-2 p-4 rounded-lg border-2 items-center justify-center ${
                 allowPartialPoints
                   ? 'bg-app-primary border-app-primary'
                   : 'bg-transparent border-gray-300 active:bg-gray-50'
@@ -127,6 +160,30 @@ export const QuizModeSelector: React.FC<QuizModeSelectorProps> = ({
                 }`}
               >
                 惜しい: 5ptを選択可能
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => onPartialPointsChange(false)}
+              disabled={disabled}
+              className={`flex-1 ml-2 p-4 rounded-lg border-2 items-center justify-center ${
+                !allowPartialPoints
+                  ? 'bg-app-primary border-app-primary'
+                  : 'bg-transparent border-gray-300 active:bg-gray-50'
+              } ${disabled ? 'opacity-50' : ''}`}
+            >
+              <Text
+                className={`text-center font-bold ${
+                  !allowPartialPoints ? 'text-white' : 'text-gray-700'
+                }`}
+              >
+                正誤判定のみ
+              </Text>
+              <Text
+                className={`text-xs text-center mt-1 ${
+                  !allowPartialPoints ? 'text-white' : 'text-gray-500'
+                }`}
+              >
+                正解: 10pt、不正解: 0pt
               </Text>
             </TouchableOpacity>
           </View>

@@ -47,6 +47,7 @@ export default function RoomScreen() {
   const [quizMode, setQuizMode] = useState<'all-at-once-host' | 'all-at-once-auto'>(
     'all-at-once-host'
   );
+  const [quizInputType, setQuizInputType] = useState<'sentence' | 'word_separate'>('sentence');
   const [allowPartialPoints, setAllowPartialPoints] = useState(true); // デフォルトで惜しい判定を有効
   const [maxReplayCount, setMaxReplayCount] = useState(3); // 最大再生回数（デフォルト3回）
 
@@ -134,7 +135,8 @@ export default function RoomScreen() {
         userId,
         quizMode,
         allowPartialPoints,
-        maxReplayCount
+        maxReplayCount,
+        quizInputType
       );
       setRoomId(roomData.id);
     } catch (err: any) {
@@ -391,6 +393,8 @@ export default function RoomScreen() {
                       setAllowPartialPoints(false);
                     }
                   }}
+                  quizInputType={quizInputType}
+                  onQuizInputTypeChange={setQuizInputType}
                   allowPartialPoints={allowPartialPoints}
                   onPartialPointsChange={setAllowPartialPoints}
                   maxReplayCount={maxReplayCount}

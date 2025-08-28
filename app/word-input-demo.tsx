@@ -5,11 +5,11 @@ import { FeatureIcon, APP_COLORS } from '@/components/common/FeatureIcon';
 import AppHeader from '@/components/AppHeader';
 
 const sampleSentences = [
-  "The quick brown fox jumps over the lazy dog.",
-  "I have a dream that one day this nation will rise up.",
-  "To be or not to be, that is the question.",
+  'The quick brown fox jumps over the lazy dog.',
+  'I have a dream that one day this nation will rise up.',
+  'To be or not to be, that is the question.',
   "I'll go there, and you can't stop me.",
-  "We hold these truths to be self-evident, that all men are created equal."
+  'We hold these truths to be self-evident, that all men are created equal.',
 ];
 
 export default function WordInputDemo() {
@@ -21,17 +21,17 @@ export default function WordInputDemo() {
 
   // 文章を単語と句読点に分離
   const parsesentence = (sentence: string) => {
-    const words = sentence.split(/\s+/).filter(word => word.length > 0);
+    const words = sentence.split(/\s+/).filter((word) => word.length > 0);
     const result: { text: string; isPunctuation: boolean; index: number }[] = [];
     let wordIndex = 0;
 
     words.forEach((word) => {
       // すべての記号を分離（句読点 + アポストロフィ）
       const parts = word.split(/([.!?,:;'])/);
-      
+
       parts.forEach((part) => {
         if (!part) return;
-        
+
         if (/[.!?,:;']/.test(part)) {
           // 句読点・アポストロフィとして扱う
           result.push({ text: part, isPunctuation: true, index: -1 });
@@ -46,7 +46,7 @@ export default function WordInputDemo() {
   };
 
   const parsedSentence = parsesentence(selectedSentence);
-  const wordItems = parsedSentence.filter(item => !item.isPunctuation);
+  const wordItems = parsedSentence.filter((item) => !item.isPunctuation);
 
   useEffect(() => {
     if (userWords.length !== wordItems.length) {
@@ -86,7 +86,7 @@ export default function WordInputDemo() {
   const getWordStyle = (index: number) => {
     const isFocused = currentIndex === index;
     const hasValue = userWords[index]?.length > 0;
-    
+
     if (isSubmitted) {
       const correctWord = wordItems[index].text;
       const isCorrect = userWords[index]?.toLowerCase().trim() === correctWord.toLowerCase().trim();
@@ -111,7 +111,7 @@ export default function WordInputDemo() {
     return 'text-app-neutral-800';
   };
 
-  const filledCount = userWords.filter(word => word.trim().length > 0).length;
+  const filledCount = userWords.filter((word) => word.trim().length > 0).length;
 
   const getResults = () => {
     let correct = 0;
@@ -121,7 +121,7 @@ export default function WordInputDemo() {
     wordItems.forEach((wordItem, index) => {
       const userWord = userWords[index]?.toLowerCase().trim();
       const correctWord = wordItem.text.toLowerCase().trim();
-      
+
       if (!userWord) {
         missing++;
       } else if (userWord === correctWord) {
@@ -144,11 +144,8 @@ export default function WordInputDemo() {
     <>
       <Stack.Screen options={{ headerShown: false }} />
       <View className="flex-1 bg-app-neutral-50">
-        <AppHeader 
-          title="単語入力デモ" 
-          settingsConfig={{ showBackButton: true }}
-        />
-        
+        <AppHeader title="単語入力デモ" settingsConfig={{ showBackButton: true }} />
+
         <ScrollView className="flex-1 px-4 py-4">
           {/* 文章選択 */}
           <View className="bg-white rounded-xl p-4 mb-4 shadow-sm">
@@ -160,15 +157,18 @@ export default function WordInputDemo() {
                     key={index}
                     onPress={() => setSelectedSentence(sentence)}
                     className={`px-4 py-2 rounded-lg border ${
-                      selectedSentence === sentence 
-                        ? 'bg-app-primary border-app-primary' 
+                      selectedSentence === sentence
+                        ? 'bg-app-primary border-app-primary'
                         : 'bg-white border-app-neutral-300'
                     }`}
                     style={{ minWidth: 150 }}
                   >
-                    <Text className={`text-sm ${
-                      selectedSentence === sentence ? 'text-white' : 'text-app-neutral-700'
-                    }`} numberOfLines={2}>
+                    <Text
+                      className={`text-sm ${
+                        selectedSentence === sentence ? 'text-white' : 'text-app-neutral-700'
+                      }`}
+                      numberOfLines={2}
+                    >
                       {sentence.length > 30 ? sentence.substring(0, 30) + '...' : sentence}
                     </Text>
                   </TouchableOpacity>
@@ -194,8 +194,8 @@ export default function WordInputDemo() {
                   // アポストロフィは上部に、その他の句読点は下部に
                   const isApostrophe = item.text === "'";
                   return (
-                    <Text 
-                      key={`punct-${sentenceIndex}`} 
+                    <Text
+                      key={`punct-${sentenceIndex}`}
                       className={`text-2xl text-app-neutral-800 ${
                         isApostrophe ? 'self-start mt-1' : 'self-end mb-2'
                       }`}
@@ -207,28 +207,35 @@ export default function WordInputDemo() {
 
                 const wordIndex = item.index;
                 const word = item.text;
-                
+
                 return (
                   <View key={`word-${wordIndex}`} className="mb-2">
                     <TextInput
-                      ref={(ref) => { inputRefs.current[wordIndex] = ref; }}
+                      ref={(ref) => {
+                        inputRefs.current[wordIndex] = ref;
+                      }}
                       value={userWords[wordIndex] || ''}
                       onChangeText={(value) => updateWord(wordIndex, value)}
                       onFocus={() => handleWordFocus(wordIndex)}
                       onSubmitEditing={() => handleWordSubmit(wordIndex)}
                       editable={!isSubmitted}
                       placeholder={`${wordIndex + 1}`}
-                      className={`text-center py-3 px-2 rounded-lg border-2 text-base font-medium ${getWordStyle(wordIndex)} ${getTextStyle(wordIndex)}`}
-                      style={{ 
+                      className={`text-center py-3 px-2 rounded-lg border-2 text-base font-medium ${getWordStyle(
+                        wordIndex
+                      )} ${getTextStyle(wordIndex)}`}
+                      style={{
                         width: getWordWidth(word),
-                        minHeight: 44
+                        minHeight: 44,
                       }}
                       returnKeyType={wordIndex === wordItems.length - 1 ? 'done' : 'next'}
                       autoCapitalize="none"
                       autoCorrect={false}
                     />
                     <View className="items-center mt-1">
-                      <View className="bg-app-neutral-300 h-0.5" style={{ width: getWordWidth(word) - 8 }} />
+                      <View
+                        className="bg-app-neutral-300 h-0.5"
+                        style={{ width: getWordWidth(word) - 8 }}
+                      />
                     </View>
                   </View>
                 );
@@ -270,7 +277,9 @@ export default function WordInputDemo() {
                   onPress={resetDemo}
                   className="flex-1 py-4 bg-app-success rounded-lg"
                 >
-                  <Text className="text-white text-center font-semibold text-base">もう一度挑戦</Text>
+                  <Text className="text-white text-center font-semibold text-base">
+                    もう一度挑戦
+                  </Text>
                 </TouchableOpacity>
               )}
             </View>
@@ -280,11 +289,11 @@ export default function WordInputDemo() {
           {isSubmitted && (
             <View className="bg-white rounded-xl p-4 shadow-sm mb-4">
               <Text className="text-lg font-bold text-app-neutral-800 mb-4">結果</Text>
-              
+
               {(() => {
                 const { correct, incorrect, missing } = getResults();
                 const accuracy = ((correct / wordItems.length) * 100).toFixed(1);
-                
+
                 return (
                   <View>
                     <View className="flex-row justify-around mb-4">
@@ -304,7 +313,7 @@ export default function WordInputDemo() {
                         <Text className="text-app-neutral-600 text-sm">未入力</Text>
                       </View>
                     </View>
-                    
+
                     <View className="bg-app-neutral-50 rounded-lg p-3">
                       <Text className="text-center text-2xl font-bold text-app-primary">
                         正解率: {accuracy}%
@@ -336,7 +345,7 @@ export default function WordInputDemo() {
                 <Text className="text-sm text-app-neutral-700">未入力</Text>
               </View>
             </View>
-            
+
             {isSubmitted && (
               <View className="mt-4 pt-3 border-t border-app-neutral-200">
                 <Text className="text-sm font-bold text-app-neutral-800 mb-2">結果の見方</Text>

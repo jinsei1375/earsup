@@ -27,7 +27,8 @@ export class SupabaseService {
     hostUserId: string,
     quizMode: 'all-at-once-host' | 'all-at-once-auto',
     allowPartialPoints: boolean = true,
-    maxReplayCount: number = 3
+    maxReplayCount: number = 3,
+    quizInputType: 'sentence' | 'word_separate' = 'sentence'
   ): Promise<Room> {
     try {
       const { data, error } = await supabase
@@ -37,6 +38,7 @@ export class SupabaseService {
           host_user_id: hostUserId,
           status: 'waiting',
           quiz_mode: quizMode,
+          quiz_input_type: quizInputType,
           allow_partial_points: allowPartialPoints,
           max_replay_count: maxReplayCount,
         })
