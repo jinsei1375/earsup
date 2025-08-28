@@ -14,17 +14,20 @@ import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { ErrorMessage } from '@/components/common/ErrorMessage';
 import { Button } from '@/components/common/Button';
 import { SampleSentenceModal } from './SampleSentenceModal';
+import { WordSeparatePreview } from './WordSeparatePreview';
 
 interface QuestionCreatorProps {
   onCreateQuestion: (text: string, sampleSentenceId?: string) => Promise<void>;
   loading: boolean;
   error: string | null;
+  quizInputType?: 'sentence' | 'word_separate';
 }
 
 export const QuestionCreator: React.FC<QuestionCreatorProps> = ({
   onCreateQuestion,
   loading,
   error,
+  quizInputType = 'sentence',
 }) => {
   const [questionText, setQuestionText] = useState('');
   const [selectedSampleSentenceId, setSelectedSampleSentenceId] = useState<string | null>(null);
@@ -79,6 +82,10 @@ export const QuestionCreator: React.FC<QuestionCreatorProps> = ({
                 returnKeyType="done"
                 onSubmitEditing={() => Keyboard.dismiss()}
               />
+
+              {/* 単語区切りモードの場合のプレビュー */}
+              {quizInputType === 'word_separate' && <WordSeparatePreview text={questionText} />}
+
               <Button
                 title="この問題を出題する"
                 onPress={handleSubmit}
@@ -86,6 +93,7 @@ export const QuestionCreator: React.FC<QuestionCreatorProps> = ({
                 size="large"
                 fullWidth
                 disabled={!questionText.trim() || loading}
+                className="mt-4"
               />
             </View>
             {loading && <LoadingSpinner variant="dots" color="#3B82F6" />}

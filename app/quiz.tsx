@@ -476,6 +476,7 @@ export default function QuizScreen() {
               onCreateQuestion={handleCreateQuestion}
               loading={loading}
               error={error}
+              quizInputType={room?.quiz_input_type || 'sentence'}
             />
           </ScrollView>
 

@@ -32,7 +32,7 @@ export const validateAnswer = (
       .replace(/[—–]/g, '-')
       // クォーテーションマークの正規化
       .replace(/[""]/g, '"')
-      .replace(/['']/g, "'");
+      .replace(/['’]/g, "'");
 
     return normalized.toLowerCase();
   };
