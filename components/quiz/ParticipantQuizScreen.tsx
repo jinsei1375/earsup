@@ -438,7 +438,7 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
 
                 <Text className="text-center text-app-primary mt-2">
                   あなたの回答: 「{userAnswer?.answer_text || '取得中...'}」
-                  {isAutoMode && trailingPunctuation}
+                  {isAutoMode && room?.quiz_input_type !== 'word_separate' && trailingPunctuation}
                 </Text>
                 <TranslationDisplay />
               </>
@@ -451,7 +451,7 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
                 </Text>
                 <Text className="text-center text-app-primary mt-2">
                   あなたの回答: 「{userAnswer?.answer_text || '取得中...'}」
-                  {isAutoMode && trailingPunctuation}
+                  {isAutoMode && room?.quiz_input_type !== 'word_separate' && trailingPunctuation}
                 </Text>
                 <Text className="text-center text-black mt-2">正解: {questionText}</Text>
                 <TranslationDisplay />
@@ -473,7 +473,7 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
                 <Text className="text-center font-bold text-app-danger text-lg mb-1">×不正解</Text>
                 <Text className="text-center text-app-primary mt-2">
                   あなたの回答: 「{userAnswer?.answer_text || '取得中...'}」
-                  {isAutoMode && trailingPunctuation}
+                  {isAutoMode && room?.quiz_input_type !== 'word_separate' && trailingPunctuation}
                 </Text>
                 <Text className="text-center text-black mt-2">正解: {questionText}</Text>
                 <TranslationDisplay />
