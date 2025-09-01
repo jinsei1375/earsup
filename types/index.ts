@@ -1,4 +1,4 @@
-// types/index.ts
+// ユーザー
 export interface User {
   id: string;
   nickname: string;
@@ -11,6 +11,7 @@ export interface VoiceSettings {
   speed: number;
 }
 
+// ルーム
 export interface Room {
   id: string;
   code: string;
@@ -25,6 +26,7 @@ export interface Room {
   updated_at: string;
 }
 
+// 問題
 export interface Question {
   id: string;
   room_id: string;
@@ -40,6 +42,7 @@ export interface QuestionWithTranslation extends Question {
   translation?: string; // Japanese translation from sample sentence
 }
 
+// 回答
 export interface Answer {
   id: string;
   room_id: string;
@@ -52,6 +55,7 @@ export interface Answer {
   nickname?: string;
 }
 
+// マイセンテンス
 export interface UserSentence {
   id: string;
   user_id: string;
@@ -69,6 +73,7 @@ export interface Buzz {
   created_at: string;
 }
 
+// ルーム参加者
 export interface RoomParticipant {
   id: string;
   room_id: string;
@@ -76,6 +81,7 @@ export interface RoomParticipant {
   joined_at: string;
 }
 
+// サンプルセンテンス
 export interface SampleSentence {
   id: string;
   category_id: string;
@@ -84,10 +90,31 @@ export interface SampleSentence {
   created_at: string;
 }
 
+// サンプルセンテンスカテゴリ
 export interface SampleCategory {
   id: string;
   name: string;
   created_at: string;
+}
+
+// ユーザー設定
+export interface UserSettings {
+  id: string;
+  user_id: string;
+  default_voice_gender: 'male' | 'female';
+  user_icon_url: string | null;
+  theme: 'light' | 'dark' | 'system';
+  font_size: 'small' | 'medium' | 'large';
+  push_notifications_enabled: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SettingsContextType {
+  settings: UserSettings | null;
+  updateSettings: (settings: Partial<UserSettings>) => Promise<void>;
+  loading: boolean;
+  error: string | null;
 }
 
 export interface ParticipantWithNickname extends User {
