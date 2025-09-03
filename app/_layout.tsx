@@ -6,15 +6,18 @@ import { SafeAreaView, View, StatusBar } from 'react-native';
 import AppHeader from '@/components/AppHeader';
 import { HeaderSettingsProvider, useHeaderSettings } from '@/contexts/HeaderSettingsContext';
 import { ToastProvider } from '@/contexts/ToastContext';
+import { SettingsProvider } from '@/contexts/SettingsContext';
 // グローバルCSSのインポート
 import '@/assets/css/global.css';
 
 export default function RootLayout() {
   return (
     <ToastProvider>
-      <HeaderSettingsProvider>
-        <RootLayoutContent />
-      </HeaderSettingsProvider>
+      <SettingsProvider>
+        <HeaderSettingsProvider>
+          <RootLayoutContent />
+        </HeaderSettingsProvider>
+      </SettingsProvider>
     </ToastProvider>
   );
 }
