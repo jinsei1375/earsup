@@ -78,6 +78,8 @@ function RootLayoutContent() {
         return 'プライバシーポリシー';
       case '/diff-demo':
         return '回答自動判定デモ';
+      case '/setting':
+        return '設定';
       default:
         // 特定の画面にマッチしない場合、最後のセグメントをキャピタライズしてタイトルとして使用
         return lastSegment.charAt(0).toUpperCase() + lastSegment.slice(1);
