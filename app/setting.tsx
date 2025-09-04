@@ -1,21 +1,25 @@
 // app/setting.tsx
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, TextInput } from 'react-native';
 import { router } from 'expo-router';
 import { useHeaderSettings } from '@/contexts/HeaderSettingsContext';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { Button } from '@/components/common/Button';
 import { FeatureIcon, APP_COLORS } from '@/components/common/FeatureIcon';
+import { supabase } from '@/lib/supabase';
 
 import { useToast } from '@/contexts/ToastContext';
 import { useSettings } from '@/contexts/SettingsContext';
+import { useUserStore } from '@/stores/userStore';
 
 export default function Setting() {
   const { setSettingsConfig } = useHeaderSettings();
   const { settings, updateSettings, loading } = useSettings();
   const { showSuccess, showError } = useToast();
+  const { userId, nickname, setUserInfo } = useUserStore();
 
   const [voiceGender, setVoiceGender] = useState(settings?.default_voice_gender || 'male');
+  const [nicknameInput, setNicknameInput] = useState(nickname || '');
   const [updating, setUpdating] = useState(false);
 
   useEffect(() => {
@@ -38,19 +42,58 @@ export default function Setting() {
     }
   }, [settings]);
 
+  // ニックネームが変更されたら初期値を設定
+  useEffect(() => {
+    if (nickname) {
+      setNicknameInput(nickname);
+    }
+  }, [nickname]);
+
   const handleSaveSettings = async () => {
-    if (!settings) return;
+    if (!settings || !userId) return;
+
+    const trimmedNickname = nicknameInput.trim();
+
+    // バリデーション
+    if (!trimmedNickname) {
+      showError('ニックネームを入力してください');
+      return;
+    }
+
+    if (trimmedNickname.length > 20) {
+      showError('ニックネームは20文字以内で入力してください');
+      return;
+    }
 
     try {
       setUpdating(true);
 
-      await updateSettings({
-        default_voice_gender: voiceGender,
-      });
+      // ニックネームが変更されている場合、データベースを更新
+      if (trimmedNickname !== nickname) {
+        const { error: nicknameError } = await supabase
+          .from('users')
+          .update({ nickname: trimmedNickname })
+          .eq('id', userId);
+
+        if (nicknameError) {
+          throw nicknameError;
+        }
+
+        // ストアを更新
+        setUserInfo(userId, trimmedNickname);
+      }
+
+      // 音声設定が変更されている場合、設定を更新
+      if (voiceGender !== settings.default_voice_gender) {
+        await updateSettings({
+          default_voice_gender: voiceGender,
+        });
+      }
 
       showSuccess('設定を保存しました');
     } catch (err) {
       showError('設定の保存に失敗しました');
+      console.error('Settings save error:', err);
     } finally {
       setUpdating(false);
     }
@@ -58,7 +101,8 @@ export default function Setting() {
 
   const hasChanges = () => {
     if (!settings) return false;
-    return voiceGender !== settings.default_voice_gender;
+    const trimmedNickname = nicknameInput.trim();
+    return voiceGender !== settings.default_voice_gender || trimmedNickname !== nickname;
   };
 
   if (loading) {
@@ -88,6 +132,29 @@ export default function Setting() {
   return (
     <View className="flex-1 bg-app-neutral-50">
       <ScrollView className="flex-1 px-4 py-4">
+        {/* ニックネーム設定 */}
+        <View className="bg-white rounded-xl p-4 mb-4 shadow-sm">
+          <View className="flex-row items-center mb-3">
+            <FeatureIcon name="person" size={20} color={APP_COLORS.gray600} />
+            <Text className="text-lg font-bold text-app-neutral-800 ml-2">ニックネーム</Text>
+          </View>
+
+          <Text className="text-app-neutral-600 text-sm mb-3">
+            他のユーザーに表示されるニックネームを設定してください。
+          </Text>
+
+          <TextInput
+            value={nicknameInput}
+            onChangeText={setNicknameInput}
+            placeholder="ニックネームを入力"
+            className="bg-app-neutral-50 border border-app-neutral-300 rounded-lg px-4 py-3 text-app-neutral-800"
+            maxLength={20}
+          />
+          <Text className="text-app-neutral-500 text-xs mt-1 text-right">
+            {nicknameInput.length}/20文字
+          </Text>
+        </View>
+
         {/* デフォルト音声設定 */}
         <View className="bg-white rounded-xl p-4 mb-4 shadow-sm">
           <View className="flex-row items-center mb-3">
@@ -96,10 +163,11 @@ export default function Setting() {
           </View>
 
           <Text className="text-app-neutral-600 text-sm mb-3">
-            クイズで使用される音声の性別を選択してください
+            クイズで使用される音声の性別を選択してください。{'\n'}
+            ホストありモードでは、ホストが選択した音声設定が優先されます。
           </Text>
 
-          <View className="flex-row space-x-3">
+          <View className="flex-row gap-3">
             <TouchableOpacity
               onPress={() => setVoiceGender('male')}
               className={`flex-1 p-4 rounded-lg border-2 ${
@@ -109,13 +177,8 @@ export default function Setting() {
               }`}
             >
               <View className="items-center">
-                <FeatureIcon
-                  name="man"
-                  size={24}
-                  color={voiceGender === 'male' ? APP_COLORS.white : APP_COLORS.gray600}
-                />
                 <Text
-                  className={`mt-2 font-medium ${
+                  className={`font-medium ${
                     voiceGender === 'male' ? 'text-white' : 'text-app-neutral-700'
                   }`}
                 >
@@ -133,13 +196,8 @@ export default function Setting() {
               }`}
             >
               <View className="items-center">
-                <FeatureIcon
-                  name="woman"
-                  size={24}
-                  color={voiceGender === 'female' ? APP_COLORS.white : APP_COLORS.gray600}
-                />
                 <Text
-                  className={`mt-2 font-medium ${
+                  className={`font-medium ${
                     voiceGender === 'female' ? 'text-white' : 'text-app-neutral-700'
                   }`}
                 >
@@ -151,7 +209,7 @@ export default function Setting() {
         </View>
 
         {/* 保存ボタン */}
-        <View className="mt-4">
+        <View className="mt-6">
           <Button
             title={updating ? '保存中...' : '設定を保存'}
             onPress={handleSaveSettings}
@@ -161,21 +219,10 @@ export default function Setting() {
           />
 
           {hasChanges() && (
-            <Text className="text-app-primary text-sm text-center mt-2">
+            <Text className="text-app-primary text-sm text-center mt-3">
               変更が保存されていません
             </Text>
           )}
-        </View>
-
-        {/* 将来の拡張エリア */}
-        <View className="bg-app-neutral-100 rounded-xl p-4 mt-6">
-          <Text className="text-app-neutral-600 text-center font-medium">
-            🚀 今後追加予定の設定
-          </Text>
-          <Text className="text-app-neutral-500 text-sm text-center mt-2">
-            • ユーザーアイコン{'\n'}• テーマ（ダーク/ライト）{'\n'}• フォントサイズ{'\n'}•
-            プッシュ通知
-          </Text>
         </View>
       </ScrollView>
     </View>

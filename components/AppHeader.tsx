@@ -64,7 +64,7 @@ export default function AppHeader({ title, rightComponent, settingsConfig }: App
               variant="ghost"
               size="small"
               onPress={onSettingsPress}
-              icon={<Ionicons name="settings-outline" size={24} color="#666" />}
+              icon={<Ionicons name="menu" size={40} color="#666" />}
             />
           ) : null)}
       </View>

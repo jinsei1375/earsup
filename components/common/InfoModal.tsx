@@ -50,24 +50,21 @@ export default function InfoModal({ visible, onClose }: InfoModalProps) {
           {/* Header */}
           <View className="flex-row items-center justify-between mb-6">
             <View style={{ width: 32 }} />
-            <Text className="text-lg font-bold">アプリ情報</Text>
+            <Text className="text-lg font-bold">メニュー</Text>
             <TouchableOpacity onPress={onClose}>
               <Ionicons name="close" size={24} color="#666" />
             </TouchableOpacity>
           </View>
 
-          <TouchableOpacity className="py-4 border-b border-gray-200" onPress={handleTermsPress}>
-            <Text className="text-base text-app-primary text-center">利用規約</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity className="py-4 border-b border-gray-200" onPress={handlePrivacyPress}>
-            <Text className="text-base text-app-primary text-center">プライバシーポリシー</Text>
-          </TouchableOpacity>
-
           <TouchableOpacity className="py-4 border-b border-gray-200" onPress={handleUserSettings}>
             <Text className="text-base text-app-primary text-center">設定</Text>
           </TouchableOpacity>
-
+          <TouchableOpacity className="py-4 border-b border-gray-200" onPress={handleTermsPress}>
+            <Text className="text-base text-app-primary text-center">利用規約</Text>
+          </TouchableOpacity>
+          <TouchableOpacity className="py-4 border-b border-gray-200" onPress={handlePrivacyPress}>
+            <Text className="text-base text-app-primary text-center">プライバシーポリシー</Text>
+          </TouchableOpacity>
           <TouchableOpacity className="py-4" onPress={handleContactPress}>
             <Text className="text-base text-app-primary text-center">お問い合わせ</Text>
           </TouchableOpacity>

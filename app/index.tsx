@@ -84,7 +84,6 @@ export default function HomeScreen() {
         {/* ヘッダーセクション */}
         <View className="items-center mb-8 mt-4">
           <Text className="text-4xl font-bold text-gray-800 mb-2">EarsUp</Text>
-          <Text className="text-lg text-gray-600 text-center mb-4">リスニングクイズアプリ</Text>
           {nickname ? (
             <View className="flex-row items-center mb-4">
               <View className="bg-white px-4 py-2 rounded-full shadow-sm">
