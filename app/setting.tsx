@@ -7,6 +7,8 @@ import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { Button } from '@/components/common/Button';
 import { FeatureIcon, APP_COLORS } from '@/components/common/FeatureIcon';
 import { supabase } from '@/lib/supabase';
+import { audioService } from '@/services/audioService';
+import { Ionicons } from '@expo/vector-icons';
 
 import { useToast } from '@/contexts/ToastContext';
 import { useSettings } from '@/contexts/SettingsContext';
@@ -21,6 +23,7 @@ export default function Setting() {
   const [voiceGender, setVoiceGender] = useState(settings?.default_voice_gender || 'male');
   const [nicknameInput, setNicknameInput] = useState(nickname || '');
   const [updating, setUpdating] = useState(false);
+  const [playingVoice, setPlayingVoice] = useState<boolean>(false);
 
   useEffect(() => {
     // ヘッダー設定
@@ -103,6 +106,25 @@ export default function Setting() {
     if (!settings) return false;
     const trimmedNickname = nicknameInput.trim();
     return voiceGender !== settings.default_voice_gender || trimmedNickname !== nickname;
+  };
+
+  const handlePlaySampleVoice = async (gender: 'male' | 'female') => {
+    if (playingVoice) return; // 既に再生中の場合は何もしない
+
+    try {
+      setPlayingVoice(true);
+      const sampleText = 'Hello! This is a sample voice for listening quiz.';
+      const voiceSettings = {
+        gender: gender,
+        speed: 1.0,
+      };
+      await audioService.playText(sampleText, voiceSettings);
+    } catch (error) {
+      console.error('Sample voice playback failed:', error);
+      showError('音声の再生に失敗しました');
+    } finally {
+      setPlayingVoice(false);
+    }
   };
 
   if (loading) {
@@ -204,6 +226,22 @@ export default function Setting() {
                   女性の声
                 </Text>
               </View>
+            </TouchableOpacity>
+          </View>
+
+          {/* サンプル音声再生ボタン */}
+          <View className="mt-4">
+            <TouchableOpacity
+              onPress={() => handlePlaySampleVoice(voiceGender)}
+              disabled={playingVoice}
+              className="flex-row items-center justify-center py-3 px-4 bg-app-neutral-100 rounded-lg border border-app-neutral-300"
+            >
+              {playingVoice ? (
+                <LoadingSpinner size="small" />
+              ) : (
+                <Ionicons name="play" size={20} color={APP_COLORS.gray600} />
+              )}
+              <Text className="text-app-neutral-700 font-medium ml-2">サンプル音声を再生する</Text>
             </TouchableOpacity>
           </View>
         </View>

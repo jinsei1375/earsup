@@ -25,6 +25,7 @@ import { SampleSentenceService } from '@/services/sampleSentenceService';
 import { DiffDisplay } from './DiffDisplay';
 import { WordSeparateInput } from './WordSeparateInput';
 import { generateDiff, getJudgmentResult } from '@/utils/diffUtils';
+import { useSettings } from '@/contexts/SettingsContext';
 import type {
   Room,
   RealtimeConnectionState,
@@ -73,6 +74,7 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
   onNextQuestion,
   onEndQuiz,
 }) => {
+  const { settings } = useSettings();
   const [answer, setAnswer] = useState('');
   const [playCount, setPlayCount] = useState(0); // 音声再生回数
   const [showExitModal, setShowExitModal] = useState(false);
@@ -259,8 +261,12 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
 
     try {
       setIsPlaying(true);
-      // ホストなしモードは固定設定（男性、1.0x）で再生
-      await audioService.playText(questionText);
+      // ホストなしモードでは設定されたデフォルト音声を使用
+      const voiceSettings = {
+        gender: settings?.default_voice_gender || 'male',
+        speed: 1.0,
+      };
+      await audioService.playText(questionText, voiceSettings);
       setPlayCount((prev) => prev + 1);
     } catch (error) {
       console.error('Audio playback failed:', error);

@@ -1,5 +1,5 @@
 // components/quiz/HostQuizScreen.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { AnswersList } from './AnswersList';
 import { ParticipantsList } from '@/components/room/ParticipantsList';
@@ -12,6 +12,7 @@ import { FeatureIcon, APP_COLORS } from '@/components/common/FeatureIcon';
 import { getQuizModeDisplayName, extractTrailingPunctuation } from '@/utils/quizUtils';
 import { audioService } from '@/services/audioService';
 import { useToast } from '@/contexts/ToastContext';
+import { useSettings } from '@/contexts/SettingsContext';
 import type { Answer, ParticipantWithNickname, VoiceSettings as VoiceSettingsType } from '@/types';
 
 interface HostQuizScreenProps {
@@ -52,12 +53,24 @@ export const HostQuizScreen: React.FC<HostQuizScreenProps> = ({
   onNextQuestion,
 }) => {
   const { showError } = useToast();
+  const { settings } = useSettings();
+
   const [voiceSettings, setVoiceSettings] = useState<VoiceSettingsType>({
-    gender: 'male',
+    gender: settings?.default_voice_gender || 'male',
     speed: 1.0,
   });
   const [showSilentModeWarning, setShowSilentModeWarning] = useState(true);
   const [showExitModal, setShowExitModal] = useState(false);
+
+  // 設定が読み込まれたら音声設定を更新
+  useEffect(() => {
+    if (settings?.default_voice_gender) {
+      setVoiceSettings((prev) => ({
+        ...prev,
+        gender: settings.default_voice_gender,
+      }));
+    }
+  }, [settings]);
 
   // 問題文から抽出した句読点
   const trailingPunctuation = extractTrailingPunctuation(questionText);
