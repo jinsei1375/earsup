@@ -10,7 +10,6 @@ import { SentenceFormModal } from '@/components/sentences/SentenceFormModal';
 import { UserSentenceService } from '@/services/userSentenceService';
 import { useUserStore } from '@/stores/userStore';
 import { useToast } from '@/contexts/ToastContext';
-import { Ionicons } from '@expo/vector-icons';
 
 interface QuizResultScreenProps {
   participants: ParticipantWithNickname[];
