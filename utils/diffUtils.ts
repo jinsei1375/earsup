@@ -18,7 +18,7 @@ export interface DiffResult {
  */
 function tokenizeText(text: string): string[] {
   return (
-    text
+    normalizeApostrophes(text)
       .trim()
       // 文末の句読点を除去
       .replace(/[.!?]+$/, '')
@@ -28,12 +28,19 @@ function tokenizeText(text: string): string[] {
 }
 
 /**
+ * アポストロフィの違いを正規化
+ */
+function normalizeApostrophes(text: string): string {
+  return text.replace(/['’]/g, "'");
+}
+
+/**
  * 2つの単語が類似しているかチェック（タイポ許容）
  */
 function isSimilar(word1: string, word2: string, threshold: number = 0.8): boolean {
-  // 大文字小文字を無視して比較
-  const normalizedWord1 = word1.toLowerCase();
-  const normalizedWord2 = word2.toLowerCase();
+  // 大文字小文字とアポストロフィを正規化して比較
+  const normalizedWord1 = normalizeApostrophes(word1.toLowerCase());
+  const normalizedWord2 = normalizeApostrophes(word2.toLowerCase());
 
   if (normalizedWord1 === normalizedWord2) return true;
 
@@ -171,18 +178,21 @@ export function generateDiff(userAnswer: string, correctAnswer: string): DiffRes
 }
 
 /**
- * 判定結果を取得（完全一致、惜しい、不正解）
+ * 判定結果を決定する（設定可能な閾値）
  */
 export function getJudgmentResult(
   userAnswer: string,
-  correctAnswer: string
+  correctAnswer: string,
+  partialThreshold: number = 70
 ): 'correct' | 'close' | 'incorrect' {
   // 文末の句読点を除去してから比較
   const normalizeForJudgment = (text: string) => {
-    return text
-      .trim()
-      .replace(/[.!?]+$/, '')
-      .toLowerCase();
+    return normalizeApostrophes(
+      text
+        .trim()
+        .replace(/[.!?]+$/, '')
+        .toLowerCase()
+    );
   };
 
   const normalizedUser = normalizeForJudgment(userAnswer);
@@ -195,8 +205,8 @@ export function getJudgmentResult(
 
   const diff = generateDiff(userAnswer, correctAnswer);
 
-  // 80%以上の一致率で「惜しい」
-  if (diff.accuracy >= 80) {
+  // 設定された閾値以上の一致率で「惜しい」
+  if (diff.accuracy >= partialThreshold) {
     return 'close';
   }
 

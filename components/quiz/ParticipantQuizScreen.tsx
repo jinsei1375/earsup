@@ -130,10 +130,10 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
     userJudgmentResult !== null &&
     userJudgmentResult !== undefined;
 
-  // In host-less mode, consider all participants except host for judgment tracking
+  // ホストなしモードでは全参加者（ホスト含む）、ホストありモードでは参加者のみ
   const participantsToJudge = isHostlessMode
-    ? participants.filter((p) => p.id !== room?.host_user_id)
-    : participants;
+    ? participants // ホストなしモードではホストも含める
+    : participants.filter((p) => p.id !== room?.host_user_id); // ホストありモードではホスト除外
 
   const totalParticipantsToJudge = participantsToJudge.length;
 
@@ -142,10 +142,10 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
     ? answers.filter((answer) => answer.question_id === currentQuestionId)
     : [];
 
-  // ホストなしモードでは非ホスト参加者の回答のみカウント
+  // ホストなしモードでは全参加者の回答、ホストありモードでは非ホスト参加者の回答のみカウント
   const relevantAnswers = isHostlessMode
-    ? currentQuestionAnswers.filter((answer) => answer.user_id !== room?.host_user_id)
-    : currentQuestionAnswers;
+    ? currentQuestionAnswers // ホストなしモードではホストの回答も含める
+    : currentQuestionAnswers.filter((answer) => answer.user_id !== room?.host_user_id);
 
   const judgedCount = relevantAnswers.filter((answer) => answer.judge_result !== null).length;
 
@@ -228,26 +228,35 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
       return false;
     }
 
-    // クイズモードに関係なく、ホスト以外の参加者の回答のみを対象とする
-    const currentQuestionRelevantAnswers = currentQuestionAnswers.filter(
-      (answer) => answer.user_id !== room?.host_user_id
-    );
+    // ホストなしモードでは全参加者、ホストありモードではホスト以外の参加者の回答を対象とする
+    const currentQuestionRelevantAnswers = isHostlessMode
+      ? currentQuestionAnswers // ホストなしモードではホストの回答も含める
+      : currentQuestionAnswers.filter((answer) => answer.user_id !== room?.host_user_id);
 
     const currentJudgedCount = currentQuestionRelevantAnswers.filter(
       (answer) => answer.judge_result !== null
     ).length;
     const currentSubmittedCount = currentQuestionRelevantAnswers.length;
 
-    // ホスト以外の参加者数を計算
-    const nonHostParticipants = participants.filter((p) => p.id !== room?.host_user_id);
-    const totalNonHostParticipants = nonHostParticipants.length;
+    // 参加者数を計算（ホストなしモードではホスト含む、ホストありモードではホスト除外）
+    const targetParticipants = isHostlessMode
+      ? participants // ホストなしモードではホスト含む
+      : participants.filter((p) => p.id !== room?.host_user_id);
+    const totalTargetParticipants = targetParticipants.length;
 
     return (
-      currentSubmittedCount >= totalNonHostParticipants &&
-      currentJudgedCount >= totalNonHostParticipants &&
-      totalNonHostParticipants > 0
+      currentSubmittedCount >= totalTargetParticipants &&
+      currentJudgedCount >= totalTargetParticipants &&
+      totalTargetParticipants > 0
     );
-  }, [currentQuestionId, currentQuestionAnswers, participants, showResult, room?.host_user_id]);
+  }, [
+    currentQuestionId,
+    currentQuestionAnswers,
+    participants,
+    showResult,
+    room?.host_user_id,
+    isHostlessMode,
+  ]);
 
   const handleSubmitAnswer = async () => {
     if (answer.trim()) {

@@ -46,7 +46,7 @@ export const ParticipantsList: React.FC<ParticipantsListProps> = ({
   // First calculate stats for sorting
   const participantStats =
     answers.length > 0
-      ? calculateParticipantStats(filteredParticipants, answers, hostUserId, judgmentTypes)
+      ? calculateParticipantStats(participants, answers, hostUserId, judgmentTypes, quizMode)
       : null;
 
   const sortedParticipants = [...filteredParticipants].sort((a, b) => {

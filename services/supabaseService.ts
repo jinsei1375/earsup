@@ -28,7 +28,8 @@ export class SupabaseService {
     quizMode: 'all-at-once-host' | 'all-at-once-auto',
     allowPartialPoints: boolean = true,
     maxReplayCount: number = 3,
-    quizInputType: 'sentence' | 'word_separate' = 'sentence'
+    quizInputType: 'sentence' | 'word_separate' = 'sentence',
+    partialJudgmentThreshold: number = 70
   ): Promise<Room> {
     try {
       const { data, error } = await supabase
@@ -40,6 +41,7 @@ export class SupabaseService {
           quiz_mode: quizMode,
           quiz_input_type: quizInputType,
           allow_partial_points: allowPartialPoints,
+          partial_judgement_threshold: partialJudgmentThreshold,
           max_replay_count: maxReplayCount,
         })
         .select()

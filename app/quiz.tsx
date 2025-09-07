@@ -380,6 +380,7 @@ export default function QuizScreen() {
           hostUserId={room?.host_user_id}
           isHost={isHost}
           loading={loading}
+          quizMode={room?.quiz_mode}
           onGoHome={handleGoHome}
           judgmentTypes={judgmentTypes}
           roomId={roomId}

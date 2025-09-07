@@ -20,6 +20,7 @@ export interface Room {
   quiz_mode: 'all-at-once-host' | 'all-at-once-auto';
   quiz_input_type?: 'sentence' | 'word_separate'; // 新しく追加
   allow_partial_points?: boolean; // 惜しい判定を許可するか
+  partial_judgement_threshold?: number; // 惜しい判定の閾値（%）
   voice_settings?: VoiceSettings; // 音声設定
   max_replay_count?: number; // 最大リプレイ回数
   created_at: string;

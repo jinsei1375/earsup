@@ -18,6 +18,7 @@ interface QuizResultScreenProps {
   isHost: boolean;
   loading: boolean;
   judgmentTypes?: Record<string, 'correct' | 'partial' | 'incorrect'>; // 判定タイプ
+  quizMode?: 'all-at-once-host' | 'all-at-once-auto'; // クイズモード
   onGoHome: () => void;
   roomId: string; // Add roomId to get questions
 }
@@ -29,6 +30,7 @@ export const QuizResultScreen: React.FC<QuizResultScreenProps> = ({
   isHost,
   loading,
   judgmentTypes = {}, // デフォルトは空のオブジェクト
+  quizMode = 'all-at-once-host', // デフォルトはホストあり
   onGoHome,
   roomId,
 }) => {
@@ -39,7 +41,7 @@ export const QuizResultScreen: React.FC<QuizResultScreenProps> = ({
 
   // 統計情報を計算して順位付きでソート
   const participantStatsWithRanks = addRanksToParticipantStats(
-    calculateParticipantStats(participants, allRoomAnswers, hostUserId, judgmentTypes)
+    calculateParticipantStats(participants, allRoomAnswers, hostUserId, judgmentTypes, quizMode)
   ).sort((a, b) => {
     // 順位順でソート（同順位の場合はポイント順、さらに正解率順）
     if (a.rank !== b.rank) {

@@ -49,6 +49,7 @@ export default function RoomScreen() {
   );
   const [quizInputType, setQuizInputType] = useState<'sentence' | 'word_separate'>('sentence');
   const [allowPartialPoints, setAllowPartialPoints] = useState(true); // デフォルトで惜しい判定を有効
+  const [partialJudgmentThreshold, setPartialJudgmentThreshold] = useState(70); // 惜しい判定の閾値（デフォルト70%）
   const [maxReplayCount, setMaxReplayCount] = useState(3); // 最大再生回数（デフォルト3回）
 
   // Room data management
@@ -136,7 +137,8 @@ export default function RoomScreen() {
         quizMode,
         allowPartialPoints,
         maxReplayCount,
-        quizInputType
+        quizInputType,
+        partialJudgmentThreshold
       );
       setRoomId(roomData.id);
     } catch (err: any) {
@@ -388,15 +390,18 @@ export default function RoomScreen() {
                   selectedMode={quizMode}
                   onModeChange={(mode) => {
                     setQuizMode(mode);
-                    // ホストなしモードの場合は惜しい判定を自動的に無効にする
+                    // ホストなしモードの場合は惜しい判定を有効にする（自動判定のため）
                     if (mode === 'all-at-once-auto') {
-                      setAllowPartialPoints(false);
+                      setAllowPartialPoints(true);
                     }
+                    // ホストありモードではユーザーが選択可能（デフォルトは有効）
                   }}
                   quizInputType={quizInputType}
                   onQuizInputTypeChange={setQuizInputType}
                   allowPartialPoints={allowPartialPoints}
                   onPartialPointsChange={setAllowPartialPoints}
+                  partialJudgmentThreshold={partialJudgmentThreshold}
+                  onPartialJudgmentThresholdChange={setPartialJudgmentThreshold}
                   maxReplayCount={maxReplayCount}
                   onMaxReplayCountChange={setMaxReplayCount}
                   disabled={loading}

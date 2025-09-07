@@ -233,45 +233,46 @@ export const calculateParticipantStats = (
   participants: ParticipantWithNickname[],
   answers: Answer[],
   hostUserId?: string,
-  judgmentTypes?: Record<string, 'correct' | 'partial' | 'incorrect'>
+  judgmentTypes?: Record<string, 'correct' | 'partial' | 'incorrect'>,
+  quizMode?: 'all-at-once-host' | 'all-at-once-auto'
 ): ParticipantStats[] => {
-  return participants
-    .filter((participant) => participant.id !== hostUserId) // ホストを除外
-    .map((participant) => {
-      const userAnswers = answers.filter(
-        (answer) => answer.user_id === participant.id && answer.judged
-      );
+  // ホストなしモードではホストも含める、ホストありモードではホストを除外
+  const targetParticipants =
+    quizMode === 'all-at-once-auto'
+      ? participants // ホストなしモードではホストも含める
+      : participants.filter((participant) => participant.id !== hostUserId); // ホストありモードではホストを除外
 
-      const correctAnswers = userAnswers.filter(
-        (answer) => answer.judge_result === 'correct'
-      ).length;
+  return targetParticipants.map((participant) => {
+    const userAnswers = answers.filter(
+      (answer) => answer.user_id === participant.id && answer.judged
+    );
 
-      // 惜しい判定
-      const partialAnswers = userAnswers.filter(
-        (answer) => answer.judge_result === 'partial'
-      ).length;
+    const correctAnswers = userAnswers.filter((answer) => answer.judge_result === 'correct').length;
 
-      // ポイント計算: 正解10pt + 惜しい5pt
-      const points = correctAnswers * 10 + partialAnswers * 5;
+    // 惜しい判定
+    const partialAnswers = userAnswers.filter((answer) => answer.judge_result === 'partial').length;
 
-      // 正解率計算
-      const accuracy =
-        userAnswers.length > 0 ? Math.round((correctAnswers / userAnswers.length) * 100) : 0;
+    // ポイント計算: 正解10pt + 惜しい5pt
+    const points = correctAnswers * 10 + partialAnswers * 5;
 
-      const streakStats = calculateStreakStats(answers, participant.id);
+    // 正解率計算
+    const accuracy =
+      userAnswers.length > 0 ? Math.round((correctAnswers / userAnswers.length) * 100) : 0;
 
-      return {
-        userId: participant.id,
-        nickname: participant.nickname,
-        correctAnswers,
-        totalAnswers: userAnswers.length,
-        points,
-        partialAnswers, // 惜しい答え数を追加
-        accuracy,
-        currentStreak: streakStats.currentStreak,
-        maxStreak: streakStats.maxStreak,
-      };
-    });
+    const streakStats = calculateStreakStats(answers, participant.id);
+
+    return {
+      userId: participant.id,
+      nickname: participant.nickname,
+      correctAnswers,
+      totalAnswers: userAnswers.length,
+      points,
+      partialAnswers, // 惜しい答え数を追加
+      accuracy,
+      currentStreak: streakStats.currentStreak,
+      maxStreak: streakStats.maxStreak,
+    };
+  });
 };
 
 export const formatParticipantStats = (stats: ParticipantStats): string => {

@@ -2,8 +2,17 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { SupabaseService } from '@/services/supabaseService';
 import { useRealtimeSubscription } from './useRealtimeSubscription';
-import type { Room, Question, Answer, Buzz, ParticipantWithNickname, Stamp } from '@/types';
+import type {
+  Room,
+  Question,
+  Answer,
+  Buzz,
+  ParticipantWithNickname,
+  Stamp,
+  RealtimeConnectionState,
+} from '@/types';
 import { validateAnswer } from '@/utils/quizUtils';
+import { getJudgmentResult } from '@/utils/diffUtils';
 
 interface UseQuizDataOptions {
   roomId: string | null;
@@ -171,7 +180,13 @@ export const useQuizData = (options: UseQuizDataOptions) => {
       setLoading(true);
       try {
         // Create question
-        const questionData = await SupabaseService.createQuestion(roomId, text, 'en-US', 1.0, sampleSentenceId);
+        const questionData = await SupabaseService.createQuestion(
+          roomId,
+          text,
+          'en-US',
+          1.0,
+          sampleSentenceId
+        );
 
         // Update room status to active
         await SupabaseService.updateRoomStatus(roomId, 'active');
@@ -206,8 +221,21 @@ export const useQuizData = (options: UseQuizDataOptions) => {
 
         if (autoJudge) {
           judged = true;
-          const isCorrect = validateAnswer(answerText, currentQuestion.text, true); // exclude punctuation
-          judgmentResult = isCorrect ? 'correct' : 'incorrect';
+          // ルームの設定に基づく詳細な判定を実行
+          const partialThreshold = room?.partial_judgement_threshold || 70;
+          const judgment = getJudgmentResult(answerText, currentQuestion.text, partialThreshold);
+
+          switch (judgment) {
+            case 'correct':
+              judgmentResult = 'correct';
+              break;
+            case 'close':
+              judgmentResult = 'partial';
+              break;
+            case 'incorrect':
+              judgmentResult = 'incorrect';
+              break;
+          }
         }
 
         const answerData = await SupabaseService.submitAnswer(

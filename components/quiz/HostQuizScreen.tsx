@@ -112,15 +112,16 @@ export const HostQuizScreen: React.FC<HostQuizScreenProps> = ({
     }
 
     // ホストありモードの場合：ホスト以外の参加者のみチェック
+    // ホストなしモードの場合：ホストも含む全参加者をチェック
     const relevantAnswers =
       quizMode === 'all-at-once-host'
         ? currentQuestionAnswers.filter((answer) => answer.user_id !== hostUserId)
-        : currentQuestionAnswers;
+        : currentQuestionAnswers; // ホストなしモードではホストの回答も含める
 
     const participantsToJudge =
       quizMode === 'all-at-once-host'
         ? participants.filter((p) => p.id !== hostUserId)
-        : participants;
+        : participants; // ホストなしモードではホストも含める
 
     const judgedCount = relevantAnswers.filter((answer) => answer.judge_result !== null).length;
     const submittedCount = relevantAnswers.length;
