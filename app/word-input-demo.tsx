@@ -1,23 +1,36 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView } from 'react-native';
-import { Stack } from 'expo-router';
+import { router, Stack } from 'expo-router';
 import { FeatureIcon, APP_COLORS } from '@/components/common/FeatureIcon';
-import AppHeader from '@/components/AppHeader';
+import { useHeaderSettings } from '@/contexts/HeaderSettingsContext';
 
 const sampleSentences = [
   'The quick brown fox jumps over the lazy dog.',
   'I have a dream that one day this nation will rise up.',
   'To be or not to be, that is the question.',
   "I'll go there, and you can't stop me.",
-  'We hold these truths to be self-evident, that all men are created equal.',
 ];
 
 export default function WordInputDemo() {
+  const { setSettingsConfig } = useHeaderSettings();
   const [selectedSentence, setSelectedSentence] = useState(sampleSentences[0]);
   const [userWords, setUserWords] = useState<string[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const inputRefs = useRef<(TextInput | null)[]>([]);
+
+  useEffect(() => {
+    // ヘッダー設定
+    setSettingsConfig({
+      showBackButton: true,
+      onBackPress: () => router.back(),
+    });
+
+    // クリーンアップ関数でヘッダー設定をリセット
+    return () => {
+      setSettingsConfig({});
+    };
+  }, []);
 
   // 文章を単語と句読点に分離
   const parsesentence = (sentence: string) => {
@@ -144,19 +157,17 @@ export default function WordInputDemo() {
     <>
       <Stack.Screen options={{ headerShown: false }} />
       <View className="flex-1 bg-app-neutral-50">
-        <AppHeader title="単語入力デモ" settingsConfig={{ showBackButton: true }} />
-
         <ScrollView className="flex-1 px-4 py-4">
           {/* 文章選択 */}
           <View className="bg-white rounded-xl p-4 mb-4 shadow-sm">
             <Text className="text-lg font-bold text-app-neutral-800 mb-3">練習文章を選択</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-              <View className="flex-row space-x-2">
+              <View className="px-2">
                 {sampleSentences.map((sentence, index) => (
                   <TouchableOpacity
                     key={index}
                     onPress={() => setSelectedSentence(sentence)}
-                    className={`px-4 py-2 rounded-lg border ${
+                    className={`px-4 py-3 mb-2 rounded-lg border ${
                       selectedSentence === sentence
                         ? 'bg-app-primary border-app-primary'
                         : 'bg-white border-app-neutral-300'
@@ -169,7 +180,7 @@ export default function WordInputDemo() {
                       }`}
                       numberOfLines={2}
                     >
-                      {sentence.length > 30 ? sentence.substring(0, 30) + '...' : sentence}
+                      {sentence}
                     </Text>
                   </TouchableOpacity>
                 ))}

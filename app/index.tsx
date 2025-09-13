@@ -193,7 +193,8 @@ export default function HomeScreen() {
             </TouchableOpacity>
           </View>
 
-          <View className="bg-white rounded-xl shadow-sm border border-gray-200 mb-2">
+          {/* 一旦動線保留 */}
+          {/* <View className="bg-white rounded-xl shadow-sm border border-gray-200 mb-2">
             <TouchableOpacity
               onPress={() => router.push('/word-input-demo')}
               className="flex-row items-center justify-between p-4 active:bg-gray-50"
@@ -209,7 +210,7 @@ export default function HomeScreen() {
               </View>
               <Text className="text-gray-400 text-lg">›</Text>
             </TouchableOpacity>
-          </View>
+          </View> */}
 
           <View className="bg-white rounded-xl shadow-sm border border-gray-200">
             <TouchableOpacity

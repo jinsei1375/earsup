@@ -83,6 +83,8 @@ function RootLayoutContent() {
         return '回答自動判定デモ';
       case '/setting':
         return '設定';
+      case '/word-input-demo':
+        return '単語入力デモ';
       default:
         // 特定の画面にマッチしない場合、最後のセグメントをキャピタライズしてタイトルとして使用
         return lastSegment.charAt(0).toUpperCase() + lastSegment.slice(1);
