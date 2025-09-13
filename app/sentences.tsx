@@ -13,12 +13,14 @@ import { SentenceFormModal } from '@/components/sentences/SentenceFormModal';
 import { ConfirmationModal } from '@/components/common/ConfirmationModal';
 import { useHeaderSettings } from '@/contexts/HeaderSettingsContext';
 import { useToast } from '@/contexts/ToastContext';
+import { useSettings } from '@/contexts/SettingsContext';
 import type { UserSentence } from '@/types';
 
 export default function SentencesScreen() {
   const userId = useUserStore((s) => s.userId);
   const { setSettingsConfig } = useHeaderSettings();
   const { showError, showSuccess } = useToast();
+  const { settings } = useSettings();
   const [sentences, setSentences] = useState<UserSentence[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -140,7 +142,10 @@ export default function SentencesScreen() {
   const handlePlaySentence = async (sentence: UserSentence) => {
     try {
       setPlayingSentenceId(sentence.id);
-      await audioService.playText(sentence.text, { gender: 'female', speed: 1.0 });
+      await audioService.playText(sentence.text, {
+        gender: settings?.default_voice_gender || 'female',
+        speed: 1.0,
+      });
     } catch (error) {
       console.error('Audio playback failed:', error);
       showError('音声エラー', '音声の再生に失敗しました');
