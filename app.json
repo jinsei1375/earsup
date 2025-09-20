@@ -15,7 +15,11 @@
     },
     "ios": {
       "supportsTablet": true,
-      "statusBarStyle": "dark"
+      "statusBarStyle": "dark",
+      "bundleIdentifier": "com.shinsei1118.earsup",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
