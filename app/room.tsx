@@ -364,28 +364,6 @@ export default function RoomScreen() {
 
             {isCreateMode ? (
               <>
-                <Text className="mb-2">合言葉をタップしてコピー</Text>
-                <TouchableOpacity
-                  onPress={async () => {
-                    try {
-                      await Clipboard.setStringAsync(code);
-                      showNotification('コピー完了', '合言葉がクリップボードにコピーされました');
-                    } catch (error) {
-                      await handleError(error, 'コピーエラー');
-                    }
-                  }}
-                  className="p-6 rounded-xl border-2 border-dashed border-app-primary bg-app-primary-light my-5 active:bg-app-primary-light"
-                  activeOpacity={0.8}
-                >
-                  <Text className="text-[32px] font-bold tracking-[4px] text-app-primary-dark text-center">
-                    {code}
-                  </Text>
-                  <View className="flex-row items-center justify-center mt-2">
-                    <FeatureIcon name="copy" size={14} color={APP_COLORS.primary} />
-                    <Text className="text-sm text-app-primary ml-1">タップしてコピー</Text>
-                  </View>
-                </TouchableOpacity>
-
                 <QuizModeSelector
                   selectedMode={quizMode}
                   onModeChange={(mode) => {
