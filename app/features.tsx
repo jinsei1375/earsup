@@ -1,5 +1,5 @@
 // app/features.tsx
-import React, { useCallback, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, ScrollView } from 'react-native';
 import { router } from 'expo-router';
 import { useHeaderSettings } from '@/contexts/HeaderSettingsContext';
@@ -8,9 +8,9 @@ import { FeatureIcon, APP_COLORS } from '@/components/common/FeatureIcon';
 export default function FeaturesScreen() {
   const { setSettingsConfig, showInfoModal } = useHeaderSettings();
 
-  const handleSettingsPress = useCallback(() => {
+  const handleSettingsPress = () => {
     showInfoModal();
-  }, [showInfoModal]);
+  };
 
   useEffect(() => {
     // ヘッダー設定
@@ -25,7 +25,7 @@ export default function FeaturesScreen() {
     return () => {
       setSettingsConfig({});
     };
-  }, [setSettingsConfig, handleSettingsPress]);
+  }, []);
 
   const features = [
     {

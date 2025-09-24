@@ -1,5 +1,5 @@
 // app/setting.tsx
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, TextInput } from 'react-native';
 import { router } from 'expo-router';
 import { useHeaderSettings } from '@/contexts/HeaderSettingsContext';
@@ -25,9 +25,9 @@ export default function Setting() {
   const [playingVoice, setPlayingVoice] = useState<boolean>(false);
   const { setSettingsConfig, showInfoModal } = useHeaderSettings();
 
-  const handleSettingsPress = useCallback(() => {
+  const handleSettingsPress = () => {
     showInfoModal();
-  }, [showInfoModal]);
+  };
 
   useEffect(() => {
     // ヘッダー設定
@@ -42,7 +42,7 @@ export default function Setting() {
     return () => {
       setSettingsConfig({});
     };
-  }, [setSettingsConfig, handleSettingsPress]);
+  }, []);
 
   // 設定が読み込まれたら初期値を設定
   useEffect(() => {

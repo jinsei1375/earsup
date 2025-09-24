@@ -1,5 +1,5 @@
 // app/privacy.tsx
-import React, { useCallback, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { useHeaderSettings } from '@/contexts/HeaderSettingsContext';
@@ -7,9 +7,9 @@ import { useHeaderSettings } from '@/contexts/HeaderSettingsContext';
 export default function PrivacyPolicy() {
   const { setSettingsConfig, showInfoModal } = useHeaderSettings();
 
-  const handleSettingsPress = useCallback(() => {
+  const handleSettingsPress = () => {
     showInfoModal();
-  }, [showInfoModal]);
+  };
 
   useEffect(() => {
     // ヘッダー設定
@@ -24,7 +24,7 @@ export default function PrivacyPolicy() {
     return () => {
       setSettingsConfig({});
     };
-  }, [setSettingsConfig, handleSettingsPress]);
+  }, []);
 
   return (
     <ScrollView className="flex-1 px-4 py-4">

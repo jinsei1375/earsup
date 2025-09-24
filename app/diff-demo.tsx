@@ -1,5 +1,5 @@
 // app/diff-demo.tsx
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, ScrollView, TouchableOpacity } from 'react-native';
 import { router } from 'expo-router';
 import { DiffDisplay } from '@/components/quiz/DiffDisplay';
@@ -13,9 +13,9 @@ export default function DiffDemoScreen() {
 
   const { setSettingsConfig, showInfoModal } = useHeaderSettings();
 
-  const handleSettingsPress = useCallback(() => {
+  const handleSettingsPress = () => {
     showInfoModal();
-  }, [showInfoModal]);
+  };
 
   useEffect(() => {
     // ヘッダー設定
@@ -30,7 +30,7 @@ export default function DiffDemoScreen() {
     return () => {
       setSettingsConfig({});
     };
-  }, [setSettingsConfig, handleSettingsPress]);
+  }, []);
 
   const diffResult = generateDiff(userAnswer, correctAnswer);
   const judgment = getJudgmentResult(userAnswer, correctAnswer);

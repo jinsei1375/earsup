@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView } from 'react-native';
 import { router, Stack } from 'expo-router';
 import { FeatureIcon, APP_COLORS } from '@/components/common/FeatureIcon';
@@ -20,9 +20,9 @@ export default function WordInputDemo() {
 
   const { setSettingsConfig, showInfoModal } = useHeaderSettings();
 
-  const handleSettingsPress = useCallback(() => {
+  const handleSettingsPress = () => {
     showInfoModal();
-  }, [showInfoModal]);
+  };
 
   useEffect(() => {
     // ヘッダー設定
@@ -37,7 +37,7 @@ export default function WordInputDemo() {
     return () => {
       setSettingsConfig({});
     };
-  }, [setSettingsConfig, handleSettingsPress]);
+  }, []);
 
   // 文章を単語と句読点に分離
   const parsesentence = (sentence: string) => {

@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { useUserStore } from '@/stores/userStore';
 import { supabase } from '@/lib/supabase';
@@ -49,9 +49,9 @@ export default function HomeScreen() {
   }, [userId, storeNickname]);
 
   // ヘッダーの設定ボタンを制御
-  const handleSettingsPress = useCallback(() => {
+  const handleSettingsPress = () => {
     showInfoModal();
-  }, [showInfoModal]);
+  };
 
   useEffect(() => {
     setSettingsConfig({
@@ -63,7 +63,7 @@ export default function HomeScreen() {
     return () => {
       setSettingsConfig({});
     };
-  }, [setSettingsConfig, handleSettingsPress]);
+  }, []);
 
   const handleCreateRoom = () => {
     router.push({ pathname: '/room', params: { mode: 'create' } });

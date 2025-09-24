@@ -18,7 +18,7 @@ import type { UserSentence } from '@/types';
 
 export default function SentencesScreen() {
   const userId = useUserStore((s) => s.userId);
-  const { setSettingsConfig } = useHeaderSettings();
+  const { setSettingsConfig, showInfoModal } = useHeaderSettings();
   const { showError, showSuccess } = useToast();
   const { settings } = useSettings();
   const [sentences, setSentences] = useState<UserSentence[]>([]);
@@ -33,14 +33,17 @@ export default function SentencesScreen() {
   }>({ isVisible: false, sentence: null });
   const [playingSentenceId, setPlayingSentenceId] = useState<string | null>(null);
 
+  const handleSettingsPress = () => {
+    showInfoModal();
+  };
+
   useEffect(() => {
-    // ヘッダー設定
+    // ヘッダー設定 - バーガーメニューを表示
     setSettingsConfig({
       showBackButton: true,
       onBackPress: handleGoBack,
-      showAddButton: true,
-      onAddPress: handleAddSentence,
-      addButtonTitle: '追加',
+      showSettings: true,
+      onSettingsPress: handleSettingsPress,
     });
 
     // クリーンアップ関数でヘッダー設定をリセット
@@ -169,6 +172,17 @@ export default function SentencesScreen() {
 
   return (
     <View className="flex-1 bg-white">
+      {/* ヘッダー下の追加ボタン */}
+      <View className="p-4 border-b border-gray-200 bg-white">
+        <Button
+          title="例文を追加"
+          onPress={handleAddSentence}
+          variant="primary"
+          size="medium"
+          icon={<Ionicons name="add" size={20} color="white" />}
+        />
+      </View>
+
       <ScrollView
         className="flex-1"
         refreshControl={
@@ -185,18 +199,11 @@ export default function SentencesScreen() {
           <View className="flex-1 items-center justify-center p-8 mt-16">
             <Ionicons name="document-text-outline" size={64} color="#D1D5DB" />
             <Text className="text-xl font-bold text-gray-600 mt-4 mb-2">例文がありません</Text>
-            <Text className="text-gray-500 text-center leading-6 mb-6">
+            <Text className="text-gray-500 text-center leading-6">
               最初の例文を登録してみましょう。{'\n'}
               クイズで使用する英語フレーズを{'\n'}
               自由に登録できます。
             </Text>
-            <Button
-              title="例文を追加"
-              onPress={handleAddSentence}
-              variant="primary"
-              size="medium"
-              icon={<Ionicons name="add" size={20} color="white" />}
-            />
           </View>
         ) : (
           <View className="p-4">
