@@ -10,6 +10,17 @@
       "ios": {
         "simulator": true
       }
+    },
+    "production": {
+      "distribution": "store"
+    }
+  },
+  "submit": {
+    "production": {
+      "ios": {
+        "appleId": "$APPLE_ID",
+        "ascAppId": "$ASC_APP_ID"
+      }
     }
   }
 }
