@@ -8,6 +8,7 @@ import AppHeader from '@/components/AppHeader';
 import { HeaderSettingsProvider, useHeaderSettings } from '@/contexts/HeaderSettingsContext';
 import { ToastProvider } from '@/contexts/ToastContext';
 import { SettingsProvider } from '@/contexts/SettingsContext';
+import InfoModal from '@/components/common/InfoModal';
 // グローバルCSSのインポート
 import '@/assets/css/global.css';
 
@@ -30,7 +31,7 @@ function RootLayoutContent() {
   const rootNavigationState = useRootNavigationState();
   const pathname = usePathname();
   const [isReady, setIsReady] = useState(false);
-  const { settingsConfig } = useHeaderSettings();
+  const { settingsConfig, isInfoModalVisible, hideInfoModal } = useHeaderSettings();
 
   useEffect(() => {
     // 初回のみAsyncStorageからuserIdを復元
@@ -101,6 +102,7 @@ function RootLayoutContent() {
       <View className="flex-1" pointerEvents="auto">
         <Slot />
       </View>
+      <InfoModal visible={isInfoModalVisible} onClose={hideInfoModal} />
     </SafeAreaView>
   );
 }

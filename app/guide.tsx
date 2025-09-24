@@ -1,16 +1,22 @@
 // app/guide.tsx
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, ScrollView } from 'react-native';
 import { router } from 'expo-router';
 import { useHeaderSettings } from '@/contexts/HeaderSettingsContext';
 import { FeatureIcon, APP_COLORS } from '@/components/common/FeatureIcon';
 
 export default function GuideScreen() {
-  const { setSettingsConfig } = useHeaderSettings();
+  const { setSettingsConfig, showInfoModal } = useHeaderSettings();
+
+  const handleSettingsPress = useCallback(() => {
+    showInfoModal();
+  }, [showInfoModal]);
 
   useEffect(() => {
     // ヘッダー設定
     setSettingsConfig({
+      showSettings: true,
+      onSettingsPress: handleSettingsPress,
       showBackButton: true,
       onBackPress: () => router.back(),
     });
@@ -19,7 +25,7 @@ export default function GuideScreen() {
     return () => {
       setSettingsConfig({});
     };
-  }, []);
+  }, [setSettingsConfig, handleSettingsPress]);
 
   const setupSteps = [
     {
@@ -198,7 +204,12 @@ export default function GuideScreen() {
         {/* 初期設定セクション */}
         <View className="mb-8">
           <View className="flex-row items-center mb-4">
-            <FeatureIcon name="rocket" size={20} color={APP_COLORS.primary} className="mr-2" />
+            <FeatureIcon
+              name="radio-button-on"
+              size={20}
+              color={APP_COLORS.primary}
+              className="mr-2"
+            />
             <Text className="text-xl font-bold text-gray-800">初期設定</Text>
           </View>
           <View className="space-y-4">
@@ -221,7 +232,7 @@ export default function GuideScreen() {
 
         {/* ホストありモード */}
         <View className="mb-8">
-          <View className="flex-row items-center mb-4">
+          <View className="flex-row items-center mb-2">
             <FeatureIcon
               name="radio-button-on"
               size={20}
@@ -231,7 +242,7 @@ export default function GuideScreen() {
             <Text className="text-xl font-bold text-gray-800">ホストありモード</Text>
           </View>
           <Text className="text-gray-600 mb-4">
-            ホストが問題作成・音声再生・判定を行うモードです。柔軟な判定が可能で、教育現場に最適です。
+            ホストが問題作成・音声再生・判定を行うモードです。
           </Text>
           <View className="space-y-3">
             {hostModeSteps.map((step, index) => (
@@ -253,7 +264,7 @@ export default function GuideScreen() {
 
         {/* ホストなしモード */}
         <View className="mb-8">
-          <View className="flex-row items-center mb-4">
+          <View className="flex-row items-center mb-2">
             <FeatureIcon
               name="radio-button-on"
               size={20}
@@ -283,39 +294,18 @@ export default function GuideScreen() {
           </View>
         </View>
 
-        {/* ヒント・コツ */}
+        {/* トラブルシューティング */}
         <View className="mb-8">
           <View className="flex-row items-center mb-4">
-            <FeatureIcon name="bulb" size={20} color={APP_COLORS.warning} className="mr-2" />
-            <Text className="text-xl font-bold text-gray-800">ヒント・コツ</Text>
+            <FeatureIcon
+              name="radio-button-on"
+              size={20}
+              color={APP_COLORS.danger}
+              className="mr-2"
+            />
+            <Text className="text-xl font-bold text-gray-800">よくある問題と解決方法</Text>
           </View>
-          <View className="space-y-4">
-            {tips.map((tip, index) => (
-              <View key={index} className="bg-app-warning-light rounded-lg p-4 mb-2">
-                <View className="flex-row items-center mb-2">
-                  <FeatureIcon
-                    name={tip.icon as any}
-                    size={20}
-                    color={tip.color}
-                    backgroundColor={tip.color}
-                    borderRadius="small"
-                    className="mr-3"
-                  />
-                  <Text className="font-bold text-app-warning-dark flex-1">{tip.title}</Text>
-                </View>
-                <Text className="text-app-warning-dark">{tip.content}</Text>
-              </View>
-            ))}
-          </View>
-        </View>
-
-        {/* トラブルシューティング */}
-        <View className="bg-app-danger-light rounded-xl p-6 mb-8">
-          <View className="flex-row items-center mb-4">
-            <FeatureIcon name="build" size={20} color={APP_COLORS.danger} className="mr-2" />
-            <Text className="text-xl font-bold text-app-danger-dark">よくある問題と解決方法</Text>
-          </View>
-          <View className="space-y-4">
+          <View className="bg-app-danger-light rounded-xl p-6 space-y-4">
             <View className="mb-2">
               <Text className="font-semibold text-app-danger-dark mb-1">音声が再生されない</Text>
               <Text className="text-app-danger-dark text-sm">

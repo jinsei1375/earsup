@@ -1,5 +1,5 @@
 // contexts/HeaderSettingsContext.tsx
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 
 export interface HeaderSettingsConfig {
   showSettings?: boolean;
@@ -14,15 +14,34 @@ export interface HeaderSettingsConfig {
 interface HeaderSettingsContextType {
   settingsConfig: HeaderSettingsConfig;
   setSettingsConfig: (config: HeaderSettingsConfig) => void;
+  // InfoModal関連を追加
+  isInfoModalVisible: boolean;
+  setIsInfoModalVisible: (visible: boolean) => void;
+  showInfoModal: () => void;
+  hideInfoModal: () => void;
 }
 
 const HeaderSettingsContext = createContext<HeaderSettingsContextType | undefined>(undefined);
 
 export const HeaderSettingsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [settingsConfig, setSettingsConfig] = useState<HeaderSettingsConfig>({});
+  const [isInfoModalVisible, setIsInfoModalVisible] = useState(false);
+
+  // useCallbackで関数の参照を安定させる
+  const showInfoModal = useCallback(() => setIsInfoModalVisible(true), []);
+  const hideInfoModal = useCallback(() => setIsInfoModalVisible(false), []);
 
   return (
-    <HeaderSettingsContext.Provider value={{ settingsConfig, setSettingsConfig }}>
+    <HeaderSettingsContext.Provider
+      value={{
+        settingsConfig,
+        setSettingsConfig,
+        isInfoModalVisible,
+        setIsInfoModalVisible,
+        showInfoModal,
+        hideInfoModal,
+      }}
+    >
       {children}
     </HeaderSettingsContext.Provider>
   );

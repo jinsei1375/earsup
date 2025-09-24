@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView } from 'react-native';
 import { router, Stack } from 'expo-router';
 import { FeatureIcon, APP_COLORS } from '@/components/common/FeatureIcon';
@@ -12,16 +12,23 @@ const sampleSentences = [
 ];
 
 export default function WordInputDemo() {
-  const { setSettingsConfig } = useHeaderSettings();
   const [selectedSentence, setSelectedSentence] = useState(sampleSentences[0]);
   const [userWords, setUserWords] = useState<string[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const inputRefs = useRef<(TextInput | null)[]>([]);
 
+  const { setSettingsConfig, showInfoModal } = useHeaderSettings();
+
+  const handleSettingsPress = useCallback(() => {
+    showInfoModal();
+  }, [showInfoModal]);
+
   useEffect(() => {
     // ヘッダー設定
     setSettingsConfig({
+      showSettings: true,
+      onSettingsPress: handleSettingsPress,
       showBackButton: true,
       onBackPress: () => router.back(),
     });
@@ -30,7 +37,7 @@ export default function WordInputDemo() {
     return () => {
       setSettingsConfig({});
     };
-  }, []);
+  }, [setSettingsConfig, handleSettingsPress]);
 
   // 文章を単語と句読点に分離
   const parsesentence = (sentence: string) => {

@@ -27,6 +27,11 @@ export default function InfoModal({ visible, onClose }: InfoModalProps) {
     router.push('/setting' as any);
   };
 
+  const handleTop = () => {
+    onClose();
+    router.push('/' as any);
+  };
+
   const handleContactPress = () => {
     Alert.alert('お問い合わせ', 'お問い合わせは以下のリンクからお願いします。', [
       { text: 'キャンセル', style: 'cancel' },
@@ -56,6 +61,9 @@ export default function InfoModal({ visible, onClose }: InfoModalProps) {
             </TouchableOpacity>
           </View>
 
+          <TouchableOpacity className="py-4 border-b border-gray-200" onPress={handleTop}>
+            <Text className="text-base text-app-primary text-center">トップ</Text>
+          </TouchableOpacity>
           <TouchableOpacity className="py-4 border-b border-gray-200" onPress={handleUserSettings}>
             <Text className="text-base text-app-primary text-center">設定</Text>
           </TouchableOpacity>

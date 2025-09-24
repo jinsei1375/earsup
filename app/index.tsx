@@ -1,9 +1,8 @@
-import { useEffect, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
+import { useEffect, useState, useCallback } from 'react';
+import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { useUserStore } from '@/stores/userStore';
 import { supabase } from '@/lib/supabase';
 import { router } from 'expo-router';
-import InfoModal from '@/components/common/InfoModal';
 import NicknameEditModal from '@/components/common/NicknameEditModal';
 import { useHeaderSettings } from '@/contexts/HeaderSettingsContext';
 import { Button } from '@/components/common/Button';
@@ -16,9 +15,8 @@ export default function HomeScreen() {
   const { showError, showSuccess } = useToast();
   const setUserInfo = useUserStore((s) => s.setUserInfo);
   const [nickname, setNickname] = useState<string | null>(storeNickname);
-  const [isInfoModalVisible, setIsInfoModalVisible] = useState(false);
   const [isNicknameEditModalVisible, setIsNicknameEditModalVisible] = useState(false);
-  const { setSettingsConfig } = useHeaderSettings();
+  const { setSettingsConfig, showInfoModal } = useHeaderSettings();
 
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -51,17 +49,21 @@ export default function HomeScreen() {
   }, [userId, storeNickname]);
 
   // ヘッダーの設定ボタンを制御
+  const handleSettingsPress = useCallback(() => {
+    showInfoModal();
+  }, [showInfoModal]);
+
   useEffect(() => {
     setSettingsConfig({
       showSettings: true,
-      onSettingsPress: () => setIsInfoModalVisible(true),
+      onSettingsPress: handleSettingsPress,
     });
 
     // クリーンアップ時に設定をリセット
     return () => {
       setSettingsConfig({});
     };
-  }, [setSettingsConfig]);
+  }, [setSettingsConfig, handleSettingsPress]);
 
   const handleCreateRoom = () => {
     router.push({ pathname: '/room', params: { mode: 'create' } });
@@ -99,9 +101,6 @@ export default function HomeScreen() {
           ) : (
             <Text className="text-gray-500">ニックネームを取得中...</Text>
           )}
-          <Text className="text-sm text-gray-500 text-center leading-6">
-            音声を聞いて答えるクイズで{'\n'}みんなで楽しく英語を学習しよう！
-          </Text>
         </View>
 
         {/* メインアクションボタン */}
@@ -236,8 +235,6 @@ export default function HomeScreen() {
           <Text className="text-xs text-gray-400 text-center">v1.0.0</Text>
         </View>
       </View>
-
-      <InfoModal visible={isInfoModalVisible} onClose={() => setIsInfoModalVisible(false)} />
 
       <NicknameEditModal
         visible={isNicknameEditModalVisible}

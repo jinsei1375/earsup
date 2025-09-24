@@ -1,5 +1,5 @@
 // app/setting.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, TextInput } from 'react-native';
 import { router } from 'expo-router';
 import { useHeaderSettings } from '@/contexts/HeaderSettingsContext';
@@ -15,7 +15,6 @@ import { useSettings } from '@/contexts/SettingsContext';
 import { useUserStore } from '@/stores/userStore';
 
 export default function Setting() {
-  const { setSettingsConfig } = useHeaderSettings();
   const { settings, updateSettings, loading } = useSettings();
   const { showSuccess, showError } = useToast();
   const { userId, nickname, setUserInfo } = useUserStore();
@@ -24,10 +23,17 @@ export default function Setting() {
   const [nicknameInput, setNicknameInput] = useState(nickname || '');
   const [updating, setUpdating] = useState(false);
   const [playingVoice, setPlayingVoice] = useState<boolean>(false);
+  const { setSettingsConfig, showInfoModal } = useHeaderSettings();
+
+  const handleSettingsPress = useCallback(() => {
+    showInfoModal();
+  }, [showInfoModal]);
 
   useEffect(() => {
     // ヘッダー設定
     setSettingsConfig({
+      showSettings: true,
+      onSettingsPress: handleSettingsPress,
       showBackButton: true,
       onBackPress: () => router.back(),
     });
@@ -36,7 +42,7 @@ export default function Setting() {
     return () => {
       setSettingsConfig({});
     };
-  }, [setSettingsConfig]);
+  }, [setSettingsConfig, handleSettingsPress]);
 
   // 設定が読み込まれたら初期値を設定
   useEffect(() => {
