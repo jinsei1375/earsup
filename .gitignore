@@ -38,3 +38,5 @@ yarn-error.*
 
 # sql
 database/*.sql
+
+earsup.app/
