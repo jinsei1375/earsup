@@ -284,6 +284,25 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
     }
   };
 
+  // 正解の音声再生（回数制限なし）
+  const handlePlayCorrectAudio = async () => {
+    if (!questionText || isPlaying) return;
+
+    try {
+      setIsPlaying(true);
+      // ホストなしモードでは設定されたデフォルト音声を使用
+      const voiceSettings = {
+        gender: settings?.default_voice_gender || 'female',
+        speed: 1.0,
+      };
+      await audioService.playText(questionText, voiceSettings);
+    } catch (error) {
+      console.error('Audio playback failed:', error);
+    } finally {
+      setIsPlaying(false);
+    }
+  };
+
   const handleInputFocus = () => {
     setTimeout(() => {
       inputRef.current?.measureInWindow((x, y, width, height) => {
@@ -341,28 +360,45 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <Text className="text-lg font-bold text-app-success mb-4 text-center">
-          聞こえたフレーズを入力してください
-        </Text>
-
         {/* 音声再生ボタン - ホストなしモードのみ */}
         {isAutoMode && (
           <View className="mb-4">
-            <Button
-              title={isPlaying ? '再生中...' : `音声を再生する (${playCount}/${maxPlayCount})`}
-              onPress={handlePlayAudio}
-              disabled={!questionText || playCount >= maxPlayCount || showResult || isPlaying}
-              variant={playCount >= maxPlayCount ? 'secondary' : 'primary'}
-              size="large"
-              fullWidth
-            />
-            {playCount >= maxPlayCount && (
-              <View className="flex-row items-center justify-center mt-2">
-                <FeatureIcon name="warning" size={16} color={APP_COLORS.danger} />
-                <Text className="text-app-danger text-sm font-medium ml-1">
-                  再生回数の上限に達しました
+            {!showResult ? (
+              // 回答前: 回数制限ありの音声再生ボタン
+              <>
+                <Text className="text-lg font-bold text-app-success mb-4 text-center">
+                  聞こえたフレーズを入力してください
                 </Text>
-              </View>
+                <Button
+                  title={isPlaying ? '再生中...' : `音声を再生する (${playCount}/${maxPlayCount})`}
+                  onPress={handlePlayAudio}
+                  disabled={!questionText || playCount >= maxPlayCount || showResult || isPlaying}
+                  variant={playCount >= maxPlayCount ? 'secondary' : 'primary'}
+                  size="large"
+                  fullWidth
+                />
+                {playCount >= maxPlayCount && (
+                  <View className="flex-row items-center justify-center mt-2">
+                    <FeatureIcon name="warning" size={16} color={APP_COLORS.danger} />
+                    <Text className="text-app-danger text-sm font-medium ml-1">
+                      再生回数の上限に達しました
+                    </Text>
+                  </View>
+                )}
+              </>
+            ) : (
+              // 回答後: 回数制限なしの正解音声再生ボタン
+              isResultDataReady &&
+              isCurrentQuestionFullyJudged && (
+                <Button
+                  title={isPlaying ? '再生中...' : '正解の音声を再生する'}
+                  onPress={handlePlayCorrectAudio}
+                  disabled={!questionText || isPlaying}
+                  variant="outline"
+                  size="large"
+                  fullWidth
+                />
+              )
             )}
           </View>
         )}
@@ -505,20 +541,6 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
                 )}
               </>
             )}
-          </View>
-        )}
-
-        {/* ホストなしモード: すべての回答判定完了後の音声再生ボタン */}
-        {isAutoMode && showResult && isResultDataReady && isCurrentQuestionFullyJudged && (
-          <View className="mt-4 mb-4">
-            <Button
-              title={isPlaying ? '再生中...' : '正解の音声を再生する'}
-              onPress={handlePlayAudio}
-              disabled={!questionText || isPlaying}
-              variant="outline"
-              size="medium"
-              fullWidth
-            />
           </View>
         )}
 
