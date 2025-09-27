@@ -3,19 +3,15 @@ import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { useUserStore } from '@/stores/userStore';
 import { supabase } from '@/lib/supabase';
 import { router } from 'expo-router';
-import NicknameEditModal from '@/components/common/NicknameEditModal';
 import { useHeaderSettings } from '@/contexts/HeaderSettingsContext';
 import { Button } from '@/components/common/Button';
-import { useToast } from '@/contexts/ToastContext';
 import { FeatureIcon, APP_COLORS } from '@/components/common/FeatureIcon';
 
 export default function HomeScreen() {
   const userId = useUserStore((s) => s.userId);
   const storeNickname = useUserStore((s) => s.nickname);
-  const { showError, showSuccess } = useToast();
   const setUserInfo = useUserStore((s) => s.setUserInfo);
   const [nickname, setNickname] = useState<string | null>(storeNickname);
-  const [isNicknameEditModalVisible, setIsNicknameEditModalVisible] = useState(false);
   const { setSettingsConfig, showInfoModal } = useHeaderSettings();
 
   useEffect(() => {
@@ -75,28 +71,17 @@ export default function HomeScreen() {
     router.push('/sentences');
   };
 
-  const handleNicknameUpdate = (newNickname: string) => {
-    setNickname(newNickname);
-    showSuccess('ニックネーム更新', 'ニックネームが更新されました');
-  };
-
   return (
     <ScrollView className="flex-1 bg-gradient-to-br from-blue-50 to-indigo-50">
       <View className="p-6">
         {/* ヘッダーセクション */}
-        <View className="items-center mb-8 mt-4">
+        <View className="items-center mb-2 mt-4">
           <Text className="text-4xl font-bold text-gray-800 mb-2">EarsUp</Text>
           {nickname ? (
             <View className="flex-row items-center mb-4">
               <View className="bg-white px-4 py-2 rounded-full shadow-sm">
                 <Text className="text-app-primary font-semibold">{nickname}</Text>
               </View>
-              <TouchableOpacity
-                onPress={() => setIsNicknameEditModalVisible(true)}
-                className="ml-2 bg-white rounded-full p-2 shadow-sm"
-              >
-                <FeatureIcon name="create" size={16} color={APP_COLORS.gray600} />
-              </TouchableOpacity>
             </View>
           ) : (
             <Text className="text-gray-500">ニックネームを取得中...</Text>
@@ -235,13 +220,6 @@ export default function HomeScreen() {
           <Text className="text-xs text-gray-400 text-center">v1.0.0</Text>
         </View>
       </View>
-
-      <NicknameEditModal
-        visible={isNicknameEditModalVisible}
-        onClose={() => setIsNicknameEditModalVisible(false)}
-        currentNickname={nickname || ''}
-        onNicknameUpdate={handleNicknameUpdate}
-      />
     </ScrollView>
   );
 }
