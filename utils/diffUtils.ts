@@ -83,88 +83,179 @@ function levenshteinDistance(str1: string, str2: string): number {
 }
 
 /**
- * ユーザーの回答と正解を比較して差分を生成
+ * LCSベースのアライメント構造
+ */
+interface AlignmentItem {
+  userIndex: number | null; // null = missing word
+  correctIndex: number | null; // null = extra word
+  isMatch: boolean;
+  isDifferent: boolean;
+}
+
+/**
+ * Edit Distance（編集距離）を使用した厳密なシーケンスアライメント
+ * 単語の順序を保持しながら最小の編集操作でマッチングを行う
+ */
+function calculateEditDistanceAlignment(
+  userWords: string[],
+  correctWords: string[]
+): AlignmentItem[] {
+  const m = userWords.length;
+  const n = correctWords.length;
+
+  // DP table for edit distance
+  const dp = Array(m + 1)
+    .fill(null)
+    .map(() => Array(n + 1).fill(0));
+  const ops = Array(m + 1)
+    .fill(null)
+    .map(() => Array(n + 1).fill(''));
+
+  // Initialize base cases
+  for (let i = 0; i <= m; i++) {
+    dp[i][0] = i; // deletions
+    ops[i][0] = 'delete';
+  }
+  for (let j = 0; j <= n; j++) {
+    dp[0][j] = j; // insertions
+    ops[0][j] = 'insert';
+  }
+  ops[0][0] = '';
+
+  // Fill DP table
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      const userWord = userWords[i - 1];
+      const correctWord = correctWords[j - 1];
+
+      // Cost of substitute/match
+      const substituteCost = isSimilar(userWord, correctWord) ? 0 : 1;
+
+      const substitute = dp[i - 1][j - 1] + substituteCost;
+      const deleteOp = dp[i - 1][j] + 1;
+      const insertOp = dp[i][j - 1] + 1;
+
+      if (substitute <= deleteOp && substitute <= insertOp) {
+        dp[i][j] = substitute;
+        ops[i][j] = substituteCost === 0 ? 'match' : 'substitute';
+      } else if (deleteOp <= insertOp) {
+        dp[i][j] = deleteOp;
+        ops[i][j] = 'delete';
+      } else {
+        dp[i][j] = insertOp;
+        ops[i][j] = 'insert';
+      }
+    }
+  }
+
+  // Backtrack to get alignment
+  const alignment: AlignmentItem[] = [];
+  let i = m,
+    j = n;
+
+  while (i > 0 || j > 0) {
+    const op = ops[i][j];
+
+    if (op === 'match' || op === 'substitute') {
+      const userWord = userWords[i - 1];
+      const correctWord = correctWords[j - 1];
+      const isExactMatch = userWord.toLowerCase() === correctWord.toLowerCase();
+
+      alignment.unshift({
+        userIndex: i - 1,
+        correctIndex: j - 1,
+        isMatch: isExactMatch,
+        isDifferent: !isExactMatch && isSimilar(userWord, correctWord),
+      });
+      i--;
+      j--;
+    } else if (op === 'delete') {
+      alignment.unshift({
+        userIndex: i - 1,
+        correctIndex: null,
+        isMatch: false,
+        isDifferent: false,
+      });
+      i--;
+    } else {
+      // insert
+      alignment.unshift({
+        userIndex: null,
+        correctIndex: j - 1,
+        isMatch: false,
+        isDifferent: false,
+      });
+      j--;
+    }
+  }
+
+  return alignment;
+}
+
+/**
+ * ユーザーの回答と正解を比較して差分を生成（改良版）
  */
 export function generateDiff(userAnswer: string, correctAnswer: string): DiffResult {
   const userWords = tokenizeText(userAnswer);
   const correctWords = tokenizeText(correctAnswer);
 
+  // Edit Distanceベースのアライメントを計算
+  const alignment = calculateEditDistanceAlignment(userWords, correctWords);
+
   const userDiffWords: DiffWord[] = [];
   const correctDiffWords: DiffWord[] = [];
-
   let matchedWords = 0;
-  const usedCorrectIndices = new Set<number>();
 
-  // ユーザーの回答の各単語をチェック
-  for (let i = 0; i < userWords.length; i++) {
-    const userWord = userWords[i];
-    let matched = false;
+  // アライメント結果からDiffWordを生成
+  for (const item of alignment) {
+    if (item.userIndex !== null && item.correctIndex !== null) {
+      // マッチした単語ペア
+      const userWord = userWords[item.userIndex];
+      const correctWord = correctWords[item.correctIndex];
 
-    // 正解の単語と比較
-    for (let j = 0; j < correctWords.length; j++) {
-      if (usedCorrectIndices.has(j)) continue;
+      const type = item.isMatch ? 'match' : 'different';
 
-      const correctWord = correctWords[j];
-      if (isSimilar(userWord, correctWord)) {
-        // 大文字小文字を無視して完全一致かチェック
-        const isExactMatch = userWord.toLowerCase() === correctWord.toLowerCase();
-
-        userDiffWords.push({
-          text: userWord, // ユーザーが入力した元の形を保持
-          type: isExactMatch ? 'match' : 'different',
-          index: i,
-        });
-
-        correctDiffWords.push({
-          text: correctWord, // 正解の元の形を保持
-          type: isExactMatch ? 'match' : 'different',
-          index: j,
-        });
-
-        usedCorrectIndices.add(j);
-        if (isExactMatch) {
-          matchedWords++;
-        }
-        matched = true;
-        break;
-      }
-    }
-
-    // マッチしなかった場合は余分な単語として扱う
-    if (!matched) {
       userDiffWords.push({
         text: userWord,
-        type: 'extra',
-        index: i,
+        type,
+        index: item.userIndex,
       });
-    }
-  }
 
-  // 正解で使用されなかった単語は欠落として扱う
-  for (let j = 0; j < correctWords.length; j++) {
-    if (!usedCorrectIndices.has(j)) {
       correctDiffWords.push({
-        text: correctWords[j],
+        text: correctWord,
+        type,
+        index: item.correctIndex,
+      });
+
+      if (item.isMatch) {
+        matchedWords++;
+      }
+    } else if (item.userIndex !== null) {
+      // ユーザーの余分な単語
+      userDiffWords.push({
+        text: userWords[item.userIndex],
+        type: 'extra',
+        index: item.userIndex,
+      });
+    } else if (item.correctIndex !== null) {
+      // 欠落した単語
+      correctDiffWords.push({
+        text: correctWords[item.correctIndex],
         type: 'missing',
-        index: j,
+        index: item.correctIndex,
       });
     }
   }
 
   // インデックス順にソート
+  userDiffWords.sort((a, b) => a.index - b.index);
   correctDiffWords.sort((a, b) => a.index - b.index);
 
-  // より厳密な正答率の計算
+  // 正答率の計算
   let accuracy = 0;
   if (correctWords.length > 0) {
     const extraWordsCount = userDiffWords.filter((word) => word.type === 'extra').length;
-    const missingWordsCount = correctDiffWords.filter((word) => word.type === 'missing').length;
-    const differentWordsCount = userDiffWords.filter((word) => word.type === 'different').length;
-
-    // 総単語数（正解の単語数 + 余分な単語数）
     const totalWordsConsidered = correctWords.length + extraWordsCount;
-
-    // 完全一致した単語のみを正解とカウント
     accuracy = totalWordsConsidered > 0 ? (matchedWords / totalWordsConsidered) * 100 : 0;
   }
 
