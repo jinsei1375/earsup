@@ -6,6 +6,7 @@ import { router } from 'expo-router';
 import { useHeaderSettings } from '@/contexts/HeaderSettingsContext';
 import { Button } from '@/components/common/Button';
 import { FeatureIcon, APP_COLORS } from '@/components/common/FeatureIcon';
+import { GAMBannerAd, BannerAdSize, TestIds } from 'react-native-google-mobile-ads';
 
 export default function HomeScreen() {
   const userId = useUserStore((s) => s.userId);
@@ -219,6 +220,10 @@ export default function HomeScreen() {
         <View className="items-center mt-4 mb-8">
           <Text className="text-xs text-gray-400 text-center">v1.0.0</Text>
         </View>
+        <GAMBannerAd
+          unitId={'ca-app-pub-2855999657692570/9497318972'}
+          sizes={[BannerAdSize.ANCHORED_ADAPTIVE_BANNER]}
+        />
       </View>
     </ScrollView>
   );

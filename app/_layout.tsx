@@ -1,5 +1,5 @@
 import { useUserStore } from '@/stores/userStore';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Slot, useRouter, useRootNavigationState, usePathname } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { View, StatusBar } from 'react-native';
@@ -9,6 +9,8 @@ import { HeaderSettingsProvider, useHeaderSettings } from '@/contexts/HeaderSett
 import { ToastProvider } from '@/contexts/ToastContext';
 import { SettingsProvider } from '@/contexts/SettingsContext';
 import InfoModal from '@/components/common/InfoModal';
+import mobileAds from 'react-native-google-mobile-ads';
+import { requestTrackingPermissionsAsync } from 'expo-tracking-transparency';
 // グローバルCSSのインポート
 import '@/assets/css/global.css';
 
@@ -32,6 +34,25 @@ function RootLayoutContent() {
   const pathname = usePathname();
   const [isReady, setIsReady] = useState(false);
   const { settingsConfig, isInfoModalVisible, hideInfoModal } = useHeaderSettings();
+
+  // admobの初期化
+  const initAd = useCallback(async () => {
+    try {
+      const { status } = await requestTrackingPermissionsAsync();
+      if (status === 'granted') {
+        console.log('Yay! I have user permission to track data');
+      }
+      await mobileAds().initialize();
+    } catch (err) {
+      console.warn('initAd', err);
+    }
+  }, []);
+
+  // 初期データの取得
+  useEffect(() => {
+    initAd();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     // 初回のみAsyncStorageからuserIdを復元
