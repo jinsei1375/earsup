@@ -1,13 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { useUserStore } from '@/stores/userStore';
 import { supabase } from '@/lib/supabase';
 import { router } from 'expo-router';
 import { useHeaderSettings } from '@/contexts/HeaderSettingsContext';
-import { useAdMob } from '@/contexts/AdMobContext';
 import { Button } from '@/components/common/Button';
 import { FeatureIcon, APP_COLORS } from '@/components/common/FeatureIcon';
-import { GAMBannerAd, BannerAdSize, TestIds } from 'react-native-google-mobile-ads';
+import { BannerAdSize, BannerAd, TestIds } from 'react-native-google-mobile-ads';
 
 export default function HomeScreen() {
   const userId = useUserStore((s) => s.userId);
@@ -15,7 +14,7 @@ export default function HomeScreen() {
   const setUserInfo = useUserStore((s) => s.setUserInfo);
   const [nickname, setNickname] = useState<string | null>(storeNickname);
   const { setSettingsConfig, showInfoModal } = useHeaderSettings();
-  const { isInitialized: isAdMobInitialized, error: adMobError } = useAdMob();
+  const bannerRef = useRef<BannerAd>(null);
 
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -222,21 +221,13 @@ export default function HomeScreen() {
         <View className="items-center mt-4 mb-8">
           <Text className="text-xs text-gray-400 text-center">v1.0.0</Text>
         </View>
-        
-        {/* AdMob Banner - Only render when SDK is initialized */}
-        {isAdMobInitialized && !adMobError && (
-          <GAMBannerAd
-            unitId={'ca-app-pub-2855999657692570/9497318972'}
-            sizes={[BannerAdSize.ANCHORED_ADAPTIVE_BANNER]}
-          />
-        )}
-        
-        {/* Debug info for development */}
-        {__DEV__ && adMobError && (
-          <View className="bg-red-100 p-2 rounded mt-2">
-            <Text className="text-red-600 text-xs">AdMob Error: {adMobError}</Text>
-          </View>
-        )}
+
+        <BannerAd
+          ref={bannerRef}
+          // unitId={'ca-app-pub-2855999657692570/9497318972'}
+          unitId={TestIds.BANNER}
+          size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
+        />
       </View>
     </ScrollView>
   );

@@ -2,7 +2,7 @@
   "expo": {
     "name": "earsup",
     "slug": "earsup",
-    "version": "1.0.3",
+    "version": "1.0.9",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "earsup",
@@ -18,7 +18,8 @@
       "statusBarStyle": "dark",
       "bundleIdentifier": "com.shinsei1118.earsup",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSUserTrackingUsageDescription": "関連性の高い広告を表示するためにIDをトラッキングいたします。"
       }
     },
     "android": {
@@ -46,9 +47,9 @@
       [
         "react-native-google-mobile-ads",
         {
-          "androidAppId": "ca-app-pub-2855999657692570~1379812340",
-          "iosAppId": "ca-app-pub-2855999657692570~4936080875",
-          "user_tracking_usage_description": "関連性の高い広告を表示するためにIDをトラッキングいたします。"
+          "androidAppId": "ca-app-pub-2855999657692570~1234567890",
+          "iosAppId": "ca-app-pub-2855999657692570~0987654321",
+          "userTrackingUsageDescription": "This identifier will be used to deliver personalized ads to you."
         }
       ]
     ],
