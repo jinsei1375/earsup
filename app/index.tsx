@@ -4,6 +4,7 @@ import { useUserStore } from '@/stores/userStore';
 import { supabase } from '@/lib/supabase';
 import { router } from 'expo-router';
 import { useHeaderSettings } from '@/contexts/HeaderSettingsContext';
+import { useAdMob } from '@/contexts/AdMobContext';
 import { Button } from '@/components/common/Button';
 import { FeatureIcon, APP_COLORS } from '@/components/common/FeatureIcon';
 import { GAMBannerAd, BannerAdSize, TestIds } from 'react-native-google-mobile-ads';
@@ -14,6 +15,7 @@ export default function HomeScreen() {
   const setUserInfo = useUserStore((s) => s.setUserInfo);
   const [nickname, setNickname] = useState<string | null>(storeNickname);
   const { setSettingsConfig, showInfoModal } = useHeaderSettings();
+  const { isInitialized: isAdMobInitialized, error: adMobError } = useAdMob();
 
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -220,10 +222,21 @@ export default function HomeScreen() {
         <View className="items-center mt-4 mb-8">
           <Text className="text-xs text-gray-400 text-center">v1.0.0</Text>
         </View>
-        <GAMBannerAd
-          unitId={'ca-app-pub-2855999657692570/9497318972'}
-          sizes={[BannerAdSize.ANCHORED_ADAPTIVE_BANNER]}
-        />
+        
+        {/* AdMob Banner - Only render when SDK is initialized */}
+        {isAdMobInitialized && !adMobError && (
+          <GAMBannerAd
+            unitId={'ca-app-pub-2855999657692570/9497318972'}
+            sizes={[BannerAdSize.ANCHORED_ADAPTIVE_BANNER]}
+          />
+        )}
+        
+        {/* Debug info for development */}
+        {__DEV__ && adMobError && (
+          <View className="bg-red-100 p-2 rounded mt-2">
+            <Text className="text-red-600 text-xs">AdMob Error: {adMobError}</Text>
+          </View>
+        )}
       </View>
     </ScrollView>
   );

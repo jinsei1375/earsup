@@ -8,21 +8,22 @@ import AppHeader from '@/components/AppHeader';
 import { HeaderSettingsProvider, useHeaderSettings } from '@/contexts/HeaderSettingsContext';
 import { ToastProvider } from '@/contexts/ToastContext';
 import { SettingsProvider } from '@/contexts/SettingsContext';
+import { AdMobProvider } from '@/contexts/AdMobContext';
 import InfoModal from '@/components/common/InfoModal';
-import mobileAds from 'react-native-google-mobile-ads';
-import { requestTrackingPermissionsAsync } from 'expo-tracking-transparency';
 // グローバルCSSのインポート
 import '@/assets/css/global.css';
 
 export default function RootLayout() {
   return (
-    <ToastProvider>
-      <SettingsProvider>
-        <HeaderSettingsProvider>
-          <RootLayoutContent />
-        </HeaderSettingsProvider>
-      </SettingsProvider>
-    </ToastProvider>
+    <AdMobProvider>
+      <ToastProvider>
+        <SettingsProvider>
+          <HeaderSettingsProvider>
+            <RootLayoutContent />
+          </HeaderSettingsProvider>
+        </SettingsProvider>
+      </ToastProvider>
+    </AdMobProvider>
   );
 }
 
@@ -35,25 +36,6 @@ function RootLayoutContent() {
   const [isReady, setIsReady] = useState(false);
   const { settingsConfig, isInfoModalVisible, hideInfoModal } = useHeaderSettings();
 
-  // admobの初期化
-  const initAd = useCallback(async () => {
-    try {
-      const { status } = await requestTrackingPermissionsAsync();
-      if (status === 'granted') {
-        console.log('Yay! I have user permission to track data');
-      }
-      await mobileAds().initialize();
-    } catch (err) {
-      console.warn('initAd', err);
-    }
-  }, []);
-
-  // 初期データの取得
-  useEffect(() => {
-    initAd();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   useEffect(() => {
     // 初回のみAsyncStorageからuserIdを復元
     (async () => {
@@ -61,7 +43,7 @@ function RootLayoutContent() {
       if (storedId) setUserId(storedId);
       setIsReady(true);
     })();
-  }, []);
+  }, [setUserId]);
 
   useEffect(() => {
     if (!isReady || !rootNavigationState?.key) return;
