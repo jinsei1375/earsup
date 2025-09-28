@@ -23,12 +23,16 @@ export const AdMobProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     setError(null);
 
     try {
-      // Request tracking permissions first
-      const { status } = await requestTrackingPermissionsAsync();
-      if (status === 'granted') {
-        console.log('AdMob: Tracking permission granted');
-      } else {
-        console.log('AdMob: Tracking permission not granted, but continuing with initialization');
+      // Request tracking permissions first (but don't fail if this fails)
+      try {
+        const { status } = await requestTrackingPermissionsAsync();
+        if (status === 'granted') {
+          console.log('AdMob: Tracking permission granted');
+        } else {
+          console.log('AdMob: Tracking permission not granted, but continuing with initialization');
+        }
+      } catch (trackingError) {
+        console.warn('AdMob: Failed to request tracking permissions, continuing anyway', trackingError);
       }
 
       // Initialize AdMob
@@ -39,12 +43,19 @@ export const AdMobProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       const errorMessage = err instanceof Error ? err.message : 'Unknown AdMob initialization error';
       setError(errorMessage);
       console.warn('AdMob: Initialization failed', err);
+      // Don't throw - just mark as failed so the app can continue without ads
     } finally {
       setIsLoading(false);
     }
   }, [isInitialized, isLoading]);
 
   useEffect(() => {
+    // Don't initialize AdMob in test environment
+    if (__DEV__ && process.env.NODE_ENV === 'test') {
+      console.log('AdMob: Skipping initialization in test environment');
+      return;
+    }
+
     // Delay initialization to ensure React Native is fully ready
     const timer = setTimeout(() => {
       initializeAdMob();
