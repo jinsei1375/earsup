@@ -11,12 +11,12 @@ import { SettingsProvider } from '@/contexts/SettingsContext';
 import InfoModal from '@/components/common/InfoModal';
 // グローバルCSSのインポート
 import '@/assets/css/global.css';
-// import {
-//   getTrackingPermissionsAsync,
-//   PermissionStatus,
-//   requestTrackingPermissionsAsync,
-// } from 'expo-tracking-transparency';
-// import mobileAds, { MaxAdContentRating } from 'react-native-google-mobile-ads';
+import {
+  getTrackingPermissionsAsync,
+  PermissionStatus,
+  requestTrackingPermissionsAsync,
+} from 'expo-tracking-transparency';
+import mobileAds, { MaxAdContentRating } from 'react-native-google-mobile-ads';
 
 export default function RootLayout() {
   return (
@@ -39,22 +39,22 @@ function RootLayoutContent() {
   const [isReady, setIsReady] = useState(false);
   const { settingsConfig, isInfoModalVisible, hideInfoModal } = useHeaderSettings();
 
-  // const initAd = useCallback(async () => {
-  //   try {
-  //     const { status } = await getTrackingPermissionsAsync();
-  //     if (status === PermissionStatus.UNDETERMINED) {
-  //       await requestTrackingPermissionsAsync();
-  //     }
+  const initAd = useCallback(async () => {
+    try {
+      const { status } = await getTrackingPermissionsAsync();
+      if (status === PermissionStatus.UNDETERMINED) {
+        await requestTrackingPermissionsAsync();
+      }
 
-  //     const adapterStatuses = await mobileAds().initialize();
-  //   } catch (err) {
-  //     console.warn('initAd', err);
-  //   }
-  // }, []);
+      const adapterStatuses = await mobileAds().initialize();
+    } catch (err) {
+      console.warn('initAd', err);
+    }
+  }, []);
 
   // 初期データの取得
   useEffect(() => {
-    // initAd();
+    initAd();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

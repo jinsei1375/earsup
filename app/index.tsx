@@ -222,12 +222,12 @@ export default function HomeScreen() {
           <Text className="text-xs text-gray-400 text-center">v1.0.0</Text>
         </View>
 
-        {/* <BannerAd
+        <BannerAd
           ref={bannerRef}
           // unitId={'ca-app-pub-2855999657692570/9497318972'}
           unitId={TestIds.BANNER}
           size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
-        /> */}
+        />
       </View>
     </ScrollView>
   );
