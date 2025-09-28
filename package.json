@@ -7,7 +7,13 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
-    "test": "jest --watchAll"
+    "test": "jest --watchAll",
+    "prebuild:clean": "rm -rf ios/ android/ .expo/",
+    "prebuild:ios": "npx expo prebuild --platform ios --clear",
+    "pods:install": "cd ios && pod install && cd ..",
+    "ios:setup": "npm run prebuild:ios && npm run pods:install",
+    "ios:open": "open ios/earsup.xcworkspace",
+    "build:ios:local": "npm run ios:setup && npm run ios:open"
   },
   "jest": {
     "preset": "jest-expo"

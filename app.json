@@ -2,7 +2,7 @@
   "expo": {
     "name": "earsup",
     "slug": "earsup",
-    "version": "1.0.9",
+    "version": "1.0.10",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "earsup",
@@ -48,8 +48,7 @@
         "react-native-google-mobile-ads",
         {
           "androidAppId": "ca-app-pub-2855999657692570~1234567890",
-          "iosAppId": "ca-app-pub-2855999657692570~0987654321",
-          "userTrackingUsageDescription": "This identifier will be used to deliver personalized ads to you."
+          "iosAppId": "ca-app-pub-2855999657692570~0987654321"
         }
       ]
     ],
