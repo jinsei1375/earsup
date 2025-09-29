@@ -145,14 +145,27 @@ export default function SentencesScreen() {
   const handlePlaySentence = async (sentence: UserSentence) => {
     try {
       setPlayingSentenceId(sentence.id);
-      await audioService.playText(sentence.text, {
-        gender: settings?.default_voice_gender || 'female',
-        speed: 1.0,
-      });
+
+      await audioService.playText(
+        sentence.text,
+        {
+          gender: settings?.default_voice_gender || 'female',
+          speed: 1.0,
+        },
+        {
+          onDone: () => {
+            setPlayingSentenceId(null);
+          },
+          onError: (error: any) => {
+            setPlayingSentenceId(null);
+            console.error('Audio playback failed:', error);
+            showError('音声エラー', '音声の再生に失敗しました');
+          },
+        }
+      );
     } catch (error) {
       console.error('Audio playback failed:', error);
       showError('音声エラー', '音声の再生に失敗しました');
-    } finally {
       setPlayingSentenceId(null);
     }
   };
@@ -228,9 +241,9 @@ export default function SentencesScreen() {
                       disabled={playingSentenceId === sentence.id}
                     >
                       <Ionicons
-                        name={playingSentenceId === sentence.id ? 'volume-high' : 'play'}
+                        name={playingSentenceId === sentence.id ? 'square' : 'play'}
                         size={20}
-                        color={playingSentenceId === sentence.id ? '#3B82F6' : '#10B981'}
+                        color={playingSentenceId === sentence.id ? '#10B981' : '#10B981'}
                       />
                     </TouchableOpacity>
                     <TouchableOpacity

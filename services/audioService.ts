@@ -5,7 +5,11 @@ import type { VoiceSettings } from '@/types';
 class AudioService {
   private currentSpeech: string | null = null;
 
-  async playText(text: string, settings: VoiceSettings = { gender: 'female', speed: 1.0 }) {
+  async playText(
+    text: string,
+    settings: VoiceSettings = { gender: 'female', speed: 1.0 },
+    callbacks?: { onDone?: () => void; onError?: (error: any) => void }
+  ) {
     try {
       // 既に再生中の音声があれば停止
       if (this.currentSpeech) {
@@ -74,13 +78,21 @@ class AudioService {
         pitch: 1.0,
         rate: settings.speed,
         voice: selectedVoice?.identifier,
+        onDone: () => {
+          this.currentSpeech = null;
+          callbacks?.onDone?.();
+        },
+        onError: (error: any) => {
+          this.currentSpeech = null;
+          callbacks?.onError?.(error);
+        },
       };
 
       await Speech.speak(text, speechOptions);
-      this.currentSpeech = null; // 再生完了
     } catch (error) {
       this.currentSpeech = null;
       console.error('Audio playback error:', error);
+      callbacks?.onError?.(error);
       throw error;
     }
   }
