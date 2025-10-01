@@ -15,7 +15,7 @@
     "pods:install": "cd ios && pod install && cd ..",
     "ios:setup": "npm run prebuild:clean && npm run prebuild:ios && npm run pods:install",
     "deploy:testflight": "npm run version:patch && npm run ios:setup && npm run ios:archive",
-    "ios:archive": "echo '📱 Xcodeで Product → Archive → TestFlight アップロードを実行してください' && open ios/earsup.xcworkspace"
+    "ios:archive": "echo '📱 app.jsonのversionを合わせてXcodeで Product → Archive → TestFlight アップロードを実行してください' && open ios/earsup.xcworkspace"
   },
   "jest": {
     "preset": "jest-expo"

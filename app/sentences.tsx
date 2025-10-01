@@ -241,7 +241,7 @@ export default function SentencesScreen() {
                       disabled={playingSentenceId === sentence.id}
                     >
                       <Ionicons
-                        name={playingSentenceId === sentence.id ? 'square' : 'play'}
+                        name={playingSentenceId === sentence.id ? 'musical-notes' : 'play'}
                         size={20}
                         color={playingSentenceId === sentence.id ? '#10B981' : '#10B981'}
                       />
