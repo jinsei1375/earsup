@@ -1,5 +1,5 @@
 // components/sentences/SentenceFormModal.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -38,6 +38,11 @@ export const SentenceFormModal: React.FC<SentenceFormModalProps> = ({
   const [translation, setTranslation] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [currentFieldIndex, setCurrentFieldIndex] = useState(0);
+
+  // 入力欄のref
+  const textInputRef = useRef<TextInput>(null);
+  const translationInputRef = useRef<TextInput>(null);
 
   // InputAccessoryView用のID
   const inputAccessoryViewID = 'sentence-form-accessory';
@@ -47,6 +52,7 @@ export const SentenceFormModal: React.FC<SentenceFormModalProps> = ({
       setText(initialText);
       setTranslation(initialTranslation);
       setError(null);
+      setCurrentFieldIndex(0);
     }
   }, [isVisible, initialText, initialTranslation]);
 
@@ -91,7 +97,28 @@ export const SentenceFormModal: React.FC<SentenceFormModalProps> = ({
     setText('');
     setTranslation('');
     setError(null);
+    setCurrentFieldIndex(0);
     onClose();
+  };
+
+  const handleNext = () => {
+    if (currentFieldIndex === 0) {
+      // 英語フレーズから日本語訳へ
+      setCurrentFieldIndex(1);
+      translationInputRef.current?.focus();
+    }
+  };
+
+  const handlePrevious = () => {
+    if (currentFieldIndex === 1) {
+      // 日本語訳から英語フレーズへ
+      setCurrentFieldIndex(0);
+      textInputRef.current?.focus();
+    }
+  };
+
+  const handleDone = () => {
+    Keyboard.dismiss();
   };
 
   return (
@@ -131,6 +158,7 @@ export const SentenceFormModal: React.FC<SentenceFormModalProps> = ({
                   <View className="mb-4">
                     <Text className="text-base font-medium mb-2">英語フレーズ *</Text>
                     <TextInput
+                      ref={textInputRef}
                       className="border border-gray-300 rounded-lg p-3 text-lg"
                       style={{ minHeight: 70, textAlignVertical: 'top' }}
                       placeholder="例: How are you doing today?"
@@ -140,6 +168,7 @@ export const SentenceFormModal: React.FC<SentenceFormModalProps> = ({
                       numberOfLines={4}
                       autoFocus={!isEditing}
                       inputAccessoryViewID={inputAccessoryViewID}
+                      onFocus={() => setCurrentFieldIndex(0)}
                     />
                   </View>
 
@@ -147,6 +176,7 @@ export const SentenceFormModal: React.FC<SentenceFormModalProps> = ({
                   <View className="mb-6">
                     <Text className="text-base font-medium mb-2">日本語訳 *</Text>
                     <TextInput
+                      ref={translationInputRef}
                       className="border border-gray-300 rounded-lg p-3 text-lg"
                       style={{ minHeight: 70, textAlignVertical: 'top' }}
                       placeholder="例: 今日はどうですか？"
@@ -155,6 +185,7 @@ export const SentenceFormModal: React.FC<SentenceFormModalProps> = ({
                       multiline
                       numberOfLines={4}
                       inputAccessoryViewID={inputAccessoryViewID}
+                      onFocus={() => setCurrentFieldIndex(1)}
                     />
                   </View>
 
@@ -199,8 +230,19 @@ export const SentenceFormModal: React.FC<SentenceFormModalProps> = ({
           </TouchableWithoutFeedback>
         </KeyboardAvoidingView>
 
-        {/* InputAccessoryView */}
-        <KeyboardAccessoryView nativeID={inputAccessoryViewID} />
+        {/* InputAccessoryView - 完全なナビゲーション */}
+        {isVisible && (
+          <KeyboardAccessoryView
+            nativeID={inputAccessoryViewID}
+            onNext={handleNext}
+            onPrevious={handlePrevious}
+            onDone={handleDone}
+            showNext={true}
+            showPrevious={true}
+            disableNext={currentFieldIndex === 1}
+            disablePrevious={currentFieldIndex === 0}
+          />
+        )}
       </Modal>
     </>
   );
