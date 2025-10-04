@@ -1,6 +1,13 @@
 // components/common/KeyboardAccessoryView.tsx
 import React from 'react';
-import { View, Text, TouchableOpacity, Keyboard, InputAccessoryView } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Keyboard,
+  InputAccessoryView,
+  Platform,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 interface KeyboardAccessoryViewProps {
@@ -28,22 +35,24 @@ export const KeyboardAccessoryView: React.FC<KeyboardAccessoryViewProps> = ({
   };
 
   const handleNext = () => {
-    if (!disableNext) {
-      // requestAnimationFrame ensures the callback executes after the current frame,
-      // allowing input refs to be properly initialized on first keyboard appearance
-      requestAnimationFrame(() => {
-        onNext?.();
-      });
+    if (!disableNext && onNext) {
+      // iOS requires a delay to prevent keyboard dismissal on first button press.
+      // Use 0ms for Android (immediate), 100ms for iOS (after keyboard animation).
+      const delay = Platform.OS === 'ios' ? 100 : 0;
+      setTimeout(() => {
+        onNext();
+      }, delay);
     }
   };
 
   const handlePrevious = () => {
-    if (!disablePrevious) {
-      // requestAnimationFrame ensures the callback executes after the current frame,
-      // allowing input refs to be properly initialized on first keyboard appearance
-      requestAnimationFrame(() => {
-        onPrevious?.();
-      });
+    if (!disablePrevious && onPrevious) {
+      // iOS requires a delay to prevent keyboard dismissal on first button press.
+      // Use 0ms for Android (immediate), 100ms for iOS (after keyboard animation).
+      const delay = Platform.OS === 'ios' ? 100 : 0;
+      setTimeout(() => {
+        onPrevious();
+      }, delay);
     }
   };
   return (
