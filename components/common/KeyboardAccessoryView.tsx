@@ -29,13 +29,21 @@ export const KeyboardAccessoryView: React.FC<KeyboardAccessoryViewProps> = ({
 
   const handleNext = () => {
     if (!disableNext) {
-      onNext?.();
+      // requestAnimationFrame ensures the callback executes after the current frame,
+      // allowing input refs to be properly initialized on first keyboard appearance
+      requestAnimationFrame(() => {
+        onNext?.();
+      });
     }
   };
 
   const handlePrevious = () => {
     if (!disablePrevious) {
-      onPrevious?.();
+      // requestAnimationFrame ensures the callback executes after the current frame,
+      // allowing input refs to be properly initialized on first keyboard appearance
+      requestAnimationFrame(() => {
+        onPrevious?.();
+      });
     }
   };
   return (
