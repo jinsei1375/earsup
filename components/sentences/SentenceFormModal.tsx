@@ -230,15 +230,14 @@ export const SentenceFormModal: React.FC<SentenceFormModalProps> = ({
           </TouchableWithoutFeedback>
         </KeyboardAvoidingView>
 
-        {/* InputAccessoryView - 完全なナビゲーション */}
+        {/* InputAccessoryView */}
         {isVisible && (
           <KeyboardAccessoryView
             nativeID={inputAccessoryViewID}
             onNext={handleNext}
             onPrevious={handlePrevious}
             onDone={handleDone}
-            showNext={true}
-            showPrevious={true}
+            showNavigation={true}
             disableNext={currentFieldIndex === 1}
             disablePrevious={currentFieldIndex === 0}
           />

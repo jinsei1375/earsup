@@ -1,7 +1,8 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity } from 'react-native';
+import React, { useState, useRef } from 'react';
+import { View, Text, TextInput, Keyboard } from 'react-native';
 import { FeatureIcon, APP_COLORS } from '@/components/common/FeatureIcon';
 import { Button } from '@/components/common/Button';
+import { KeyboardAccessoryView } from '@/components/common/KeyboardAccessoryView';
 import {
   parsesentence,
   getWordItems,
@@ -28,6 +29,30 @@ export const WordSeparateInput: React.FC<WordSeparateInputProps> = ({
   const [userWords, setUserWords] = useState<string[]>(new Array(wordItems.length).fill(''));
   const [currentIndex, setCurrentIndex] = useState(0);
   const inputRefs = useRef<(TextInput | null)[]>([]);
+
+  // KeyboardAccessoryView用のID
+  const inputAccessoryViewID = 'word-separate-input-accessory';
+
+  // ナビゲーション関数
+  const handleNext = () => {
+    if (currentIndex < wordItems.length - 1) {
+      const nextIndex = currentIndex + 1;
+      setCurrentIndex(nextIndex);
+      inputRefs.current[nextIndex]?.focus();
+    }
+  };
+
+  const handlePrevious = () => {
+    if (currentIndex > 0) {
+      const prevIndex = currentIndex - 1;
+      setCurrentIndex(prevIndex);
+      inputRefs.current[prevIndex]?.focus();
+    }
+  };
+
+  const handleDone = () => {
+    Keyboard.dismiss();
+  };
 
   const updateWord = (index: number, value: string) => {
     const newWords = [...userWords];
@@ -130,6 +155,7 @@ export const WordSeparateInput: React.FC<WordSeparateInputProps> = ({
                 returnKeyType={wordIndex === wordItems.length - 1 ? 'done' : 'next'}
                 autoCapitalize="none"
                 autoCorrect={false}
+                inputAccessoryViewID={inputAccessoryViewID}
               />
               <View className="items-center mt-1">
                 <View
@@ -171,6 +197,16 @@ export const WordSeparateInput: React.FC<WordSeparateInputProps> = ({
         onPress={handleSubmit}
         disabled={!canSubmit}
         variant="primary"
+      />
+
+      <KeyboardAccessoryView
+        nativeID={inputAccessoryViewID}
+        showNavigation={true}
+        disablePrevious={currentIndex === 0}
+        disableNext={currentIndex === wordItems.length - 1}
+        onPrevious={handlePrevious}
+        onNext={handleNext}
+        onDone={handleDone}
       />
     </View>
   );

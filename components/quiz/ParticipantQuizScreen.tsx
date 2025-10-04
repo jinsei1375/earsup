@@ -13,6 +13,7 @@ import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { ErrorMessage } from '@/components/common/ErrorMessage';
 import { Button } from '@/components/common/Button';
 import { FeatureIcon, APP_COLORS } from '@/components/common/FeatureIcon';
+import { KeyboardAccessoryView } from '@/components/common/KeyboardAccessoryView';
 import {
   canParticipantAnswer,
   isQuizActive,
@@ -82,6 +83,9 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
   const [isPlaying, setIsPlaying] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
   const inputRef = useRef<TextInput>(null);
+
+  // KeyboardAccessoryView用のID
+  const inputAccessoryViewID = 'quiz-answer-accessory';
 
   const quizMode = room?.quiz_mode || 'all-at-once-host';
   const isAutoMode = quizMode === 'all-at-once-auto';
@@ -442,6 +446,7 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
                     returnKeyType="done"
                     onSubmitEditing={() => Keyboard.dismiss()}
                     onFocus={handleInputFocus}
+                    inputAccessoryViewID={inputAccessoryViewID}
                   />
                   {/* ホストなしモードでは句読点を表示 */}
                   {isAutoMode && trailingPunctuation && (
@@ -598,6 +603,12 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
           isHost={true}
         />
       </ScrollView>
+
+      <KeyboardAccessoryView
+        nativeID={inputAccessoryViewID}
+        showNavigation={false}
+        onDone={() => Keyboard.dismiss()}
+      />
     </KeyboardAvoidingView>
   );
 };

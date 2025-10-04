@@ -15,6 +15,7 @@ import { ErrorMessage } from '@/components/common/ErrorMessage';
 import { Button } from '@/components/common/Button';
 import { SampleSentenceModal } from './SampleSentenceModal';
 import { WordSeparatePreview } from './WordSeparatePreview';
+import { KeyboardAccessoryView } from '@/components/common/KeyboardAccessoryView';
 
 interface QuestionCreatorProps {
   onCreateQuestion: (text: string, sampleSentenceId?: string) => Promise<void>;
@@ -32,6 +33,9 @@ export const QuestionCreator: React.FC<QuestionCreatorProps> = ({
   const [questionText, setQuestionText] = useState('');
   const [selectedSampleSentenceId, setSelectedSampleSentenceId] = useState<string | null>(null);
   const [isSampleModalVisible, setIsSampleModalVisible] = useState(false);
+
+  // KeyboardAccessoryView用のID
+  const inputAccessoryViewID = 'question-creator-accessory';
 
   const handleSubmit = async () => {
     if (questionText.trim()) {
@@ -81,6 +85,7 @@ export const QuestionCreator: React.FC<QuestionCreatorProps> = ({
                 numberOfLines={4}
                 returnKeyType="done"
                 onSubmitEditing={() => Keyboard.dismiss()}
+                inputAccessoryViewID={inputAccessoryViewID}
               />
 
               {/* 単語区切りモードの場合のプレビュー */}
@@ -107,6 +112,12 @@ export const QuestionCreator: React.FC<QuestionCreatorProps> = ({
         onClose={() => setIsSampleModalVisible(false)}
         onSelectSentence={handleSampleSentenceSelect}
         hasCurrentText={!!questionText.trim()}
+      />
+
+      <KeyboardAccessoryView
+        nativeID={inputAccessoryViewID}
+        showNavigation={false}
+        onDone={() => Keyboard.dismiss()}
       />
     </KeyboardAvoidingView>
   );

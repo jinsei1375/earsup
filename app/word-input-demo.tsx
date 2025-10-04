@@ -3,6 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, ScrollView } from 'react-nativ
 import { router, Stack } from 'expo-router';
 import { FeatureIcon, APP_COLORS } from '@/components/common/FeatureIcon';
 import { useHeaderSettings } from '@/contexts/HeaderSettingsContext';
+import { KeyboardAccessoryView } from '@/components/common/KeyboardAccessoryView';
 
 const sampleSentences = [
   'The quick brown fox jumps over the lazy dog.',
@@ -17,6 +18,9 @@ export default function WordInputDemo() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const inputRefs = useRef<(TextInput | null)[]>([]);
+
+  // KeyboardAccessoryView用のID
+  const inputAccessoryViewID = 'word-input-accessory';
 
   const { setSettingsConfig, showInfoModal } = useHeaderSettings();
 
@@ -92,6 +96,27 @@ export default function WordInputDemo() {
       setCurrentIndex(nextIndex);
       inputRefs.current[nextIndex]?.focus();
     }
+  };
+
+  // KeyboardAccessoryView ナビゲーション関数
+  const handleNext = () => {
+    if (currentIndex < wordItems.length - 1) {
+      const nextIndex = currentIndex + 1;
+      setCurrentIndex(nextIndex);
+      inputRefs.current[nextIndex]?.focus();
+    }
+  };
+
+  const handlePrevious = () => {
+    if (currentIndex > 0) {
+      const prevIndex = currentIndex - 1;
+      setCurrentIndex(prevIndex);
+      inputRefs.current[prevIndex]?.focus();
+    }
+  };
+
+  const handleDone = () => {
+    inputRefs.current[currentIndex]?.blur();
   };
 
   const handleSubmit = () => {
@@ -248,6 +273,7 @@ export default function WordInputDemo() {
                       returnKeyType={wordIndex === wordItems.length - 1 ? 'done' : 'next'}
                       autoCapitalize="none"
                       autoCorrect={false}
+                      inputAccessoryViewID={inputAccessoryViewID}
                     />
                     <View className="items-center mt-1">
                       <View
@@ -386,6 +412,16 @@ export default function WordInputDemo() {
           </View>
         </ScrollView>
       </View>
+
+      <KeyboardAccessoryView
+        nativeID={inputAccessoryViewID}
+        showNavigation={true}
+        disablePrevious={currentIndex === 0}
+        disableNext={currentIndex === wordItems.length - 1}
+        onPrevious={handlePrevious}
+        onNext={handleNext}
+        onDone={handleDone}
+      />
     </>
   );
 }

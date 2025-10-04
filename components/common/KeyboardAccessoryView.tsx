@@ -8,10 +8,9 @@ interface KeyboardAccessoryViewProps {
   onDone?: () => void;
   onNext?: () => void;
   onPrevious?: () => void;
-  showNext?: boolean;
   disableNext?: boolean;
-  showPrevious?: boolean;
   disablePrevious?: boolean;
+  showNavigation?: boolean;
 }
 
 export const KeyboardAccessoryView: React.FC<KeyboardAccessoryViewProps> = ({
@@ -19,10 +18,9 @@ export const KeyboardAccessoryView: React.FC<KeyboardAccessoryViewProps> = ({
   onDone,
   onNext,
   onPrevious,
-  showNext = false,
   disableNext = false,
-  showPrevious = false,
   disablePrevious = false,
+  showNavigation = false,
 }) => {
   const handleDone = () => {
     Keyboard.dismiss();
@@ -43,28 +41,32 @@ export const KeyboardAccessoryView: React.FC<KeyboardAccessoryViewProps> = ({
   return (
     <InputAccessoryView nativeID={nativeID}>
       <View className="flex-row justify-between items-center px-4 py-2 bg-gray-100 border-t border-gray-300">
-        {/* 左側: 前へ・次へボタングループ */}
-        <View className="flex-row">
-          <TouchableOpacity
-            onPress={handlePrevious}
-            className="flex-row items-center px-3 py-1 rounded-lg mr-2"
-            activeOpacity={disablePrevious ? 1 : 0.7}
-            disabled={disablePrevious}
-            style={{ opacity: disablePrevious ? 0.3 : 1 }}
-          >
-            <Ionicons name="chevron-back" size={24} color="#3B82F6" />
-          </TouchableOpacity>
+        {/* 左側: 前へ・次へボタングループ（条件付き表示） */}
+        {showNavigation ? (
+          <View className="flex-row">
+            <TouchableOpacity
+              onPress={handlePrevious}
+              className="flex-row items-center px-3 py-1 rounded-lg mr-2"
+              activeOpacity={disablePrevious ? 1 : 0.7}
+              disabled={disablePrevious}
+              style={{ opacity: disablePrevious ? 0.3 : 1 }}
+            >
+              <Ionicons name="chevron-back" size={24} color="#3B82F6" />
+            </TouchableOpacity>
 
-          <TouchableOpacity
-            onPress={handleNext}
-            className="flex-row items-center px-3 py-1 rounded-lg"
-            activeOpacity={disableNext ? 1 : 0.7}
-            disabled={disableNext}
-            style={{ opacity: disableNext ? 0.3 : 1 }}
-          >
-            <Ionicons name="chevron-forward" size={24} color="#3B82F6" />
-          </TouchableOpacity>
-        </View>
+            <TouchableOpacity
+              onPress={handleNext}
+              className="flex-row items-center px-3 py-1 rounded-lg"
+              activeOpacity={disableNext ? 1 : 0.7}
+              disabled={disableNext}
+              style={{ opacity: disableNext ? 0.3 : 1 }}
+            >
+              <Ionicons name="chevron-forward" size={24} color="#3B82F6" />
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <View />
+        )}
 
         {/* 右側: 完了ボタン */}
         <TouchableOpacity

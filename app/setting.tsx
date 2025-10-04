@@ -9,6 +9,7 @@ import { FeatureIcon, APP_COLORS } from '@/components/common/FeatureIcon';
 import { supabase } from '@/lib/supabase';
 import { audioService } from '@/services/audioService';
 import { Ionicons } from '@expo/vector-icons';
+import { KeyboardAccessoryView } from '@/components/common/KeyboardAccessoryView';
 
 import { useToast } from '@/contexts/ToastContext';
 import { useSettings } from '@/contexts/SettingsContext';
@@ -18,6 +19,9 @@ export default function Setting() {
   const { settings, updateSettings, loading } = useSettings();
   const { showSuccess, showError } = useToast();
   const { userId, nickname, setUserInfo } = useUserStore();
+
+  // KeyboardAccessoryView用のID
+  const inputAccessoryViewID = 'setting-nickname-accessory';
 
   const [voiceGender, setVoiceGender] = useState(settings?.default_voice_gender || 'male');
   const [nicknameInput, setNicknameInput] = useState(nickname || '');
@@ -177,6 +181,7 @@ export default function Setting() {
             placeholder="ニックネームを入力"
             className="bg-app-neutral-50 border border-app-neutral-300 rounded-lg px-4 py-3 text-app-neutral-800"
             maxLength={20}
+            inputAccessoryViewID={inputAccessoryViewID}
           />
           <Text className="text-app-neutral-500 text-xs mt-1 text-right">
             {nicknameInput.length}/20文字
@@ -269,6 +274,12 @@ export default function Setting() {
           )}
         </View>
       </ScrollView>
+
+      <KeyboardAccessoryView
+        nativeID={inputAccessoryViewID}
+        showNavigation={false}
+        onDone={() => {}}
+      />
     </View>
   );
 }
