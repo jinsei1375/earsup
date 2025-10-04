@@ -39,6 +39,7 @@ export const SentenceFormModal: React.FC<SentenceFormModalProps> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [currentFieldIndex, setCurrentFieldIndex] = useState(0);
+  const [isAccessoryReady, setIsAccessoryReady] = useState(false);
 
   // 入力欄のref
   const textInputRef = useRef<TextInput>(null);
@@ -53,6 +54,12 @@ export const SentenceFormModal: React.FC<SentenceFormModalProps> = ({
       setTranslation(initialTranslation);
       setError(null);
       setCurrentFieldIndex(0);
+      // Ensure InputAccessoryView is mounted before inputs can focus
+      setIsAccessoryReady(false);
+      // Use setTimeout to ensure InputAccessoryView is rendered in the next frame
+      setTimeout(() => setIsAccessoryReady(true), 0);
+    } else {
+      setIsAccessoryReady(false);
     }
   }, [isVisible, initialText, initialTranslation]);
 
@@ -98,6 +105,7 @@ export const SentenceFormModal: React.FC<SentenceFormModalProps> = ({
     setTranslation('');
     setError(null);
     setCurrentFieldIndex(0);
+    setIsAccessoryReady(false);
     onClose();
   };
 
@@ -166,7 +174,7 @@ export const SentenceFormModal: React.FC<SentenceFormModalProps> = ({
                       onChangeText={setText}
                       multiline
                       numberOfLines={4}
-                      autoFocus={!isEditing}
+                      autoFocus={!isEditing && isAccessoryReady}
                       inputAccessoryViewID={inputAccessoryViewID}
                       onFocus={() => setCurrentFieldIndex(0)}
                     />
