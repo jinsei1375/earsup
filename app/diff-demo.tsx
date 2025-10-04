@@ -21,6 +21,7 @@ import { KeyboardAccessoryView } from '@/components/common/KeyboardAccessoryView
 export default function DiffDemoScreen() {
   const [userAnswer, setUserAnswer] = useState('I am going to school');
   const [correctAnswer, setCorrectAnswer] = useState('I am going to the school');
+  const [, forceUpdate] = useState(0);
 
   // KeyboardAccessoryView用の状態管理
   const inputAccessoryViewID = 'diff-demo-accessory';
@@ -61,6 +62,12 @@ export default function DiffDemoScreen() {
       onSettingsPress: handleSettingsPress,
       showBackButton: true,
       onBackPress: () => router.back(),
+    });
+
+    // Force a re-render to ensure InputAccessoryView is properly registered
+    // This fixes an iOS issue where InputAccessoryView doesn't appear on first keyboard show
+    requestAnimationFrame(() => {
+      forceUpdate(1);
     });
 
     // クリーンアップ関数でヘッダー設定をリセット

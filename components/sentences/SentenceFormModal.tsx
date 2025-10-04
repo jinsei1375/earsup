@@ -56,8 +56,10 @@ export const SentenceFormModal: React.FC<SentenceFormModalProps> = ({
       setCurrentFieldIndex(0);
       // Ensure InputAccessoryView is mounted before inputs can focus
       setIsAccessoryReady(false);
-      // Use setTimeout to ensure InputAccessoryView is rendered in the next frame
-      setTimeout(() => setIsAccessoryReady(true), 0);
+      // Use requestAnimationFrame to ensure InputAccessoryView is rendered in the next frame
+      requestAnimationFrame(() => {
+        setIsAccessoryReady(true);
+      });
     } else {
       setIsAccessoryReady(false);
     }
