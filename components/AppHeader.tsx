@@ -7,7 +7,6 @@ export interface SettingsConfig {
   onSettingsPress?: () => void;
   showBackButton?: boolean;
   onBackPress?: () => void;
-  showAddButton?: boolean;
   onAddPress?: () => void;
   addButtonTitle?: string;
 }
@@ -24,13 +23,12 @@ export default function AppHeader({ title, rightComponent, settingsConfig }: App
     onSettingsPress,
     showBackButton = false,
     onBackPress,
-    showAddButton = false,
     onAddPress,
     addButtonTitle = '追加',
   } = settingsConfig || {};
 
   return (
-    <View className="h-[60px] flex-row items-center px-4 border-b border-gray-200 bg-white w-full relative">
+    <View className="h-[50px] flex-row items-center px-4 border-b border-gray-200 bg-white w-full relative">
       {/* Left side - Back button */}
       <View className="w-[60px] items-start">
         {showBackButton && onBackPress ? (
@@ -51,20 +49,12 @@ export default function AppHeader({ title, rightComponent, settingsConfig }: App
       {/* Right component, add button, or settings */}
       <View className="w-[60px] items-end">
         {rightComponent ||
-          (showAddButton && onAddPress ? (
-            <Button
-              title={addButtonTitle}
-              onPress={onAddPress}
-              variant="primary"
-              size="small"
-              icon={<Ionicons name="add" size={20} color="white" />}
-            />
-          ) : showSettings && onSettingsPress ? (
+          (showSettings && onSettingsPress ? (
             <Button
               variant="ghost"
               size="small"
               onPress={onSettingsPress}
-              icon={<Ionicons name="menu" size={40} color="#666" />}
+              icon={<Ionicons name="menu" size={32} color="#666" />}
             />
           ) : null)}
       </View>

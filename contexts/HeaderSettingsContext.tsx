@@ -6,7 +6,6 @@ export interface HeaderSettingsConfig {
   onSettingsPress?: () => void;
   showBackButton?: boolean;
   onBackPress?: () => void;
-  showAddButton?: boolean;
   onAddPress?: () => void;
   addButtonTitle?: string;
 }
