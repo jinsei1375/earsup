@@ -4,7 +4,6 @@ import { useUserStore } from '@/stores/userStore';
 import { useState } from 'react';
 import {
   View,
-  TextInput,
   Text,
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
@@ -19,6 +18,7 @@ import { Button } from '@/components/common/Button';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { KeyboardAccessoryView } from '@/components/common/KeyboardAccessoryView';
 import { useErrorHandler } from '@/hooks/useErrorHandler';
+import { AppTextInput } from '@/components/common/AppTextInput';
 
 export default function NicknameScreen() {
   const [nickname, setNickname] = useState('');
@@ -88,8 +88,8 @@ export default function NicknameScreen() {
             <Text className="text-xl font-bold text-center mb-6">
               ニックネームを入力してください
             </Text>
-            <TextInput
-              className="border border-gray-300 p-4 rounded-lg text-lg"
+            <AppTextInput
+              className="text-lg"
               placeholder="例: EarsFan123"
               value={nickname}
               onChangeText={setNickname}

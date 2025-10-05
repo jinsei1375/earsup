@@ -10,6 +10,7 @@ import {
   Keyboard,
   ScrollView,
 } from 'react-native';
+import { AppTextInput } from '@/components/common/AppTextInput';
 import { Ionicons } from '@expo/vector-icons';
 import { Button } from '@/components/common/Button';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
@@ -157,9 +158,9 @@ export const SentenceFormModal: React.FC<SentenceFormModalProps> = ({
                   {/* English Text Input */}
                   <View className="mb-4">
                     <Text className="text-base font-medium mb-2">英語フレーズ *</Text>
-                    <TextInput
+                    <AppTextInput
                       ref={textInputRef}
-                      className="border border-gray-300 rounded-lg p-3 text-lg"
+                      className="text-lg"
                       style={{ minHeight: 70, textAlignVertical: 'top' }}
                       placeholder="例: How are you doing today?"
                       value={text}
@@ -175,9 +176,9 @@ export const SentenceFormModal: React.FC<SentenceFormModalProps> = ({
                   {/* Japanese Translation Input */}
                   <View className="mb-6">
                     <Text className="text-base font-medium mb-2">日本語訳 *</Text>
-                    <TextInput
+                    <AppTextInput
                       ref={translationInputRef}
-                      className="border border-gray-300 rounded-lg p-3 text-lg"
+                      className="text-lg"
                       style={{ minHeight: 70, textAlignVertical: 'top' }}
                       placeholder="例: 今日はどうですか？"
                       value={translation}

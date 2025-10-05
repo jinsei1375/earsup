@@ -17,6 +17,7 @@ import { generateDiff, getJudgmentResult } from '@/utils/diffUtils';
 import { FeatureIcon, APP_COLORS } from '@/components/common/FeatureIcon';
 import { useHeaderSettings } from '@/contexts/HeaderSettingsContext';
 import { KeyboardAccessoryView } from '@/components/common/KeyboardAccessoryView';
+import { AppTextInput } from '@/components/common/AppTextInput';
 
 export default function DiffDemoScreen() {
   const [userAnswer, setUserAnswer] = useState('I am going to school');
@@ -149,7 +150,7 @@ export default function DiffDemoScreen() {
             {/* カスタム入力 */}
             <View className="bg-white rounded-xl p-4 mb-4 shadow-sm">
               <Text className="text-sm font-medium text-app-neutral-700 mb-2">ユーザーの回答</Text>
-              <TextInput
+              <AppTextInput
                 ref={(ref) => {
                   inputRefs.current[0] = ref;
                 }}
@@ -157,13 +158,13 @@ export default function DiffDemoScreen() {
                 onChangeText={setUserAnswer}
                 onFocus={() => setCurrentIndex(0)}
                 placeholder="ユーザーの回答を入力..."
-                className="border border-app-neutral-300 rounded-lg p-3 mb-3 text-base"
+                className="mb-3 text-base"
                 multiline
                 inputAccessoryViewID={inputAccessoryViewID}
               />
 
               <Text className="text-sm font-medium text-app-neutral-700 mb-2">正解</Text>
-              <TextInput
+              <AppTextInput
                 ref={(ref) => {
                   inputRefs.current[1] = ref;
                 }}
@@ -171,7 +172,7 @@ export default function DiffDemoScreen() {
                 onChangeText={setCorrectAnswer}
                 onFocus={() => setCurrentIndex(1)}
                 placeholder="正解を入力..."
-                className="border border-app-neutral-300 rounded-lg p-3 mb-4 text-base"
+                className="mb-4 text-base"
                 multiline
                 inputAccessoryViewID={inputAccessoryViewID}
               />

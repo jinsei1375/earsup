@@ -27,6 +27,7 @@ import { KeyboardAccessoryView } from '@/components/common/KeyboardAccessoryView
 import { useErrorHandler } from '@/hooks/useErrorHandler';
 import { FeatureIcon, APP_COLORS } from '@/components/common/FeatureIcon';
 import type { RoomScreenParams } from '@/types';
+import { AppTextInput } from '@/components/common/AppTextInput';
 
 export default function RoomScreen() {
   const params = useLocalSearchParams() as RoomScreenParams;
@@ -407,8 +408,8 @@ export default function RoomScreen() {
             ) : (
               <>
                 <Text className="mb-4">合言葉を入力</Text>
-                <TextInput
-                  className="w-full border border-gray-300 p-4 rounded-lg mb-4 text-center text-2xl"
+                <AppTextInput
+                  className="w-full p-4 mb-4 text-center text-2xl"
                   placeholder="例: ABC123"
                   value={code}
                   onChangeText={setCode}

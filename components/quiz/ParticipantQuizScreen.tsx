@@ -14,6 +14,7 @@ import { ErrorMessage } from '@/components/common/ErrorMessage';
 import { Button } from '@/components/common/Button';
 import { FeatureIcon, APP_COLORS } from '@/components/common/FeatureIcon';
 import { KeyboardAccessoryView } from '@/components/common/KeyboardAccessoryView';
+import { AppTextInput } from '@/components/common/AppTextInput';
 import {
   canParticipantAnswer,
   isQuizActive,
@@ -436,9 +437,9 @@ export const ParticipantQuizScreen: React.FC<ParticipantQuizScreenProps> = ({
                 )}
 
                 <View className="flex-row items-center">
-                  <TextInput
+                  <AppTextInput
                     ref={inputRef}
-                    className="border border-gray-300 p-4 rounded-lg w-full text-xl flex-1"
+                    className="p-4 w-full text-xl flex-1"
                     placeholder="聞こえたフレーズを入力"
                     value={answer}
                     onChangeText={setAnswer}

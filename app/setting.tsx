@@ -10,6 +10,7 @@ import { supabase } from '@/lib/supabase';
 import { audioService } from '@/services/audioService';
 import { Ionicons } from '@expo/vector-icons';
 import { KeyboardAccessoryView } from '@/components/common/KeyboardAccessoryView';
+import { AppTextInput } from '@/components/common/AppTextInput';
 
 import { useToast } from '@/contexts/ToastContext';
 import { useSettings } from '@/contexts/SettingsContext';
@@ -175,11 +176,11 @@ export default function Setting() {
             他のユーザーに表示されるニックネームを設定してください。
           </Text>
 
-          <TextInput
+          <AppTextInput
             value={nicknameInput}
             onChangeText={setNicknameInput}
             placeholder="ニックネームを入力"
-            className="bg-app-neutral-50 border border-app-neutral-300 rounded-lg px-4 py-3 text-app-neutral-800"
+            className="bg-app-neutral-50 px-4 py-3 text-app-neutral-800"
             maxLength={20}
             inputAccessoryViewID={inputAccessoryViewID}
           />

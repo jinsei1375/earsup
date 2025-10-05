@@ -16,6 +16,7 @@ import { Button } from '@/components/common/Button';
 import { SampleSentenceModal } from './SampleSentenceModal';
 import { WordSeparatePreview } from './WordSeparatePreview';
 import { KeyboardAccessoryView } from '@/components/common/KeyboardAccessoryView';
+import { AppTextInput } from '@/components/common/AppTextInput';
 
 interface QuestionCreatorProps {
   onCreateQuestion: (text: string, sampleSentenceId?: string) => Promise<void>;
@@ -75,8 +76,8 @@ export const QuestionCreator: React.FC<QuestionCreatorProps> = ({
                   size="small"
                 />
               </View>
-              <TextInput
-                className="border border-gray-300 p-4 rounded-lg my-2 w-full h-[120px] text-lg"
+              <AppTextInput
+                className="p-4 my-2 w-full h-[120px] text-lg"
                 style={{ textAlignVertical: 'top' }}
                 placeholder="英語フレーズを入力してください"
                 value={questionText}

@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { View, Text, TextInput, Keyboard } from 'react-native';
+import { AppTextInput } from '@/components/common/AppTextInput';
 import { FeatureIcon, APP_COLORS } from '@/components/common/FeatureIcon';
 import { Button } from '@/components/common/Button';
 import { KeyboardAccessoryView } from '@/components/common/KeyboardAccessoryView';
@@ -135,7 +136,7 @@ export const WordSeparateInput: React.FC<WordSeparateInputProps> = ({
 
           return (
             <View key={`word-${wordIndex}`} className="mb-2">
-              <TextInput
+              <AppTextInput
                 ref={(ref) => {
                   inputRefs.current[wordIndex] = ref;
                 }}
@@ -145,7 +146,7 @@ export const WordSeparateInput: React.FC<WordSeparateInputProps> = ({
                 onSubmitEditing={() => handleWordSubmit(wordIndex)}
                 editable={!disabled && !isSubmitting}
                 placeholder={`${wordIndex + 1}`}
-                className={`text-center py-3 px-2 rounded-lg border-2 text-base font-medium text-app-neutral-800 ${getWordStyle(
+                className={`text-center py-3 px-2 border-2 text-base font-medium text-app-neutral-800 ${getWordStyle(
                   wordIndex
                 )}`}
                 style={{
