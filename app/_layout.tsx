@@ -9,6 +9,7 @@ import { HeaderSettingsProvider, useHeaderSettings } from '@/contexts/HeaderSett
 import { ToastProvider } from '@/contexts/ToastContext';
 import { SettingsProvider } from '@/contexts/SettingsContext';
 import InfoModal from '@/components/common/InfoModal';
+import { BannerAdUnit } from '@/components/ads/BannerAdUnit';
 // グローバルCSSのインポート
 import '@/assets/css/global.css';
 import {
@@ -124,6 +125,7 @@ function RootLayoutContent() {
     <SafeAreaView className="flex-1 bg-white">
       <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
       <AppHeader title={title} settingsConfig={settingsConfig} />
+      <BannerAdUnit />
       <View className="flex-1" pointerEvents="auto">
         <Slot />
       </View>
