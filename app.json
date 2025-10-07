@@ -50,6 +50,12 @@
           "androidAppId": "ca-app-pub-2855999657692570~1234567890",
           "iosAppId": "ca-app-pub-2855999657692570~0987654321"
         }
+      ],
+      [
+        "expo-tracking-transparency",
+        {
+          "userTrackingPermission": "広告表示にのみ使用されます。許可しなくても機能制限等はございません。"
+        }
       ]
     ],
     "experiments": {
