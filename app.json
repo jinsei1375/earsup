@@ -19,7 +19,7 @@
       "bundleIdentifier": "com.shinsei1118.earsup",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
-        "NSUserTrackingUsageDescription": "関連性の高い広告を表示するためにIDをトラッキングいたします。"
+        "NSUserTrackingUsageDescription": "広告表示にのみ使用されます。許可しなくても機能制限等はございません。"
       }
     },
     "android": {
