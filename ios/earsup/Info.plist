@@ -62,7 +62,7 @@
       <string>$(PRODUCT_BUNDLE_IDENTIFIER).expo.index_route</string>
     </array>
     <key>NSUserTrackingUsageDescription</key>
-    <string>関連性の高い広告を表示するためにIDをトラッキングいたします。</string>
+    <string>広告表示にのみ使用されます。許可しなくても機能制限等はございません。</string>
     <key>RCTNewArchEnabled</key>
     <true/>
     <key>UILaunchStoryboardName</key>

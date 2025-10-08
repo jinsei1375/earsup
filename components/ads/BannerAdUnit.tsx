@@ -12,7 +12,7 @@ const adUnitId = __DEV__
   ? TestIds.BANNER
   : Platform.OS === 'ios'
   ? 'ca-app-pub-2855999657692570/9497318972' // 本番環境のiOS用広告ID
-  : 'ca-app-pub-2855999657692570/9497318972'; // 本番環境のAndroid用広告ID (適宜変更)
+  : 'ca-app-pub-2855999657692570/6134133935'; // 本番環境のAndroid用広告ID (適宜変更)
 
 interface BannerAdUnitProps {
   size?: BannerAdSize;
