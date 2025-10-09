@@ -12,6 +12,7 @@ import InfoModal from '@/components/common/InfoModal';
 import { BannerAdUnit } from '@/components/ads/BannerAdUnit';
 import { trackingTransparencyService } from '@/services/trackingTransparencyService';
 import mobileAds from 'react-native-google-mobile-ads';
+import { requestTrackingPermissionsAsync } from 'expo-tracking-transparency';
 // グローバルCSSのインポート
 import '@/assets/css/global.css';
 
@@ -47,27 +48,11 @@ function RootLayoutContent() {
     }
   }, []);
 
-  // EarsUpサービス層パターン: App Tracking Transparency リクエスト
-  const requestATT = useCallback(async () => {
-    if (Platform.OS !== 'ios') {
-      console.log('[ATT] Not iOS, skipping');
-      return;
-    }
-
-    try {
-      console.log('[ATT] Starting request...');
-      // サービス層で undetermined チェックを含む適切な処理を実行
-      await trackingTransparencyService.requestTrackingPermission();
-    } catch (err) {
-      console.error('[ATT] Request failed:', err);
-    }
-  }, []);
-
   // アプリ初期化処理
   useEffect(() => {
     async function initApp() {
       try {
-        console.log('[App] Starting initialization...');
+        const status = await requestTrackingPermissionsAsync();
 
         // 1. AdMob初期化（ATTなしでも動作可能）
         await initAdMob();
@@ -79,14 +64,6 @@ function RootLayoutContent() {
         }
 
         setIsReady(true);
-
-        // 3. iOSの場合、アプリ起動後にATTリクエスト
-        if (Platform.OS === 'ios') {
-          // スプラッシュ画面との重複を避けるため遅延
-          setTimeout(async () => {
-            await requestATT();
-          }, 1000);
-        }
       } catch (error) {
         console.error('[App] Initialization failed:', error);
         setIsReady(true);
@@ -94,7 +71,7 @@ function RootLayoutContent() {
     }
 
     initApp();
-  }, [initAdMob, requestATT, setUserId]);
+  }, [initAdMob, setUserId]);
 
   useEffect(() => {
     if (!isReady || !rootNavigationState?.key) return;

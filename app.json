@@ -2,7 +2,7 @@
   "expo": {
     "name": "earsup",
     "slug": "earsup",
-    "version": "1.0.22",
+    "version": "1.0.23",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "earsup",
@@ -18,8 +18,7 @@
       "statusBarStyle": "dark",
       "bundleIdentifier": "com.shinsei1118.earsup",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false,
-        "NSUserTrackingUsageDescription": "広告表示にのみ使用されます。許可しなくても機能制限等はございません。"
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
@@ -51,6 +50,12 @@
           "androidAppId": "ca-app-pub-2855999657692570~1379812340",
           "iosAppId": "ca-app-pub-2855999657692570~4936080875",
           "userTrackingUsageDescription": "広告表示にのみ使用されます。許可しなくても機能制限等はございません。"
+        }
+      ],
+      [
+        "expo-tracking-transparency",
+        {
+          "userTrackingPermission": "「許可」することで表示される広告がユーザーに最適化された内容になります。"
         }
       ]
     ],
