@@ -8,10 +8,10 @@
 
 /* Begin PBXBuildFile section */
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
-		14FA36C1F94DF435E45F114E /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DE0514A293D41FBB5CFDC2D /* ExpoModulesProvider.swift */; };
-		315A2329708EB6A391811F57 /* Pods_earsup.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6636E38552175ED1724E353B /* Pods_earsup.framework */; };
+		14D616849899F6E75C282769 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 8A25438AA6993BC26427EE92 /* PrivacyInfo.xcprivacy */; };
+		1B99430E92E043441F3A7A51 /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C630F0B2036048618213E3D /* ExpoModulesProvider.swift */; };
 		3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */; };
-		BB2E1D53871A8EBB12457076 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = BB9C5A922A0501F280E42FA7 /* PrivacyInfo.xcprivacy */; };
+		90647EF74D66F0589AB979F6 /* Pods_earsup.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 798A924C0A4CF8BE0E33DBAF /* Pods_earsup.framework */; };
 		BB2F792D24A3F905000567C9 /* Expo.plist in Resources */ = {isa = PBXBuildFile; fileRef = BB2F792C24A3F905000567C9 /* Expo.plist */; };
 		F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F11748412D0307B40044C1D9 /* AppDelegate.swift */; };
 /* End PBXBuildFile section */
@@ -20,16 +20,16 @@
 		13B07F961A680F5B00A75B9A /* earsup.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = earsup.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = earsup/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = earsup/Info.plist; sourceTree = "<group>"; };
-		6636E38552175ED1724E353B /* Pods_earsup.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_earsup.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		8DE0514A293D41FBB5CFDC2D /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-earsup/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
+		18BC054D7C1CBF9A08F31451 /* Pods-earsup.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-earsup.release.xcconfig"; path = "Target Support Files/Pods-earsup/Pods-earsup.release.xcconfig"; sourceTree = "<group>"; };
+		5C630F0B2036048618213E3D /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-earsup/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
+		798A924C0A4CF8BE0E33DBAF /* Pods_earsup.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_earsup.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		8A25438AA6993BC26427EE92 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = earsup/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = SplashScreen.storyboard; path = earsup/SplashScreen.storyboard; sourceTree = "<group>"; };
+		B9130BA0C7DBA04FD6094C89 /* Pods-earsup.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-earsup.debug.xcconfig"; path = "Target Support Files/Pods-earsup/Pods-earsup.debug.xcconfig"; sourceTree = "<group>"; };
 		BB2F792C24A3F905000567C9 /* Expo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Expo.plist; sourceTree = "<group>"; };
-		BB9C5A922A0501F280E42FA7 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = earsup/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
-		D3E32E0631A1EA5899FE45B9 /* Pods-earsup.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-earsup.debug.xcconfig"; path = "Target Support Files/Pods-earsup/Pods-earsup.debug.xcconfig"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		F11748412D0307B40044C1D9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = earsup/AppDelegate.swift; sourceTree = "<group>"; };
 		F11748442D0722820044C1D9 /* earsup-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "earsup-Bridging-Header.h"; path = "earsup/earsup-Bridging-Header.h"; sourceTree = "<group>"; };
-		F45111A7FE5690CC402DBD09 /* Pods-earsup.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-earsup.release.xcconfig"; path = "Target Support Files/Pods-earsup/Pods-earsup.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -37,7 +37,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				315A2329708EB6A391811F57 /* Pods_earsup.framework in Frameworks */,
+				90647EF74D66F0589AB979F6 /* Pods_earsup.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -53,7 +53,7 @@
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */,
-				BB9C5A922A0501F280E42FA7 /* PrivacyInfo.xcprivacy */,
+				8A25438AA6993BC26427EE92 /* PrivacyInfo.xcprivacy */,
 			);
 			name = earsup;
 			sourceTree = "<group>";
@@ -62,9 +62,18 @@
 			isa = PBXGroup;
 			children = (
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
-				6636E38552175ED1724E353B /* Pods_earsup.framework */,
+				798A924C0A4CF8BE0E33DBAF /* Pods_earsup.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		4F00A81D9BD60532BCBD905B /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				B9130BA0C7DBA04FD6094C89 /* Pods-earsup.debug.xcconfig */,
+				18BC054D7C1CBF9A08F31451 /* Pods-earsup.release.xcconfig */,
+			);
+			path = Pods;
 			sourceTree = "<group>";
 		};
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
@@ -81,8 +90,8 @@
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
-				904AB4C79A388789973D1EF2 /* Pods */,
-				9D1DDCBDBA215A5F49BA68A0 /* ExpoModulesProviders */,
+				4F00A81D9BD60532BCBD905B /* Pods */,
+				8D87B0338715C52FC1238C2B /* ExpoModulesProviders */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -97,19 +106,10 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		904AB4C79A388789973D1EF2 /* Pods */ = {
+		8D87B0338715C52FC1238C2B /* ExpoModulesProviders */ = {
 			isa = PBXGroup;
 			children = (
-				D3E32E0631A1EA5899FE45B9 /* Pods-earsup.debug.xcconfig */,
-				F45111A7FE5690CC402DBD09 /* Pods-earsup.release.xcconfig */,
-			);
-			path = Pods;
-			sourceTree = "<group>";
-		};
-		9D1DDCBDBA215A5F49BA68A0 /* ExpoModulesProviders */ = {
-			isa = PBXGroup;
-			children = (
-				ECE919ED9CE1949D7CCC95B3 /* earsup */,
+				CB6962575CA9FA8FB8F80C29 /* earsup */,
 			);
 			name = ExpoModulesProviders;
 			sourceTree = "<group>";
@@ -123,10 +123,10 @@
 			path = earsup/Supporting;
 			sourceTree = "<group>";
 		};
-		ECE919ED9CE1949D7CCC95B3 /* earsup */ = {
+		CB6962575CA9FA8FB8F80C29 /* earsup */ = {
 			isa = PBXGroup;
 			children = (
-				8DE0514A293D41FBB5CFDC2D /* ExpoModulesProvider.swift */,
+				5C630F0B2036048618213E3D /* ExpoModulesProvider.swift */,
 			);
 			name = earsup;
 			sourceTree = "<group>";
@@ -139,14 +139,14 @@
 			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "earsup" */;
 			buildPhases = (
 				08A4A3CD28434E44B6B9DE2E /* [CP] Check Pods Manifest.lock */,
-				556B9811942484ABA7EA1C20 /* [Expo] Configure project */,
+				26CBD64A7F214F16B66DF53D /* [Expo] Configure project */,
 				13B07F871A680F5B00A75B9A /* Sources */,
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
 				800E24972A6A228C8D4807E9 /* [CP] Copy Pods Resources */,
-				30118EE545E449255C8EE603 /* [CP] Embed Pods Frameworks */,
-				C7743A50856381606D14E377 /* [CP-User] [RNGoogleMobileAds] Configuration */,
+				2661E33E3A60C7EE0C7CB96C /* [CP] Embed Pods Frameworks */,
+				803C4C1C5B2DCBC895859BDF /* [CP-User] [RNGoogleMobileAds] Configuration */,
 			);
 			buildRules = (
 			);
@@ -196,7 +196,7 @@
 				BB2F792D24A3F905000567C9 /* Expo.plist in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */,
-				BB2E1D53871A8EBB12457076 /* PrivacyInfo.xcprivacy in Resources */,
+				14D616849899F6E75C282769 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -242,7 +242,7 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		30118EE545E449255C8EE603 /* [CP] Embed Pods Frameworks */ = {
+		2661E33E3A60C7EE0C7CB96C /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -264,7 +264,7 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-earsup/Pods-earsup-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		556B9811942484ABA7EA1C20 /* [Expo] Configure project */ = {
+		26CBD64A7F214F16B66DF53D /* [Expo] Configure project */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
@@ -326,7 +326,7 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-earsup/Pods-earsup-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		C7743A50856381606D14E377 /* [CP-User] [RNGoogleMobileAds] Configuration */ = {
+		803C4C1C5B2DCBC895859BDF /* [CP-User] [RNGoogleMobileAds] Configuration */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -349,7 +349,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */,
-				14FA36C1F94DF435E45F114E /* ExpoModulesProvider.swift in Sources */,
+				1B99430E92E043441F3A7A51 /* ExpoModulesProvider.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -358,7 +358,7 @@
 /* Begin XCBuildConfiguration section */
 		13B07F941A680F5B00A75B9A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = D3E32E0631A1EA5899FE45B9 /* Pods-earsup.debug.xcconfig */;
+			baseConfigurationReference = B9130BA0C7DBA04FD6094C89 /* Pods-earsup.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
@@ -394,7 +394,7 @@
 		};
 		13B07F951A680F5B00A75B9A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = F45111A7FE5690CC402DBD09 /* Pods-earsup.release.xcconfig */;
+			baseConfigurationReference = 18BC054D7C1CBF9A08F31451 /* Pods-earsup.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
