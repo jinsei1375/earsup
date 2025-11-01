@@ -182,6 +182,9 @@ const shuffleArray = <T>(array: T[]): T[] => {
   return shuffled;
 };
 
+// Unicode character constants
+const RIGHT_SINGLE_QUOTATION_MARK = '\u2019'; // Curly apostrophe '
+
 /**
  * スロットから回答文を再構築
  */
@@ -197,7 +200,7 @@ export const reconstructAnswerFromSlots = (
   parsedSentence.forEach((item) => {
     if (item.isPunctuation) {
       result += item.text;
-      needSpace = !['"', "'", '\u2019'].includes(item.text);
+      needSpace = !['"', "'", RIGHT_SINGLE_QUOTATION_MARK].includes(item.text);
     } else {
       const word = selectedWords[item.index] || '';
       if (word) {

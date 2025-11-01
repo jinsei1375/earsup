@@ -158,7 +158,7 @@ export const QuizModeSelector: React.FC<QuizModeSelectorProps> = ({
               quizInputType === 'word_selection' ? 'text-white' : 'text-gray-500'
             }`}
           >
-            単語を選んでドラッグ&ドロップ
+            単語を選んでタップで配置
           </Text>
         </TouchableOpacity>
       </View>
