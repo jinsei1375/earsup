@@ -1,13 +1,5 @@
-import React, { useState, useRef, useCallback } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Animated,
-  PanResponder,
-  LayoutChangeEvent,
-  StyleSheet,
-} from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { Button } from '@/components/common/Button';
 import { FeatureIcon, APP_COLORS } from '@/components/common/FeatureIcon';
 import {
@@ -25,13 +17,6 @@ interface WordSelectionInputProps {
   isSubmitting?: boolean;
 }
 
-interface TokenPosition {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-}
-
 export const WordSelectionInput: React.FC<WordSelectionInputProps> = ({
   questionText,
   disabled = false,
@@ -41,106 +26,49 @@ export const WordSelectionInput: React.FC<WordSelectionInputProps> = ({
   const [selectionData] = useState(() => generateWordSelectionData(questionText));
   const [slots, setSlots] = useState<WordSlot[]>(selectionData.slots);
   const [availableTokens, setAvailableTokens] = useState<WordToken[]>(selectionData.tokens);
-  const [draggedToken, setDraggedToken] = useState<WordToken | null>(null);
-  const [draggedFromSlot, setDraggedFromSlot] = useState<number | null>(null);
-
-  // Token and slot positions for drag and drop calculation
-  const tokenPositions = useRef<Map<string, TokenPosition>>(new Map());
-  const slotPositions = useRef<Map<number, TokenPosition>>(new Map());
-
-  // Animated value for drag position
-  const pan = useRef(new Animated.ValueXY()).current;
+  const [selectedToken, setSelectedToken] = useState<WordToken | null>(null);
 
   const parsedSentence: ParsedItem[] = selectionData.parsedSentence;
 
-  // Create PanResponder for drag and drop
-  const createPanResponder = (token: WordToken, fromSlotIndex: number | null) => {
-    return PanResponder.create({
-      onStartShouldSetPanResponder: () => !disabled && !isSubmitting,
-      onPanResponderGrant: () => {
-        setDraggedToken(token);
-        setDraggedFromSlot(fromSlotIndex);
-        pan.setOffset({
-          x: (pan.x as any)._value,
-          y: (pan.y as any)._value,
-        });
-        pan.setValue({ x: 0, y: 0 });
-      },
-      onPanResponderMove: Animated.event([null, { dx: pan.x, dy: pan.y }], {
-        useNativeDriver: false,
-      }),
-      onPanResponderRelease: (_, gesture) => {
-        pan.flattenOffset();
-        handleDrop(gesture.moveX, gesture.moveY);
-        Animated.spring(pan, {
-          toValue: { x: 0, y: 0 },
-          useNativeDriver: false,
-        }).start();
-        setDraggedToken(null);
-        setDraggedFromSlot(null);
-      },
-    });
+  // Handle token selection from available pool
+  const handleSelectToken = (token: WordToken) => {
+    if (disabled || isSubmitting) return;
+    setSelectedToken(token);
   };
 
-  const handleDrop = (x: number, y: number) => {
-    if (!draggedToken) return;
+  // Handle placing selected token in a slot
+  const handlePlaceInSlot = (slotIndex: number) => {
+    if (!selectedToken || disabled || isSubmitting) return;
 
-    // Find which slot the token was dropped on
-    let targetSlotIndex: number | null = null;
-    slotPositions.current.forEach((pos, index) => {
-      if (
-        x >= pos.x &&
-        x <= pos.x + pos.width &&
-        y >= pos.y &&
-        y <= pos.y + pos.height
-      ) {
-        targetSlotIndex = index;
-      }
-    });
+    const newSlots = [...slots];
+    const targetSlot = newSlots[slotIndex];
 
-    if (targetSlotIndex !== null) {
-      // Token dropped on a slot
-      const newSlots = [...slots];
-      const targetSlot = newSlots[targetSlotIndex];
-
-      // If the slot already has a token, return it to available tokens
-      if (targetSlot.selectedToken) {
-        setAvailableTokens((prev) => [...prev, targetSlot.selectedToken!]);
-      }
-
-      // Place the dragged token in the slot
-      targetSlot.selectedToken = draggedToken;
-      setSlots(newSlots);
-
-      // Remove token from available tokens if it came from there
-      if (draggedFromSlot === null) {
-        setAvailableTokens((prev) => prev.filter((t) => t.id !== draggedToken.id));
-      } else if (draggedFromSlot !== targetSlotIndex) {
-        // If dragged from another slot, clear that slot
-        newSlots[draggedFromSlot].selectedToken = null;
-      }
-    } else {
-      // Token dropped outside any slot - return to available tokens if it came from a slot
-      if (draggedFromSlot !== null) {
-        const newSlots = [...slots];
-        newSlots[draggedFromSlot].selectedToken = null;
-        setSlots(newSlots);
-        setAvailableTokens((prev) => [...prev, draggedToken]);
-      }
+    // If the slot already has a token, return it to available tokens
+    if (targetSlot.selectedToken) {
+      setAvailableTokens((prev) => [...prev, targetSlot.selectedToken!]);
     }
+
+    // Place the selected token in the slot
+    targetSlot.selectedToken = selectedToken;
+    setSlots(newSlots);
+
+    // Remove token from available tokens
+    setAvailableTokens((prev) => prev.filter((t) => t.id !== selectedToken.id));
+    setSelectedToken(null);
   };
 
-  const handleTokenLayout = (tokenId: string, event: LayoutChangeEvent) => {
-    const { x, y, width, height } = event.nativeEvent.layout;
-    event.target.measure((fx, fy, w, h, px, py) => {
-      tokenPositions.current.set(tokenId, { x: px, y: py, width: w, height: h });
-    });
-  };
+  // Handle removing token from slot back to available pool
+  const handleRemoveFromSlot = (slotIndex: number) => {
+    if (disabled || isSubmitting) return;
 
-  const handleSlotLayout = (slotIndex: number, event: LayoutChangeEvent) => {
-    event.target.measure((fx, fy, w, h, px, py) => {
-      slotPositions.current.set(slotIndex, { x: px, y: py, width: w, height: h });
-    });
+    const newSlots = [...slots];
+    const slot = newSlots[slotIndex];
+
+    if (slot.selectedToken) {
+      setAvailableTokens((prev) => [...prev, slot.selectedToken!]);
+      slot.selectedToken = null;
+      setSlots(newSlots);
+    }
   };
 
   const handleSubmit = async () => {
@@ -150,10 +78,6 @@ export const WordSelectionInput: React.FC<WordSelectionInputProps> = ({
 
   const handleReset = () => {
     // Return all tokens to available tokens
-    const tokensFromSlots = slots
-      .map((slot) => slot.selectedToken)
-      .filter((token): token is WordToken => token !== null);
-
     setAvailableTokens(selectionData.tokens);
     setSlots(
       selectionData.slots.map((slot) => ({
@@ -161,64 +85,82 @@ export const WordSelectionInput: React.FC<WordSelectionInputProps> = ({
         selectedToken: null,
       }))
     );
+    setSelectedToken(null);
   };
 
   const filledCount = slots.filter((slot) => slot.selectedToken !== null).length;
   const canSubmit = filledCount > 0 && !disabled && !isSubmitting;
 
-  const renderToken = (
-    token: WordToken,
-    fromSlotIndex: number | null,
-    isInSlot: boolean
-  ) => {
-    const panResponder = createPanResponder(token, fromSlotIndex);
-    const isDragging = draggedToken?.id === token.id;
-
+  const renderToken = (token: WordToken, isSelected: boolean) => {
     return (
-      <Animated.View
+      <TouchableOpacity
         key={token.id}
-        {...panResponder.panHandlers}
-        style={[
-          isDragging && {
-            transform: pan.getTranslateTransform(),
-            zIndex: 1000,
-          },
-        ]}
-        onLayout={(e) => !isInSlot && handleTokenLayout(token.id, e)}
+        activeOpacity={0.7}
+        disabled={disabled || isSubmitting}
+        onPress={() => handleSelectToken(token)}
+        className={`px-4 py-2 m-1 rounded-lg border-2 ${
+          isSelected
+            ? 'bg-app-primary border-app-primary'
+            : 'bg-white border-app-neutral-400'
+        } ${disabled || isSubmitting ? 'opacity-50' : ''}`}
       >
-        <TouchableOpacity
-          activeOpacity={0.8}
-          disabled={disabled || isSubmitting}
-          className={`px-4 py-2 m-1 rounded-lg border-2 ${
-            isDragging
-              ? 'bg-app-primary-light border-app-primary opacity-50'
-              : isInSlot
-              ? 'bg-app-success-light border-app-success'
-              : 'bg-white border-app-neutral-400'
-          } ${disabled || isSubmitting ? 'opacity-50' : ''}`}
+        <Text
+          className={`text-base font-medium ${
+            isSelected ? 'text-white' : 'text-app-neutral-800'
+          }`}
         >
-          <Text
-            className={`text-base font-medium ${
-              isDragging
-                ? 'text-app-primary'
-                : isInSlot
-                ? 'text-app-success-dark'
-                : 'text-app-neutral-800'
-            }`}
-          >
-            {token.text}
-          </Text>
-        </TouchableOpacity>
-      </Animated.View>
+          {token.text}
+        </Text>
+      </TouchableOpacity>
+    );
+  };
+
+  const renderSlot = (slot: WordSlot, slotIndex: number) => {
+    const hasToken = slot.selectedToken !== null;
+    
+    return (
+      <TouchableOpacity
+        key={`slot-${slotIndex}`}
+        activeOpacity={0.7}
+        disabled={disabled || isSubmitting}
+        onPress={() => {
+          if (hasToken) {
+            handleRemoveFromSlot(slotIndex);
+          } else if (selectedToken) {
+            handlePlaceInSlot(slotIndex);
+          }
+        }}
+        className={`min-w-[80px] px-3 py-3 border-2 rounded-lg mb-2 ${
+          hasToken
+            ? 'border-app-success bg-app-success-light'
+            : selectedToken
+            ? 'border-app-primary border-dashed bg-app-primary-light'
+            : 'border-app-neutral-400 border-dashed bg-app-neutral-100'
+        } ${disabled || isSubmitting ? 'opacity-50' : ''}`}
+        style={{ minHeight: 44 }}
+      >
+        {hasToken ? (
+          <View className="flex-row items-center justify-center">
+            <Text className="text-base font-medium text-app-success-dark mr-1">
+              {slot.selectedToken!.text}
+            </Text>
+            <FeatureIcon name="close-circle" size={16} color={APP_COLORS.danger} />
+          </View>
+        ) : (
+          <View className="items-center justify-center">
+            <Text className="text-app-neutral-400 text-sm">{slotIndex + 1}</Text>
+          </View>
+        )}
+      </TouchableOpacity>
     );
   };
 
   return (
-    <View className="bg-white rounded-xl p-4 shadow-sm">
+    <ScrollView className="bg-white rounded-xl p-4 shadow-sm">
       <View className="flex-row items-center justify-between mb-4">
         <Text className="text-lg font-bold text-app-neutral-800">単語を選択してください</Text>
         <View className="flex-row items-center">
-          <FeatureIcon name="shuffle" size={20} color={APP_COLORS.gray600} />
+          <FeatureIcon name="albums-outline" size={20} color={APP_COLORS.gray600} />
           <Text className="ml-1 text-sm text-app-neutral-600">
             {availableTokens.length + slots.filter((s) => s.selectedToken).length}単語
           </Text>
@@ -228,7 +170,9 @@ export const WordSelectionInput: React.FC<WordSelectionInputProps> = ({
       {/* 説明 */}
       <View className="mb-4 p-3 bg-app-primary-light rounded-lg">
         <Text className="text-sm text-app-primary-dark">
-          正しい単語を選んで、下の空欄にドラッグ&ドロップしてください
+          {selectedToken
+            ? '配置したい位置をタップしてください'
+            : '正しい単語を選んで、空欄に配置してください'}
         </Text>
       </View>
 
@@ -237,7 +181,9 @@ export const WordSelectionInput: React.FC<WordSelectionInputProps> = ({
         <Text className="text-sm font-semibold text-app-neutral-700 mb-2">選択可能な単語:</Text>
         <View className="flex-row flex-wrap min-h-[60px] p-2 bg-app-neutral-50 rounded-lg border border-app-neutral-300">
           {availableTokens.length > 0 ? (
-            availableTokens.map((token) => renderToken(token, null, false))
+            availableTokens.map((token) =>
+              renderToken(token, selectedToken?.id === token.id)
+            )
           ) : (
             <Text className="text-app-neutral-400 text-center w-full py-4">
               全ての単語が配置されました
@@ -248,8 +194,13 @@ export const WordSelectionInput: React.FC<WordSelectionInputProps> = ({
 
       {/* Sentence with drop zones */}
       <View className="mb-4">
-        <Text className="text-sm font-semibold text-app-neutral-700 mb-2">文章を完成させてください:</Text>
-        <View className="flex-row flex-wrap items-baseline p-2 bg-white rounded-lg border border-app-primary" style={{ gap: 4 }}>
+        <Text className="text-sm font-semibold text-app-neutral-700 mb-2">
+          文章を完成させてください:
+        </Text>
+        <View
+          className="flex-row flex-wrap items-baseline p-2 bg-white rounded-lg border border-app-primary"
+          style={{ gap: 4 }}
+        >
           {parsedSentence.map((item, sentenceIndex) => {
             if (item.isPunctuation) {
               const isApostrophe = /^['']/.test(item.text);
@@ -274,30 +225,7 @@ export const WordSelectionInput: React.FC<WordSelectionInputProps> = ({
             const slotIndex = item.index;
             const slot = slots[slotIndex];
 
-            return (
-              <View
-                key={`slot-${slotIndex}`}
-                onLayout={(e) => handleSlotLayout(slotIndex, e)}
-                className="mb-2"
-              >
-                <View
-                  className={`min-w-[80px] px-3 py-2 border-2 border-dashed rounded-lg ${
-                    slot.selectedToken
-                      ? 'border-app-success bg-app-success-light'
-                      : 'border-app-neutral-400 bg-app-neutral-100'
-                  }`}
-                  style={{ minHeight: 44 }}
-                >
-                  {slot.selectedToken ? (
-                    renderToken(slot.selectedToken, slotIndex, true)
-                  ) : (
-                    <View className="items-center justify-center py-1">
-                      <Text className="text-app-neutral-400 text-sm">{slotIndex + 1}</Text>
-                    </View>
-                  )}
-                </View>
-              </View>
-            );
+            return renderSlot(slot, slotIndex);
           })}
         </View>
       </View>
@@ -344,6 +272,6 @@ export const WordSelectionInput: React.FC<WordSelectionInputProps> = ({
           />
         </View>
       </View>
-    </View>
+    </ScrollView>
   );
 };
