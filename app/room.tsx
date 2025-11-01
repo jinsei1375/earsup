@@ -48,7 +48,7 @@ export default function RoomScreen() {
   const [quizMode, setQuizMode] = useState<'all-at-once-host' | 'all-at-once-auto'>(
     'all-at-once-host'
   );
-  const [quizInputType, setQuizInputType] = useState<'sentence' | 'word_separate'>('sentence');
+  const [quizInputType, setQuizInputType] = useState<'sentence' | 'word_separate' | 'word_selection'>('sentence');
   const [allowPartialPoints, setAllowPartialPoints] = useState(true); // デフォルトで惜しい判定を有効
   const [partialJudgmentThreshold, setPartialJudgmentThreshold] = useState(70); // 惜しい判定の閾値（デフォルト70%）
   const [maxReplayCount, setMaxReplayCount] = useState(3); // 最大再生回数（デフォルト3回）

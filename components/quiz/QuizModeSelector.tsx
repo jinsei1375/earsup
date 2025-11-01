@@ -5,8 +5,8 @@ import { View, Text, TouchableOpacity } from 'react-native';
 interface QuizModeSelectorProps {
   selectedMode: 'all-at-once-host' | 'all-at-once-auto';
   onModeChange: (mode: 'all-at-once-host' | 'all-at-once-auto') => void;
-  quizInputType: 'sentence' | 'word_separate';
-  onQuizInputTypeChange: (type: 'sentence' | 'word_separate') => void;
+  quizInputType: 'sentence' | 'word_separate' | 'word_selection';
+  onQuizInputTypeChange: (type: 'sentence' | 'word_separate' | 'word_selection') => void;
   allowPartialPoints: boolean;
   onPartialPointsChange: (allow: boolean) => void;
   partialJudgmentThreshold: number;
@@ -86,53 +86,79 @@ export const QuizModeSelector: React.FC<QuizModeSelectorProps> = ({
 
       {/* 入力タイプ選択 */}
       <Text className="mb-2 font-bold">回答入力方式</Text>
-      <View className="flex-row justify-between mb-4">
+      <View className="mb-4">
+        <View className="flex-row justify-between mb-2">
+          <TouchableOpacity
+            onPress={() => onQuizInputTypeChange('sentence')}
+            disabled={disabled}
+            className={`flex-1 mr-2 p-4 rounded-lg border-2 items-center justify-center ${
+              quizInputType === 'sentence'
+                ? 'bg-app-primary border-app-primary'
+                : 'bg-transparent border-gray-300 active:bg-gray-50'
+            } ${disabled ? 'opacity-50' : ''}`}
+          >
+            <Text
+              className={`text-center font-bold ${
+                quizInputType === 'sentence' ? 'text-white' : 'text-gray-700'
+              }`}
+            >
+              文章入力
+            </Text>
+            <Text
+              className={`text-xs text-center mt-1 ${
+                quizInputType === 'sentence' ? 'text-white' : 'text-gray-500'
+              }`}
+            >
+              文章全体を入力
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => onQuizInputTypeChange('word_separate')}
+            disabled={disabled}
+            className={`flex-1 ml-2 p-4 rounded-lg border-2 items-center justify-center ${
+              quizInputType === 'word_separate'
+                ? 'bg-app-primary border-app-primary'
+                : 'bg-transparent border-gray-300 active:bg-gray-50'
+            } ${disabled ? 'opacity-50' : ''}`}
+          >
+            <Text
+              className={`text-center font-bold ${
+                quizInputType === 'word_separate' ? 'text-white' : 'text-gray-700'
+              }`}
+            >
+              単語区切り
+            </Text>
+            <Text
+              className={`text-xs text-center mt-1 ${
+                quizInputType === 'word_separate' ? 'text-white' : 'text-gray-500'
+              }`}
+            >
+              単語ごとに入力
+            </Text>
+          </TouchableOpacity>
+        </View>
         <TouchableOpacity
-          onPress={() => onQuizInputTypeChange('sentence')}
+          onPress={() => onQuizInputTypeChange('word_selection')}
           disabled={disabled}
-          className={`flex-1 mr-2 p-4 rounded-lg border-2 items-center justify-center ${
-            quizInputType === 'sentence'
+          className={`w-full p-4 rounded-lg border-2 items-center justify-center ${
+            quizInputType === 'word_selection'
               ? 'bg-app-primary border-app-primary'
               : 'bg-transparent border-gray-300 active:bg-gray-50'
           } ${disabled ? 'opacity-50' : ''}`}
         >
           <Text
             className={`text-center font-bold ${
-              quizInputType === 'sentence' ? 'text-white' : 'text-gray-700'
+              quizInputType === 'word_selection' ? 'text-white' : 'text-gray-700'
             }`}
           >
-            文章入力
+            単語選択
           </Text>
           <Text
             className={`text-xs text-center mt-1 ${
-              quizInputType === 'sentence' ? 'text-white' : 'text-gray-500'
+              quizInputType === 'word_selection' ? 'text-white' : 'text-gray-500'
             }`}
           >
-            従来の文章全体入力
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => onQuizInputTypeChange('word_separate')}
-          disabled={disabled}
-          className={`flex-1 ml-2 p-4 rounded-lg border-2 items-center justify-center ${
-            quizInputType === 'word_separate'
-              ? 'bg-app-primary border-app-primary'
-              : 'bg-transparent border-gray-300 active:bg-gray-50'
-          } ${disabled ? 'opacity-50' : ''}`}
-        >
-          <Text
-            className={`text-center font-bold ${
-              quizInputType === 'word_separate' ? 'text-white' : 'text-gray-700'
-            }`}
-          >
-            単語区切り
-          </Text>
-          <Text
-            className={`text-xs text-center mt-1 ${
-              quizInputType === 'word_separate' ? 'text-white' : 'text-gray-500'
-            }`}
-          >
-            単語ごとに分けて入力
+            単語を選んでタップで配置
           </Text>
         </TouchableOpacity>
       </View>
